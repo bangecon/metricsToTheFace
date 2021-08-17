@@ -1,0 +1,95 @@
+---
+title: "Chapter 2-2 Practice"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+ceosal1 <- wooldridge::ceosal1
+meap93 <- wooldridge::meap93
+gradethis_setup()
+tutorial_options(exercise.timelimit = 60)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Exercise
+
+Use the $ceosal1$ data to regress the *log* of CEO salaries on the *log* of sales. 
+
+Use the $meap93$ data to regress the percentage of tenth graders receiving a passing score on a standardized math test on the percentage of the students eligible for the federally-funded school lunch program.
+
+```{r lmPractice1, exercise=TRUE, exercise.reveal_solution = TRUE}
+
+```
+
+```{r lmPractice1-solution}
+lm(log(salary) ~ log(sales), data = ceosal1)
+lm(math10 ~ lnchprg, data = meap93)
+```
+
+```{r lmPractice1-hint}
+lm(..., ...)
+lm(..., ...)
+```
+
+```{r -check}
+grade_code()
+```
+
+## Plotting the Regression Line
+
+Estimate the percentage voting for candidate A ($voteA$) as a linear function of the share of expenditures spent on candidate A ($shareA$). Name your result $vote.lm$. 
+
+Plot the votes for candidate A (on the y-axis) on their expenditure share (on the x-axis), and add the regression line using $abline$. 
+
+```{r lmPractice2, exercise=TRUE, exercise.reveal_solution = TRUE}
+
+```
+
+```{r lmPractice2-solution}
+attach(vote1)
+vote.lm <- lm(voteA ~ shareA, data=vote1)
+plot(vote1$shareA, vote1$voteA)
+abline(vote.lm)
+detach(vote1)
+```
+
+```{r lmPractice2-hint}
+attach(...)
+vote.lm <- lm(...)
+plot(..., ...)
+abline(...)
+detach(...)
+```
+
+```{r lmPractice2-check}
+grade_code()
+```
+
+## Regression without a constant and with only a constant
+
+Regress CEO salary on: (1) ROE (with a constant - name this $salary.lm1$); (2) ROE (without a constant - $salary.lm2$); and (3) only a constant($salary.lm3$). Plot all three regression lines with a scatterplot of salary on ROE. 
+
+```{r lmPractice1, exercise=TRUE, exercise.reveal_solution = TRUE}
+
+```
+
+```{r lmPractice1-solution}
+salary.lm1 <- lm(salary ~ roe, data = ceosal1)
+salary.lm2 <- lm(salary ~ 0 + roe, data = ceosal1)
+salary.lm3 <- lm(salary ~ 1, data = ceosal1)
+plot(ceosal1$roe, ceosal1$salary)
+abline
+```
+
+```{r lmPractice1-hint}
+lm(..., ...)
+lm(..., ...)
+```
+
+```{r -check}
+grade_code()
+```
+

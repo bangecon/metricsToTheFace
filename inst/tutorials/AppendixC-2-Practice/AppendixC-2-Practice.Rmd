@@ -1,0 +1,33 @@
+---
+title: "Appendix C \n\n Fundamentals of Mathematical Statistics"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+gradethis_setup()
+tutorial_options(exercise.timelimit = 60)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Exercise
+
+
+
+```{r , exercise=TRUE, exercise.reveal_solution = TRUE}
+
+```
+
+```{r -solution}
+
+```
+
+```{r -hint}
+
+```
+
+```{r -check}
+grade_result() 
+```

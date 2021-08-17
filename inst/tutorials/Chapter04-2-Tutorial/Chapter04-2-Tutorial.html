@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="James Bang" />
+  <title>Chapter04-2-Tutorial.knit</title>
+  <style type="text/css">
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+              </style>
+  <!-- HEAD_CONTENT -->
+</head>
+<body>
+<div class="slide titlepage">
+  <h1 class="title"><p>Chapter 4</p>
+Multiple Regression Analysis - Inference</h1>
+  <p class="author">
+James Bang
+  </p>
+</div>
+<div id="section-warmup" class="slide section level2">
+<h1>Warmup</h1>
+<p>Re-estimate <span class="math inline">\(wage.lm7\)</span>, which from the previous tutorial regressed wage on education, experience, experience squared, job tenure, and occupation type.</p>
+<p><span class="math display">\[ wage = \beta_0 + \beta_1educ + \beta_2exper + \beta_3exper^2 + \beta_4tenure + \beta_5profocc + \beta_6clerocc + \beta_7servocc \]</span></p>
+<p>Summarize the result.</p>
+<div class="tutorial-exercise" data-label="tTestReview" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-ui-opts="1">{"engine":"r","has_checker":true,"caption":"<span data-i18n=\"text.enginecap\" data-i18n-opts=\"{&quot;engine&quot;:&quot;R&quot;}\">R Code<\/span>"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="tTestReview-hint" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+
+</div>
+<div class="tutorial-exercise-support" data-label="tTestReview-solution" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+
+</div>
+<div class="panel panel-default">
+<div data-label="pValReview" class="tutorial-question panel-body">
+<div id="pValReview-answer_container" class="shiny-html-output"></div>
+<div id="pValReview-message_container" class="shiny-html-output"></div>
+<div id="pValReview-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div>
+</div>
+<div id="section-testing-linear-combinations-of-multiple-coefficients" class="slide section level2">
+<h1>Testing Linear Combinations of Multiple Coefficients</h1>
+<p>Suppose we want to test whether clerical and service occupations differ <em>from each other</em>. One way to write this is:</p>
+<ul>
+<li><span class="math inline">\(H_0: \beta_6 = \beta_7\)</span></li>
+<li><span class="math inline">\(H_1: \beta_6 \ne \beta_7\)</span></li>
+</ul>
+<p>Another way to write this is:</p>
+<ul>
+<li><span class="math inline">\(H_0: \beta_6 - \beta_7 = 0\)</span></li>
+<li><span class="math inline">\(H_1: \beta_6 - \beta_7 \ne 0\)</span></li>
+</ul>
+<p>It might seem like these are identical but rearranging them the second way has an important purpose: it arranges all of the unknown parameters (the estimates of which are random variables!) on the left and known constants on the right.</p>
+<p>We can now think about what the distribution of the (random) estimated difference (<span class="math inline">\(\hat\beta_6 - \hat\beta_7\)</span>) is under the null hypothesis.</p>
+</div>
+<div id="section-sampling-distribution-of-beta_j---beta_l" class="slide section level2">
+<h1>Sampling distribution of <span class="math inline">\(\beta_j - \beta_l\)</span></h1>
+<p>If the null hypothesis is true, then <span class="math inline">\(\beta_6 - \beta_7 = 0\)</span></p>
+<p>If the OLS assumptions hold, <span class="math inline">\(E(\hat\beta_6) = \beta_6\)</span> and <span class="math inline">\(E(\hat\beta_7) = \beta_7\)</span>, so under the null <span class="math inline">\(E(\hat\beta_6 - \hat\beta_7) = 0\)</span></p>
+<p>Using the rules on variance in Appendix B, the variance of the difference is <span class="math display">\[ Var(\hat\beta_6 - \hat\beta_7) = Var(\hat\beta_6) + Var(\hat\beta_7) - 2Cov(\hat\beta_6,\hat\beta_7) \]</span> So the standard error is <span class="math display">\[ se_{\hat\beta_6 - \hat\beta_7} = \sqrt{Var(\hat\beta_6) + Var(\hat\beta_7) - 2Cov(\hat\beta_6,\hat\beta_7)} \]</span></p>
+<p>Since the parameter estimates are normally distributed, and the variances are <span class="math inline">\(\chi^2\)</span>, the test statistic,</p>
+<p><span class="math display">\[ t_{\hat\beta_6-\hat\beta_7} = \frac{\hat\beta_6 - \hat\beta_7}{se_{\hat\beta_6 - \hat\beta_7}} \sim t(n-k-1) \]</span></p>
+</div>
+<div id="section-example" class="slide section level2">
+<h1>Example</h1>
+<p>Use the <span class="math inline">\(glht\)</span> function from the <span class="math inline">\(multcomp\)</span> package (preloaded with this tutorial) to test the hypothesis that clerical occupations have the same wages as service occupations against the alternative that they differ. Nest the test inside a <span class="math inline">\(summary\)</span> to give the full table of test statistics.</p>
+<p>Use the <span class="math inline">\(lht\)</span> function from the <span class="math inline">\(car\)</span> package (also preloaded). You do not need to <span class="math inline">\(summary()\)</span> the results to get the output you want to see.</p>
+<div class="tutorial-exercise" data-label="lincom" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-ui-opts="1">{"engine":"r","has_checker":true,"caption":"<span data-i18n=\"text.enginecap\" data-i18n-opts=\"{&quot;engine&quot;:&quot;R&quot;}\">R Code<\/span>"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="lincom-hint" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code># glht requires a model and a &quot;linfct&quot; option where &quot;linfct&quot; is a linear function of the variables in quotation marks.
+summary(glht(..., linfct = ...))
+# lht requires a model, a linear function of the parameters for the left-hand side of the hypothesis, and the numerical value(s) for the right hand side. 
+lht(..., ..., ...)</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="lincom-solution" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>summary(glht(wage.lm7, linfct = &quot;clerocc - servocc = 0&quot;))
+lht(wage.lm7, &quot;clerocc - servocc&quot;,  0)</code></pre>
+</div>
+</div>
+<div id="section-testing-joint-significance-of-multiple-coefficients" class="slide section level2">
+<h1>Testing Joint Significance of Multiple Coefficients</h1>
+<p>We have our wage model:</p>
+<p><span class="math display">\[ wage = \beta_0 + \beta_1educ + \beta_2exper + \beta_3exper^2 + \beta_4tenure + \beta_5profocc + \beta_6clerocc + \beta_7servocc \]</span> We want to test the following hypothesis:</p>
+<p><span class="math display">\[ H_0: \begin{pmatrix} \beta_5 \\ \beta_6 \\ \beta_7 \end{pmatrix} = \begin{pmatrix} 0\\ 0 \\ 0 \end{pmatrix} \]</span> All three occupation coefficents equal zero. <span class="math display">\[ H_1: \begin{pmatrix} \beta_5 \\ \beta_6 \\ \beta_7 \end{pmatrix} \ne \begin{pmatrix} 0\\ 0 \\ 0 \end{pmatrix} \]</span> At least one occupation coefficient is not zero.</p>
+<p>This involves (a vector of) multiple restrictions and we cannot test this hypothesis using a simple t-Test. We must use an F-test (like you might have if you have studied ANoVA).</p>
+</div>
+<div id="section-calculating-the-f-statitic" class="slide section level2">
+<h1>Calculating the F-Statitic</h1>
+<p>There are a couple of different (but equivalent) ways to calculate the F-Statistic for the joint significance of a group of variables. They involve the same basic steps.</p>
+<ul>
+<li>Estimate the unrestricted model (the full model) and store the <span class="math inline">\(R^2\)</span> <em>or</em> the residual sum of squares (SSR).</li>
+<li>Estimate the restricted model (which <em>excludes</em> the variables you wish to test) and store the <span class="math inline">\(R^2\)</span> or SSR.</li>
+<li>Calculate the F statistic:
+<ul>
+<li>Formula using SSR: <span class="math display">\[ F = \frac{(SSR_r - SSR_u)/q}{SSR_u/(n-k-1)} \]</span></li>
+<li>Formula using <span class="math inline">\(R^2\)</span>: <span class="math display">\[ F = \frac{(R_u^2 - R_r^2)/q}{(1-R_u^2/(n-k-1)} \]</span></li>
+<li>You should be able to work out the equivalence of these formulas by noting that <span class="math inline">\(R^2 = 1 - \frac{SSR}{SST}\)</span></li>
+</ul></li>
+</ul>
+</div>
+<div id="section-example-1" class="slide section level2">
+<h1>Example</h1>
+<p>Test the joint significance of occupational choice on wages “by hand” using the <span class="math inline">\(R^2\)</span> formula</p>
+<p>Note that the unrestricted model is <span class="math inline">\(wage.lm7\)</span> that we re-estimated in the warmup; you will need to run the restricted model yourself (call it wage.lm8).</p>
+<p>Name the R-squareds <span class="math inline">\(r2.u\)</span> for the unrestricted model and <span class="math inline">\(r2.r\)</span> for the restricted model.</p>
+<p>Name the F statistic “wage.F.occ” and print its p-value without assigning it a name.</p>
+<div class="tutorial-exercise" data-label="fTest" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-ui-opts="1">{"engine":"r","has_checker":true,"caption":"<span data-i18n=\"text.enginecap\" data-i18n-opts=\"{&quot;engine&quot;:&quot;R&quot;}\">R Code<\/span>"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="fTest-hint" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code># Estimate the restricted Model:
+wage.lm8 &lt;- lm(..., ...)
+# The R-squareds are an object stored in the summary() of the regression output:
+r2.u &lt;- summary(...)$... 
+r2.r  &lt;- summary(...)$...
+# F statistic:
+wage.F.occ &lt;- ...
+# p value = 1-cdf of the appropriate F distribution:
+1 - pf(..., ..., ...)</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="fTest-solution" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code># Restricted Model:
+wage.lm8 &lt;- lm(wage ~ educ + exper + I(exper^2) + tenure, data = wage1)
+# Extract the R-squareds:
+r2.u &lt;- summary(wage.lm7)$r.squared
+r2.r &lt;- summary(wage.lm8)$r.squared
+# F statistic:
+wage.F.occ &lt;- ((r2.u-r2.r)/3) / ((1-r2.u)/wage.lm7$df.residual)
+# p value = 1-cdf of the appropriate F distribution:
+1 - pf(wage.F.occ, 3,wage.lm7$df.residual)</code></pre>
+</div>
+</div>
+<div id="section-warning-about-independent-t-tests-and-a-note-on-the-regression-f-statistic" class="slide section level2">
+<h1>Warning about Independent t-Tests and a Note on the <em>Regression F-Statistic</em></h1>
+<div class="panel panel-default">
+<div data-label="independentTTest" class="tutorial-question panel-body">
+<div id="independentTTest-answer_container" class="shiny-html-output"></div>
+<div id="independentTTest-message_container" class="shiny-html-output"></div>
+<div id="independentTTest-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div>
+<p>The <em>regression F-Statistic</em> (the F-Statistic reported when you <span class="math inline">\(summary()\)</span> a model) is simply a joint significance test where the number of restrictions is all of the independent variables. The restricted model is the unconditional mean (regression on a constant). Its formula is:</p>
+<span class="math display">\[ F = \frac{SSR/k}{SST/(n-k-1)} \]</span> 
+<script type="application/shiny-prerendered" data-context="server-start">
+library(learnr)
+library(gradethis)
+library(car)
+library(multcomp)
+library(tidyverse)
+library(wooldridge)
+wage1 <- wooldridge::wage1
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)
+wage.lm8 <- lm(wage ~ educ + exper + I(exper^2) + tenure, data = wage1)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::register_http_handlers(session, metadata = NULL)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::clear_exercise_cache_env()
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+session$onSessionEnded(function() {
+        learnr:::event_trigger(session, "session_stop")
+      })
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::store_exercise_setup_chunk("__setup__", c("library(learnr)", "library(gradethis)", "library(car)", "library(multcomp)", 
+"library(tidyverse)", "library(wooldridge)", "wage1 <- wooldridge::wage1", 
+"wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)", 
+"wage.lm8 <- lm(wage ~ educ + exper + I(exper^2) + tenure, data = wage1)", 
+"gradethis::gradethis_setup()", "knitr::opts_chunk$set(echo = FALSE)"
+), overwrite = FALSE)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::store_exercise_setup_chunk("__setup__", c("library(learnr)", "library(gradethis)", "library(car)", "library(multcomp)", 
+"library(tidyverse)", "library(wooldridge)", "wage1 <- wooldridge::wage1", 
+"wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)", 
+"wage.lm8 <- lm(wage ~ educ + exper + I(exper^2) + tenure, data = wage1)", 
+"gradethis::gradethis_setup()", "knitr::opts_chunk$set(echo = FALSE)"
+), overwrite = FALSE)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::store_exercise_setup_chunk("__setup__", c("library(learnr)", "library(gradethis)", "library(car)", "library(multcomp)", 
+"library(tidyverse)", "library(wooldridge)", "wage1 <- wooldridge::wage1", 
+"wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)", 
+"wage.lm8 <- lm(wage ~ educ + exper + I(exper^2) + tenure, data = wage1)", 
+"gradethis::gradethis_setup()", "knitr::opts_chunk$set(echo = FALSE)"
+), overwrite = FALSE)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::store_exercise_setup_chunk("__setup__", c("library(learnr)", "library(gradethis)", "library(car)", "library(multcomp)", 
+"library(tidyverse)", "library(wooldridge)", "wage1 <- wooldridge::wage1", 
+"wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)", 
+"wage.lm8 <- lm(wage ~ educ + exper + I(exper^2) + tenure, data = wage1)", 
+"gradethis::gradethis_setup()", "knitr::opts_chunk$set(echo = FALSE)"
+), overwrite = FALSE)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::store_exercise_setup_chunk("__setup__", c("library(learnr)", "library(gradethis)", "library(car)", "library(multcomp)", 
+"library(tidyverse)", "library(wooldridge)", "wage1 <- wooldridge::wage1", 
+"wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)", 
+"wage.lm8 <- lm(wage ~ educ + exper + I(exper^2) + tenure, data = wage1)", 
+"gradethis::gradethis_setup()", "knitr::opts_chunk$set(echo = FALSE)"
+), overwrite = FALSE)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::store_exercise_setup_chunk("__setup__", c("library(learnr)", "library(gradethis)", "library(car)", "library(multcomp)", 
+"library(tidyverse)", "library(wooldridge)", "wage1 <- wooldridge::wage1", 
+"wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)", 
+"wage.lm8 <- lm(wage ~ educ + exper + I(exper^2) + tenure, data = wage1)", 
+"gradethis::gradethis_setup()", "knitr::opts_chunk$set(echo = FALSE)"
+), overwrite = FALSE)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-tTestReview-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-tTestReview-code-editor`)), session)
+output$`tutorial-exercise-tTestReview-output` <- renderUI({
+  `tutorial-exercise-tTestReview-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::store_exercise_cache("tTestReview", list(setup = NULL, chunks = list(list(label = "tTestReview", 
+    code = "\n", opts = list(label = "\"tTestReview\"", exercise = "TRUE"), 
+    engine = "r")), code_check = NULL, error_check = NULL, check = structure("grade_code()", chunk_opts = list(
+    label = "tTestReview-check")), solution = structure("", chunk_opts = list(
+    label = "tTestReview-solution")), options = list(eval = FALSE, 
+    echo = TRUE, results = "markup", tidy = FALSE, tidy.opts = NULL, 
+    collapse = FALSE, prompt = FALSE, comment = NA, highlight = FALSE, 
+    strip.white = TRUE, size = "normalsize", background = "#F7F7F7", 
+    cache = 0, cache.path = "Chapter04-2-Tutorial_cache/slidy/", 
+    cache.vars = NULL, cache.lazy = TRUE, dependson = NULL, autodep = FALSE, 
+    cache.rebuild = FALSE, fig.keep = "high", fig.show = "asis", 
+    fig.align = "default", fig.path = "Chapter04-2-Tutorial_files/figure-slidy/", 
+    dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
+    fig.width = 8, fig.height = 6, fig.env = "figure", fig.cap = NULL, 
+    fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, fig.pos = "", 
+    out.width = 768, out.height = NULL, out.extra = NULL, fig.retina = 2, 
+    external = TRUE, sanitize = FALSE, interval = 1, aniopts = "controls,loop", 
+    warning = TRUE, error = FALSE, message = TRUE, render = NULL, 
+    ref.label = NULL, child = NULL, engine = "r", split = FALSE, 
+    include = TRUE, purl = TRUE, tutorial = TRUE, exercise.timelimit = 60, 
+    exercise.checker = "function (label = NULL, solution_code = NULL, user_code = NULL, \n    check_code = NULL, envir_result = NULL, evaluate_result = NULL, \n    envir_prep = NULL, last_value = NULL, ...) \n{\n    (utils::getFromNamespace(\"check_exercise\", \"gradethis\"))(label = label, \n        solution_code = solution_code, user_code = user_code, \n        check_code = check_code, envir_result = envir_result, \n        evaluate_result = evaluate_result, envir_prep = envir_prep, \n        last_value = last_value, ...)\n}", 
+    exercise.error.check.code = "gradethis_error_checker()", 
+    label = "tTestReview", exercise = TRUE, code = c("", ""), 
+    out.width.px = 768, out.height.px = 576, params.src = "tTestReview, exercise = TRUE", 
+    fig.num = 0L, exercise.df_print = "default"), engine = "r"))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "pValReview", question = structure("The p-Value to test whether the wages of clerical occupations differ from the baseline group (manufacturing occupations) is:", html = TRUE, class = c("html", 
+"character")), answers = list(structure(list(id = "lnr_ans_8c0ab06", 
+    option = "0.0208", value = "0.0208", label = structure("0.0208", html = TRUE, class = c("html", 
+    "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_6c7ec02", 
+    option = "0.0824", value = "0.0824", label = structure("0.0824", html = TRUE, class = c("html", 
+    "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_4f7f136", 
+    option = "0.9176", value = "0.9176", label = structure("0.9176", html = TRUE, class = c("html", 
+    "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_fd4f8e0", 
+    option = "0.3876", value = "0.3876", label = structure("0.3876", html = TRUE, class = c("html", 
+    "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
+"tutorial_quiz_answer"))), button_labels = list(submit = structure("<span data-i18n=\"button.questionsubmit\">Submit Answer<\u002fspan>", html = TRUE, class = c("html", 
+"character")), try_again = structure("<span data-i18n=\"button.questiontryagain\">Try Again<\u002fspan>", html = TRUE, class = c("html", 
+"character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html", 
+"character")), try_again = structure("Incorrect", html = TRUE, class = c("html", 
+"character")), incorrect = structure("Incorrect", html = TRUE, class = c("html", 
+"character")), message = NULL, post_message = NULL), ids = list(
+    answer = "pValReview-answer", question = "pValReview"), loading = structure("<strong>Loading:<\u002fstrong> \nThe p-Value to test whether the wages of clerical occupations differ from the baseline group (manufacturing occupations) is:\n<br/><br/><br/>", html = TRUE, class = c("html", 
+"character")), random_answer_order = FALSE, allow_retry = TRUE, 
+    seed = 120382865.943942, options = list()), class = c("learnr_radio", 
+"tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-lincom-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-lincom-code-editor`)), session)
+output$`tutorial-exercise-lincom-output` <- renderUI({
+  `tutorial-exercise-lincom-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::store_exercise_cache("lincom", list(setup = NULL, chunks = list(list(label = "lincom", code = "\n\n", 
+    opts = list(label = "\"lincom\"", exercise = "TRUE"), engine = "r")), 
+    code_check = NULL, error_check = NULL, check = structure("grade_code(\"Notice that the test statistic for $lht$ is exactly the value of that for $glht$. That's because lht uses an F-Test for everything, and the F-distribution (ratio of two $\\chi^2$s) is exactly the same as the distribution of the square of a t-distributed random variable (ratio of a normal and the square root of a $\\chi^2$). $glht$ is cleaner for single restrictions, $lht$ is more flexible.\")", chunk_opts = list(
+        label = "lincom-check")), solution = structure(c("summary(glht(wage.lm7, linfct = \"clerocc - servocc = 0\"))", 
+    "lht(wage.lm7, \"clerocc - servocc\",  0)"), chunk_opts = list(
+        label = "lincom-solution")), options = list(eval = FALSE, 
+        echo = TRUE, results = "markup", tidy = FALSE, tidy.opts = NULL, 
+        collapse = FALSE, prompt = FALSE, comment = NA, highlight = FALSE, 
+        strip.white = TRUE, size = "normalsize", background = "#F7F7F7", 
+        cache = 0, cache.path = "Chapter04-2-Tutorial_cache/slidy/", 
+        cache.vars = NULL, cache.lazy = TRUE, dependson = NULL, 
+        autodep = FALSE, cache.rebuild = FALSE, fig.keep = "high", 
+        fig.show = "asis", fig.align = "default", fig.path = "Chapter04-2-Tutorial_files/figure-slidy/", 
+        dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
+        fig.width = 8, fig.height = 6, fig.env = "figure", fig.cap = NULL, 
+        fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
+        fig.pos = "", out.width = 768, out.height = NULL, out.extra = NULL, 
+        fig.retina = 2, external = TRUE, sanitize = FALSE, interval = 1, 
+        aniopts = "controls,loop", warning = TRUE, error = FALSE, 
+        message = TRUE, render = NULL, ref.label = NULL, child = NULL, 
+        engine = "r", split = FALSE, include = TRUE, purl = TRUE, 
+        tutorial = TRUE, exercise.timelimit = 60, exercise.checker = "function (label = NULL, solution_code = NULL, user_code = NULL, \n    check_code = NULL, envir_result = NULL, evaluate_result = NULL, \n    envir_prep = NULL, last_value = NULL, ...) \n{\n    (utils::getFromNamespace(\"check_exercise\", \"gradethis\"))(label = label, \n        solution_code = solution_code, user_code = user_code, \n        check_code = check_code, envir_result = envir_result, \n        evaluate_result = evaluate_result, envir_prep = envir_prep, \n        last_value = last_value, ...)\n}", 
+        exercise.error.check.code = "gradethis_error_checker()", 
+        label = "lincom", exercise = TRUE, code = c("", "", ""
+        ), out.width.px = 768, out.height.px = 576, params.src = "lincom, exercise = TRUE", 
+        fig.num = 0L, exercise.df_print = "default"), engine = "r"))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-fTest-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-fTest-code-editor`)), session)
+output$`tutorial-exercise-fTest-output` <- renderUI({
+  `tutorial-exercise-fTest-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::store_exercise_cache("fTest", list(setup = NULL, chunks = list(list(label = "fTest", code = "\n", 
+    opts = list(label = "\"fTest\"", exercise = "TRUE"), engine = "r")), 
+    code_check = NULL, error_check = NULL, check = structure("grade_code(\"Note that here I have just used the number *3* as the numerator degrees of freedom. If we wanted to generalize this code for any model or any number of restrictions, we could use the difference in the *rank* of the X-matrix (number of non-collinear columns) for the two models, $wage.lm7$rank - wage.lm8$rank$.\")", chunk_opts = list(
+        label = "fTest-check")), solution = structure(c("# Restricted Model:", 
+    "wage.lm8 <- lm(wage ~ educ + exper + I(exper^2) + tenure, data = wage1)", 
+    "# Extract the R-squareds:", "r2.u <- summary(wage.lm7)$r.squared", 
+    "r2.r <- summary(wage.lm8)$r.squared", "# F statistic:", 
+    "wage.F.occ <- ((r2.u-r2.r)/3) / ((1-r2.u)/wage.lm7$df.residual)", 
+    "# p value = 1-cdf of the appropriate F distribution:", "1 - pf(wage.F.occ, 3,wage.lm7$df.residual)"
+    ), chunk_opts = list(label = "fTest-solution")), options = list(
+        eval = FALSE, echo = TRUE, results = "markup", tidy = FALSE, 
+        tidy.opts = NULL, collapse = FALSE, prompt = FALSE, comment = NA, 
+        highlight = FALSE, strip.white = TRUE, size = "normalsize", 
+        background = "#F7F7F7", cache = 0, cache.path = "Chapter04-2-Tutorial_cache/slidy/", 
+        cache.vars = NULL, cache.lazy = TRUE, dependson = NULL, 
+        autodep = FALSE, cache.rebuild = FALSE, fig.keep = "high", 
+        fig.show = "asis", fig.align = "default", fig.path = "Chapter04-2-Tutorial_files/figure-slidy/", 
+        dev = "png", dev.args = NULL, dpi = 192, fig.ext = "png", 
+        fig.width = 8, fig.height = 6, fig.env = "figure", fig.cap = NULL, 
+        fig.scap = NULL, fig.lp = "fig:", fig.subcap = NULL, 
+        fig.pos = "", out.width = 768, out.height = NULL, out.extra = NULL, 
+        fig.retina = 2, external = TRUE, sanitize = FALSE, interval = 1, 
+        aniopts = "controls,loop", warning = TRUE, error = FALSE, 
+        message = TRUE, render = NULL, ref.label = NULL, child = NULL, 
+        engine = "r", split = FALSE, include = TRUE, purl = TRUE, 
+        tutorial = TRUE, exercise.timelimit = 60, exercise.checker = "function (label = NULL, solution_code = NULL, user_code = NULL, \n    check_code = NULL, envir_result = NULL, evaluate_result = NULL, \n    envir_prep = NULL, last_value = NULL, ...) \n{\n    (utils::getFromNamespace(\"check_exercise\", \"gradethis\"))(label = label, \n        solution_code = solution_code, user_code = user_code, \n        check_code = check_code, envir_result = envir_result, \n        evaluate_result = evaluate_result, envir_prep = envir_prep, \n        last_value = last_value, ...)\n}", 
+        exercise.error.check.code = "gradethis_error_checker()", 
+        label = "fTest", exercise = TRUE, code = c("", ""), out.width.px = 768, 
+        out.height.px = 576, params.src = "fTest, exercise = TRUE", 
+        fig.num = 0L, exercise.df_print = "default"), engine = "r"))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "independentTTest", 
+    question = structure("Suppose we test these three parameters independently and reject just one of them at \\(\\alpha \\le 0.05\\) (we do not know the actual p-value or exact t-statistic, only the result of the test for some reason). What is the probability of a type I error if we use this method to test joint significance?", html = TRUE, class = c("html", 
+    "character")), answers = list(structure(list(id = "lnr_ans_f4cb848", 
+        option = "0.05", value = "0.05", label = structure("0.05", html = TRUE, class = c("html", 
+        "character")), correct = FALSE, message = structure("Careful! We cannot substitute individual t-tests for joint tests and get equivalent levels of significance! The true probability of type I error in this case is \\(1 - P(    ext{none of the hypotheses rejected}) = 1 - 0.95^3\\)!", html = TRUE, class = c("html", 
+        "character"))), class = c("tutorial_question_answer", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_42cec39", 
+        option = "0.000125", value = "0.000125", label = structure("0.000125", html = TRUE, class = c("html", 
+        "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_5407a63", 
+        option = "0.142625", value = "0.142625", label = structure("0.142625", html = TRUE, class = c("html", 
+        "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_ca88782", 
+        option = "0.15", value = "0.15", label = structure("0.15", html = TRUE, class = c("html", 
+        "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
+    "tutorial_quiz_answer"))), button_labels = list(submit = structure("<span data-i18n=\"button.questionsubmit\">Submit Answer<\u002fspan>", html = TRUE, class = c("html", 
+    "character")), try_again = structure("<span data-i18n=\"button.questiontryagain\">Try Again<\u002fspan>", html = TRUE, class = c("html", 
+    "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html", 
+    "character")), try_again = structure("Incorrect", html = TRUE, class = c("html", 
+    "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html", 
+    "character")), message = NULL, post_message = NULL), ids = list(
+        answer = "independentTTest-answer", question = "independentTTest"), 
+    loading = structure("<strong>Loading:<\u002fstrong> \nSuppose we test these three parameters independently and reject just one of them at \\(\\alpha \\le 0.05\\) (we do not know the actual p-value or exact t-statistic, only the result of the test for some reason). What is the probability of a type I error if we use this method to test joint significance?\n<br/><br/><br/>", html = TRUE, class = c("html", 
+    "character")), random_answer_order = FALSE, allow_retry = TRUE, 
+    seed = 2108196901.01829, options = list()), class = c("learnr_radio", 
+"tutorial_question")))
+</script>
+ <!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="dependencies">
+{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["header-attrs"]},{"type":"character","attributes":{},"value":["2.8"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/pandoc"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["header-attrs.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.8"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootstrap"]},{"type":"character","attributes":{},"value":["3.3.5"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/bootstrap"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["viewport"]}},"value":[{"type":"character","attributes":{},"value":["width=device-width, initial-scale=1"]}]},{"type":"character","attributes":{},"value":["js/bootstrap.min.js","shim/html5shiv.min.js","shim/respond.min.js"]},{"type":"character","attributes":{},"value":["css/bootstrap.min.css"]},{"type":"character","attributes":{},"value":["<style>h1 {font-size: 34px;}\n       h1.title {font-size: 38px;}\n       h2 {font-size: 30px;}\n       h3 {font-size: 24px;}\n       h4 {font-size: 18px;}\n       h5 {font-size: 16px;}\n       h6 {font-size: 12px;}\n       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}\n       pre:not([class]) { background-color: white }<\/style>"]},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.8"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["slidy"]},{"type":"character","attributes":{},"value":["2"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/slidy/Slidy2"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["scripts/slidy.js"]},{"type":"character","attributes":{},"value":["styles/slidy.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.8"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["slidy_shiny"]},{"type":"character","attributes":{},"value":["1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/slidy"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["slidy_shiny.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["2.8"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.11.3"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/jquery"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.8"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["font-awesome"]},{"type":"character","attributes":{},"value":["5.1.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/fontawesome"]}]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["css/all.css","css/v4-shims.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.8"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootbox"]},{"type":"character","attributes":{},"value":["4.4.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/bootbox"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["bootbox.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1.9009"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["idb-keyvalue"]},{"type":"character","attributes":{},"value":["3.2.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/idb-keyval"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["idb-keyval-iife-compat.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["0.10.1.9009"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.10.1.9009"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1.9009"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.10.1.9009"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1.9009"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.10.1.9009"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1.9009"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1.9009"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1.9009"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1.9009"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1.9009"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1.9009"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1.9009"]}]}]}
+</script>
+<!--/html_preserve-->
+<!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="execution_dependencies">
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages","version"]},"class":{"type":"character","attributes":{},"value":["data.frame"]},"row.names":{"type":"integer","attributes":{},"value":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103]}},"value":[{"type":"character","attributes":{},"value":["abind","assertthat","backports","base","broom","bslib","car","carData","cellranger","checkmate","cli","codetools","colorspace","compiler","crayon","curl","data.table","datasets","DBI","dbplyr","digest","dplyr","ellipsis","evaluate","fansi","fastmap","forcats","foreign","fs","generics","ggplot2","glue","gradethis","graphics","grDevices","grid","gtable","haven","hms","htmltools","htmlwidgets","httpuv","httr","jquerylib","jsonlite","knitr","later","lattice","learnr","lifecycle","lubridate","magrittr","markdown","MASS","Matrix","methods","mime","modelr","multcomp","munsell","mvtnorm","openxlsx","pillar","pkgconfig","promises","purrr","R6","Rcpp","readr","readxl","reprex","rio","rlang","rmarkdown","rprojroot","rstudioapi","rvest","sandwich","sass","scales","shiny","splines","stats","stringi","stringr","survival","TH.data","tibble","tidyr","tidyselect","tidyverse","tools","utf8","utils","vctrs","withr","wooldridge","xfun","xml2","xtable","yaml","zip","zoo"]},{"type":"character","attributes":{},"value":["1.4-5","0.2.1","1.2.1","4.0.5","0.7.6","0.2.5.1","3.0-10","3.0-4","1.1.0","2.0.0","2.5.0","0.2-18","2.0-1","4.0.5","1.4.1","4.3.1","1.14.0","4.0.5","1.1.1","2.1.1","0.6.27","1.0.6","0.3.2","0.14","0.5.0","1.1.0","0.5.1","0.8-81","1.5.0","0.1.0","3.3.3","1.4.2","0.2.3.9001","4.0.5","4.0.5","4.0.5","0.3.0","2.4.1","1.1.0","0.5.1.1","1.5.3","1.6.1","1.4.2","0.1.4","1.7.2","1.33","1.2.0","0.20-41","0.10.1.9009","1.0.0","1.7.10","2.0.1","1.1","7.3-53.1","1.3-2","4.0.5","0.10","0.1.8","1.4-17","0.5.0","1.1-2","4.2.3","1.6.1","2.0.3","1.2.0.1","0.3.4","2.5.0","1.0.6","1.4.0","1.3.1","2.0.0","0.5.26","0.4.11","2.8","2.0.2","0.13","1.0.0","3.0-1","0.4.0","1.1.1","1.6.0","4.0.5","4.0.5","1.6.2","1.4.0","3.2-10","1.0-10","3.1.2","1.1.3","1.1.1","1.3.1","4.0.5","1.2.1","4.0.5","0.3.8","2.4.2","1.3.1","0.23","1.3.2","1.8-4","2.2.1","2.2.0","1.8-9"]}]}]}
+</script>
+<!--/html_preserve-->
+</div>
+
+  <!-- dynamically load mathjax for compatibility with self-contained -->
+  <script>
+    (function () {
+      var script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+      document.getElementsByTagName("head")[0].appendChild(script);
+    })();
+  </script>
+
+</body>
+</html>

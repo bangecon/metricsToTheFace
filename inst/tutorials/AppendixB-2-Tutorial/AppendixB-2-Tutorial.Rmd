@@ -1,0 +1,188 @@
+---
+output: slidy_presentation
+runtime: shiny_prerendered
+title: "Appendix B \n\n Fundamentals of Probability"
+description: >
+  This tutorial reviews some basic concepts about relationships between two variables.
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+ceosal1 <- wooldridge::ceosal1
+affairs <- wooldridge::affairs
+affairs$haskids <- factor(affairs$kids, labels = c("no","yes"))
+affairs$marriage <- factor(affairs$ratemarr, labels = c("very unhappy","unhappy","average","happy", "very happy"))
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Joint Probability Distributions
+
+-   Discrete Case: $P_{X,Y}(x,y) = P(X = x, Y = y)$
+-   Continuous Case: $f_{X,Y}(x,y)$ is its own function.
+
+For *independent* random variables:
+
+-   Discrete Case: $P_{X,Y}(x,y) = P(X = x) \cdot P(Y = y)$
+-   Continuous Case: $f_{X,Y}(x,y) = f(x) \cdot f(y)$
+
+## Conditional Distributions
+
+-   Discrete Case: $P_{Y|X}(y|x) = P(X = x, Y = y)/P_x(X=x)$
+-   Continuous Case: $f_{Y|X}(y|x) = f_{X,Y}(x, y)/f_X(x)$ is its own function.
+
+## Crosstab Redux 1: /n/n*Estimated* Joint Probabilities of Discrete Variables
+
+Re-create the crosstabulation of marital happiness and whether a couple has kids from the affairs dataset showing only the *proportion* (not percentage) of each joint outcome.
+
+```{r joint, exercise=TRUE, exercise.eval=TRUE}
+
+
+```
+
+```{r joint-hint}
+# Typical statistic options are "{n}" (default), "{p}%", or "{n}, ({p}%)". 
+# Typical percent options are "none" (default), "column", "row", or "cell". 
+prop.table(..., ...)
+```
+
+```{r joint-solution}
+prop.table(table(affairs$marriage,affairs$haskids))
+```
+
+```{r joint-check}
+grade_code("The values within each cell represent the estimated joint probability.")
+```
+
+## Crosstab Redux 2: /n/n*Estimated* Conditional Probabilities of Discrete Variables
+
+Re-create the crosstabulation of marital happiness and whether a couple has kids from the affairs dataset showing only the *proportion* (not percentage) of each joint outcome.
+
+```{r conditional, exercise=TRUE, exercise.eval=TRUE}
+
+
+```
+
+```{r conditional-hint}
+# Set margin = 1 to condition over the row variable; 2 for the column variable. 
+prop.table(table(..., ...), margin = ...)
+```
+
+```{r conditional-solution}
+prop.table(table(affairs$marriage,affairs$haskids), margin = 1)
+prop.table(table(affairs$marriage,affairs$haskids), margin = 2)
+```
+
+```{r conditional-check}
+grade_code("Within each column, the values in each cell represent the estimated conditional probability.")
+```
+
+## Covariance and Correlation
+
+Using the ceosal1 data, calculate: 
+
+- $E(salary \times roe)$ (name this "E_sal.roe")
+- $E(salary) \times E(roe)$ (name this "E_sal.E_roe")
+
+```{r Exy, exercise=TRUE, exercise.eval=TRUE}
+# Tip: When you "attach" a data frame you can call the variables directly.
+attach(ceosal1) 
+# Now we won't need "ceosal1$" before the variables when we repeatedly reference "ceosal1." 
+
+```
+
+```{r Exy-hint}
+# Tip: When you "attach" a data frame you can call the variables directly.
+attach(ceosal1) 
+# Now we won't need "ceosal1$" before the variables when we repeatedly reference "ceosal1." 
+
+```
+
+```{r Exy-solution}
+# Tip: When you "attach" a data frame you can call the variables directly.
+attach(ceosal1) 
+# Now we won't need "ceosal1$" before the variables when we repeatedly reference "ceosal1." 
+E_sal.roe <- mean(salary*roe)
+E_sal.E_roe <- mean(salary)*mean(roe)
+```
+
+```{r Exy-check}
+grade_code()
+```
+
+Using the previous results, calculate (without assigning object names):
+
+- $Cov(salary, roe) = E(salary-\mu_{salary})(roe-\mu_{roe}) = E(salary \times roe) - E(salary) \times E(roe)$ 
+- $Cor(salary, roe) = \frac{Cov(salary, roe)}{\sigma_{salary}\sigma_{roe}} $
+
+```{r covcor, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r covcor-hint}
+
+
+```
+
+```{r covcor-solution}
+ E_sal.roe - E_sal.E_roe
+(E_sal.roe - E_sal.E_roe)/(sd(salary)*sd(roe))
+```
+
+```{r covcor-check}
+grade_code()
+```
+
+Calculate the covariance and correlation for salary and roe using the "cov" and "cor" functions.
+
+```{r covcor2, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r covcor2-hint}
+
+
+```
+
+```{r covcor2-solution}
+cov(ceosal1$salary, ceosal1$roe)
+cor(ceosal1$salary, ceosal1$roe)
+```
+
+```{r covcor2-check}
+grade_code("Notice that they are slightly different. This is because to calculate the covariance for the sample, we should divide by (n - 1) instead of by n (just like we do with the sample variance). Why?")
+```
+
+## Multivariate Normal Distributions
+
+For Independent RVs: 
+
+$$ f(x,y) = f(x) \cdot f(y) = \frac{1}{2\pi\sigma_x\sigma_y}e^{-\frac{1}{2}([\frac{(x - \mu_x)}{\sigma_x}]^2+[\frac{(y - \mu_y)}{\sigma_y}]^2)} $$ 
+
+Bivariate Correlated RVs: 
+
+$$ f(x,y) = \frac{1}{2\pi\sigma_x\sigma_y\sqrt{1-\rho^2}}e^{\frac{-1}{2(1-\rho^2)}[(\frac{x-\mu_x}{\sigma_x})^2-2\rho[(\frac{x-\mu_x}{\sigma_x})(\frac{y-\mu_y}{\sigma_y})]+(\frac{y-\mu_y}{\sigma_y})]^2} $$
+
+Multivariate Normal (in Matrix Form): 
+
+$$ f(\mathbf{x}) = \frac{1}{\sqrt{2\pi|\mathbf{\Sigma}|}}e^{(\mathbf{x}-\mathbf{\mu})'\mathbf{\Sigma}^{-1}(\mathbf{x}-\mathbf{\mu})} $$
+## Independence Questions
+
+```{r cor_x-x2, echo=FALSE}
+question("What is $corr(x, x^2)$?",
+    answer("-1", message = random_encouragement()),
+    answer("0", correct = TRUE, message = paste(random_praise(), "It's strange at first but true: x is linearly uncorrelated with the square of itself")),
+    answer("1", message = random_encouragement()),
+    answer("This cannot be determined.", message = random_encouragement()),
+    allow_retry = TRUE
+  )
+```
+
+```{r dep_x-x2, echo=FALSE}
+  question("Are $x$ and $x^2$ independent?",
+    answer("Yes.", message = random_encouragement()),
+    answer("No.", correct = TRUE, message = paste(random_praise(), "The square of X definitely depends on X, just not linearly."))
+  )
+```
+

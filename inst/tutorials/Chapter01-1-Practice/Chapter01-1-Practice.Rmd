@@ -1,0 +1,191 @@
+---
+title: "Chapter 1-1 Practice"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+gradethis_setup()
+tutorial_options(exercise.timelimit = 60)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Exercise
+
+Here's a simple exercise with an empty code chunk provided for entering the answer.
+
+Write the R code required to perform the following operations:
+
+- $21 + 21$
+- $5(4-1)^2-3$
+- $\sqrt{1764}$
+
+```{r R_as_a_calculator, exercise=TRUE, exercise.reveal_solution = TRUE}
+
+```
+
+```{r R_as_a_calculator-solution}
+21+21
+5*(4-1)^2-3
+sqrt(1764)
+```
+
+```{r R_as_a_calculator-hint}
+# R can be used as a calculator using the command line e.g.:
+1 + 1
+```
+
+```{r R_as_a_calculator-check}
+grade_result(
+  pass_if(~identical(.result, 42))) 
+```
+
+## Using Objects
+
+Do the following: 
+
+- Assign a value of five to a numerical object x
+- Display x and it's squared value
+- Assign a value of 3 to the object y and a value of $y^x$ to the object z using these objects.
+
+```{r objects, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r objects-solution}
+x <- 5
+x
+x^2
+y <- 3
+z <- y^x
+```
+
+```{r objects-code-check}
+grade_code() 
+```
+
+## Vectors and Matrices
+
+Do the following: 
+
+- Create the vector $a = \begin{pmatrix} 1 \\ 2 \\ 3 \\ 4 \\ 5 \\ 6 \end{pmatrix}$;
+- Assign the value $a + 1$ to the object b;
+- Assign the value $a + b$ to the object c;
+- Assign the value $b + c$ to the object d;
+- Calculate $\sqrt{d}$;
+
+```{r Vectors, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r Vectors-solution}
+a <- c(1,2,3,4,5,6)
+b <- a+1
+c <- a+b
+d <- b+c
+sqrt(d)
+A <- matrix(a, ncol = 2)
+
+```
+
+```{r Vectors-code-check}
+grade_code() 
+```
+
+- Create a matrix, A that splits the values of a across two columns;
+- Create a matrix, B that duplicates the columns of A twice. 
+- Extract the third column of B as a matrix named "b."
+
+```{r Matrices, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r Matrices-solution}
+A <- matrix(a, ncol = 2)
+B <- cbind(A, A)
+b <- B[, 3]
+```
+
+```{r Matrices-code-check}
+grade_code() 
+```
+
+## Loading and importing data frames
+
+Load the RData file, "BeerData" into your workspace, then import the CSV file by the same name as an object named "BeerDataCSV"
+
+```{r Import, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r Import-solution}
+load("BeerData.RData")
+BeerDataCSV <- read.csv("BeerData.csv")
+```
+
+```{r Import-code-check}
+grade_code() 
+```
+
+## Saving your work
+
+When you are finished it is *crucial* that you save your work. Save the object, BeerDataCSV as its own RData file named "BeerDataCSV.RData," then save your entire workspace as "BeerData.RData."
+
+```{r Save, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r Save-solution}
+save(BeerDataCSV, file = "BeerDataCSV.RData")
+save.image("BeerData.RData")
+```
+
+```{r Save-code-check}
+grade_code() 
+```
+
+## Examining a Dataset
+ 
+Display the first *five* rows of the mtcars dataset. Then, View the complete data frame in a new window.
+
+```{r View, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r View-solution}
+head(mtcars, n = 5)
+View(mtcars)
+```
+
+```{r View-code-check}
+grade_code() 
+```
+
+## Writing your own function 
+
+Now write a function that adds any two numbers, x and y:
+
+```{r add_function, exercise=TRUE, exercise.lines = 5}
+add <- function() {
+  
+}
+```
+
+```{r add_function-hint}
+# A function needs arguments (variables) as inputs.
+function(...)
+```
+
+
+```{r add_function-solution}
+add <- function(x, y) {
+  x + y
+}
+```
+
+```{r add_function-code-check}
+grade_code() 
+```
+

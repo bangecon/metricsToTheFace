@@ -1,0 +1,78 @@
+---
+title: "Chapter 3-1 Practice"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+gpa1 <- wooldridge::gpa1
+k401k <- wooldridge::k401k
+gradethis_setup()
+tutorial_options(exercise.timelimit = 60)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Exercise
+
+Using the $gpa1$ dataset do the following: 
+  - Regress college GPA ($colGPA$) on ACT score($ACT$) and name the result $GPA.lm1$; 
+  - Regress college GPA on high school GPA ($hsGPA$) and ACT score, and name the result $GPA.lm2$. 
+
+```{r colGPA, exercise=TRUE, exercise.reveal_solution = TRUE}
+
+```
+
+```{r colGPA-solution}
+GPA.lm1 <- lm(colGPA ~ ACT, data=gpa1)
+GPA.lm2 <- lm(colGPA ~ hsGPA + ACT, data=gpa1)
+stargazer(GPA.lm1, GPA.lm2, type = 'text')
+```
+
+```{r colGPA-hint}
+GPA.lm1 <- lm(..., data = ...)
+GPA.lm2 <- lm(..., data = ...)
+stargazer(..., ..., ...)
+```
+
+```{r colGPA-check}
+grade_code()
+```
+
+## Partition Regression
+
+Use partitioned regression to partial out the effect of a company's matching rate to their employees' 401k plan on the plan's participation rates, controlling for the plan's age. Recall that to do this you need to: 
+
+  - Regress the outcome ($prate$) on the control ($age$) and extract the residuals ($prate.u$);
+  - Regress the treatment ($mrate$) on the control ($age$) and extract the residuals ($mrate.u$); 
+  - Regress the residuals of participation on the residuals of matching (name this $prate.lm1$ and note that the coefficient matches the $mrate$ coefficient in example 3.3 in the book); 
+  - Summarize the final residual regression. 
+  - Plot the outcome residuals ($prate.u$) on the treatment residuals ($mrate.u$)
+  - Add the regression line. 
+
+```{r k401k, exercise=TRUE, exercise.reveal_solution = TRUE}
+
+```
+
+```{r k401k-solution}
+prate.u <- lm(prate ~ age, data = k401k)$residuals
+mrate.u <- lm(mrate ~ age, data = k401k)$residuals
+prate.lm1 <- lm(prate.u ~ mrate.u)
+summary(prate.lm1)
+plot(mrate.u, prate.u)
+abline(prate.lm1)
+```
+
+```{r k401k-hint}
+prate.u <- lm(..., ...)$...
+mrate.u <- lm(..., ...)$...
+prate.lm1 <- lm(...)
+summary(...)
+plot(..., ...)
+abline(...)
+```
+
+```{r k401k-check}
+grade_code()
+```

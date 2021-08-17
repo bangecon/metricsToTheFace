@@ -1,0 +1,46 @@
+---
+title: "Chapter 4-1 Practice"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+crime2 <- wooldridge::crime2
+gradethis_setup()
+tutorial_options(exercise.timelimit = 60)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Exercise
+
+Estimate the following model using the $crime2$ dataset:
+$$ln(CrimeRate) = \beta_0 + \beta_1ln(LawExpedPC) + \beta_2ln(IncomePC) + \beta_3ln(PopulationDensity) + \beta_4West + \beta5Northeast + \beta_6South + u$$
+Name your model $crime.lm1$ and do the following: 
+
+  - Test whether population density significantly impacts crime at the 0.05 level. Report the critical value for the test. 
+  - Construct a 99% confidence interval for the expenditure elasticity of crime rate.
+
+```{r crime, exercise=TRUE, exercise.reveal_solution = TRUE}
+
+```
+
+```{r crime-solution}
+crime.lm1 <- lm(log(crmrte) ~ log(lawexpc) + log(pcinc) + log(popden) + west + nrtheast + south, data = crime2)
+qt(1-0.05/2, crime.lm1$df.residual)
+confint(crime.lm1, "log(lawexpc)", level = 0.99)
+```
+
+```{r crime-hint}
+crime.lm1 <- lm(..., ...)
+# Specify the probability in the left tail, and the residual degrees of freedom (n-k-1) from the regression object. 
+qt(..., ...)
+# Specify the model, parameter for which you want the interval estimate in "", and the confidence level. 
+confint(..., "...", ...)
+```
+
+```{r crime-check}
+grade_code()
+```
+

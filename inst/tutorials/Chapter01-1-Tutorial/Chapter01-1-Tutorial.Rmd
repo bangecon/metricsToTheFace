@@ -1,0 +1,212 @@
+---
+output: slidy_presentation
+runtime: shiny_prerendered
+title: "Chapter 1 \n\n Installing R and RStudio \n\n The Nature of Econometrics and Econometric Data"
+description: >
+  This tutorial introduces students to the course and demonstrates the basic setup for R and RStudio.
+always_allow_html: yes
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+gradethis_setup()
+tutorial_options(exercise.timelimit = 60)
+knitr::opts_chunk$set(echo = FALSE, tidy.opts=list(width.cutoff=80), tidy=TRUE)
+tutorial_options(exercise.eval = FALSE)
+webshot::install_phantomjs(force = TRUE)
+new_recorder <- function(tutorial_id, tutorial_version, user_id, event, data) {
+    cat(tutorial_id, " (", tutorial_version, "): ", user_id, ", ", event, ", ", data$label, ", ", data$answers, ", ", data$correct, "\n", sep = "")
+}
+options(tutorial.event_recorder = new_recorder)
+```
+
+## Syllabus Information
+
+-   Office Hours: Liberally by appointment.
+-   Research Paper Deadlines:
+-   Class Preparation, Participation, and Discussion
+    -   The class participant's engagement actively contributes to general student learning -- particularly important with a very small class.
+    
+## Resources
+
+-   Blackboard 
+-   Software
+    -   R (Free Download): <https://cran.r-project.org/>
+    -   RStudio (Free Download -- Recommended): <https://www.rstudio.com/>
+
+<html>
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">In the topsy-turvy world of <a href="https://twitter.com/hashtag/metricstotheface?src=hash&amp;ref_src=twsrc%5Etfw">#metricstotheface</a>, having a good solid piece of wood in your hand is quite often useful.</p>&mdash; Jeffrey Wooldridge (@jmwooldridge) <a href="https://twitter.com/jmwooldridge/status/1375201672901890051?ref_src=twsrc%5Etfw">March 25, 2021</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</html>
+
+## Install R
+
+![](https://vimeo.com/203516510)
+
+## Installing R
+
+```{r installR, echo=FALSE}
+question("Where do you download R?",
+    answer("www.rstudio.com/download"),
+    answer("[cloud.r-project.org](http://cloud.r-project.org)", correct = TRUE, message = "You can also download R from [cran.r-project.org](http://cran.r-project.org)"),
+    answer("www.r-project.org", message = "Good try, but not exactly. www.r-project.org doesn't provide a download link, but it does provide a link to one the websites above."),
+    answer("www.r.com"),
+    allow_retry = TRUE
+  )
+```
+
+## Updating R
+
+```{r updaterR, echo=FALSE}
+question("How often should you update R?",
+    answer("Everytime you use it", message = "This will be too often unless you use R very rarely!"),
+    answer("About once a year", correct = TRUE, "A new version of R is released about once a year. Update sooner if you encounter a bug that you cannot explain."),
+    answer("Never", message = "A new version of R is released about once a year. I'll assume that you are using the newest version of R, which will be the fastest version with the fewest unexpected behaviors." ),
+    allow_retry = TRUE
+  )
+```
+
+## Install RStudio
+
+### How to install RStudio
+
+RStudio is an Integrated Development Environment (IDE) for R. What does that mean? Well, if you think of R as a language, which it is, you can think of RStudio as a program that helps you write and work in the language. RStudio makes programming in R much easier and I suggest that you use it!
+
+![](https://vimeo.com/203516968)
+
+## What is RStudio?
+
+```{r rStudio, echo=FALSE}
+  question("What is the RStudio IDE?",
+    answer("An application that makes it easier to use R.", correct = TRUE, message = "RStudio organizes your workspace and makes it easier to write, use, debug, and save R code. I highly recommend it and will rely on the RStudio IDE in several tutorials."),
+    answer("An application that let's you use R without writing any code", message = "And thank goodness! Code provides a reproducible record of your work, which is essential for data science."),
+    answer("A spreadsheet program like Microsoft Excel."),
+    answer("Another name for R", message = "R and RStudio are two separate things. R is a language, like English. Think of RStudio as a program that helps you use the language, kind of like how a word processing program helps you write in English."),
+    allow_retry = TRUE
+  )
+```
+
+## Where do I get RStudio? 
+
+```{r installRStudio, echo=FALSE}
+question("Where do you download RStudio?",
+    answer("www.rstudio.com/download", correct = TRUE, message = "For these tutorials, download and install the RStudio Desktop Open Source License."),
+    answer("[cloud.r-project.org](http://cloud.r-project.org)", message = "This is where you download R, not RStudio."),
+    answer("www.r-project.org"),
+    answer("[cran.rstudio.org](http://cran.rstudio.org)"),
+    allow_retry = TRUE
+  )
+```
+
+## Do I still need R?
+
+```{r installR_RStudio, echo=FALSE}
+  question("Do you need to install R if you already have RStudio?",
+    answer("Yes.", correct = TRUE),
+    answer("No.", message = "R does not come with RStudio; you need to install R separately.")
+  )
+```
+
+## Install Packages
+
+### How to install R packages
+
+![](https://vimeo.com/203516241)
+
+## How do I install packages?
+
+```{r install_packages, echo = FALSE}
+  question("What command do you use to install packages?",
+    answer("`library()`", message = "We will see what `library()` does later."),
+    answer("`install.packages()`", correct = TRUE),
+    answer("`install_packages()`"),
+    answer("There is no command. You must visit [cran.r-project.org](http://cran.r-project.org) and download packages manually.", message = "R makes it easy to download packages. You connect to the internet and then run one of the commands above."),
+    allow_retry = TRUE
+  )
+```
+
+## How often do I install a package?
+
+```{r reinstall_packages, echo = FALSE}
+  question("How often do you need to install a package on your computer?",
+    answer("Every time you restart R"),
+    answer("Every time you restart your computer"),
+    answer("Once.", correct = TRUE, message = "Afterwards, R can find it on your hard drive and load it using 'library()' or 'require()' as needed."),
+    answer("Never, as long as you are connected to the internet.", message = "This could be true if you are using R over a cloud service. However, if you are using R locally on your own computer, you will need to install each package that you use on your computer."),
+    allow_retry = TRUE
+  )
+```
+
+## What is Econometrics?
+
+- "How much?"
+  - The quantitative analysis of economic data
+  - Helps to quantify relationships
+
+## Economics and the Scientific Method
+
+1.  Ask a Question
+
+2.  Form a Hypothesis
+
+3.  Review Existing Research
+
+4.  Collect Data
+
+5.  Analyze the Data
+
+  - Test *Causal* Hypotheses 
+  - Forecast/Predict
+
+6.  Form a Conclusion
+
+## Example: Effects of Training on Productivity
+
+<p align="center">
+$wage=f(educ,exper,training)$, </p>
+
+where $educ$ is a measure of schooling, $exper$ is a measure of workforce experience, and $training$ is a measure of time spent training.
+
+<p align="center">
+$wage=\beta_{0}+\beta_{1}educ+\beta_{2}exper+\beta_{3}training+u$ </p>
+
+An econometric model consists of a systematic part – $f(*)$ – and a random error – $u$
+
+## Example: Effects of Training on Productivity
+
+<p align="center">
+$crime=f(crime wage, market wage, other income, p_{caught}, p_{convicted|caught}, \hat{sentence}, age)$, 
+
+where $educ$ is a measure of schooling, $exper$ is a measure of workforce experience, and $training$ is a measure of time spent training.
+
+<p align="center">
+$wage=\beta_{0}+\beta_{1}wage_m+\beta_{2}otherinc+\beta_{3}freqarr+\beta_{4}freqconv+\beta_{5}avesen+\beta_{6}age+u$  </p>
+
+## Data: Sources and Types
+-   Experimental versus Observational Data
+-   Cross-section
+-   Time-series data
+-   Pooled cross sections
+-   Panel/longitudinal data
+
+## Causality
+
+How could we determine whether spending on education *causes* better performance? 
+
+Hold all else equal: *ceteris paribus*
+
+Problems: 
+
+- Confounding (omitted) variables
+
+  Solution: Add those variables to the model.
+
+- Non-random sample selection
+
+  Solution: Tobit (Chapter 17; Tobin, 1958)
+            Heckit (Chapter 17; Heckman, 1976)
+
+- Non-random treatment assignment
+  Solution: Instrumental Variables (Chapter 15)
+            Matching treatment and controls (Rosenbaum & Rubin, 1983); 
+            Covariate balancing (Horvitz & Thompson, 1952; Robins et al., 2000)

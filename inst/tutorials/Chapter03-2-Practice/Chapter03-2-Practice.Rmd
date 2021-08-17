@@ -1,0 +1,57 @@
+---
+title: "Chapter 3-2 Practice"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+gpa1 <- wooldridge::gpa1
+k401k <- wooldridge::k401k
+gradethis_setup()
+tutorial_options(exercise.timelimit = 60)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Exercise
+
+Using the matrix formula for calculating the coefficients and their variance matrix, estimate the regression coefficients and their standard errors for the regression of college GPA on high school GPA ($hsGPA$) and ACT score ($ACT$) using the $gpa1$ dataset. 
+
+```{r colGPA, exercise=TRUE, exercise.reveal_solution = TRUE}
+
+```
+
+```{r colGPA-solution}
+n <- nrow(gpa1)
+y <- gpa1$colGPA
+X <- cbind(1, gpa1$hsGPA, gpa1$ACT)
+k <- ncol(X) - 1
+bhat <- solve( t(X)%*%X ) %*% t(X)%*%y
+uhat <- y - X %*% bhat
+sigsqhat <- as.numeric( t(uhat) %*% uhat / (n-k-1) )
+SER <- sqrt(sigsqhat)
+Vbetahat <- sigsqhat * solve( t(X)%*%X )
+se <- sqrt( diag(Vbetahat) )
+```
+
+```{r colGPA-hint}
+n <- nrow(...)
+y <- ...
+X <- cbind(..., ..., ...)
+k <- ncol(...) - ...
+# To transpose a matrix, use the function t(); to calculate the matrix product use %*%; and to invert a matrix use the solve() function.
+bhat <- solve(...%*%... ) %*% ...%*%...
+uhat <- y - X %*% bhat
+# when you calculate sigsqhat define the results as a scalar number using as.numeric().
+sigsqhat <- as.numeric( ... %*% ... / (...) )
+SER <- sqrt(...)
+Vbetahat <- ... * solve( ...%*%... )
+# The variances of the betas are on the diagonal of the variance matrix; the standard errors are their square root. 
+se <- sqrt( ... )
+```
+
+```{r colGPA-check}
+grade_code()
+```
+

@@ -1,0 +1,54 @@
+---
+title: "Chapter 3-2 Practice"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+gpa1 <- wooldridge::gpa1
+gradethis_setup()
+tutorial_options(exercise.timelimit = 60)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Exercise
+
+Simulate the bias term from the omitted variable bias formula, $E(\tilde\beta_1) = \beta_1 + \beta_2\delta$ for the model $CollegeGPA = \beta_0 + \beta_1HighSchoolGPA + \beta_2ACTScore + u$ using the $gpa1$ data. 
+  - Define $beta.hat$ as the coefficient vector from the OLS estimates of college GPA on ACT score and high school GPA. 
+  - Define $delta.tilde$ as the coefficient vector from the OLS estimates of high school GPA on ACT score. 
+  - Calculate the formula for $E(\tilde\beta)$. 
+  - Estimate $\tilde\beta$ for the simple regression of college GPA on ACT Score. 
+
+```{r omittedVariableBias, exercise=TRUE, exercise.reveal_solution = TRUE}
+
+```
+
+```{r omittedVariableBias-solution}
+beta.hat <- coef( lm(colGPA ~ ACT+hsGPA, data=gpa1) )
+beta.hat
+delta.tilde <- coef( lm(hsGPA ~ ACT, data=gpa1) )
+delta.tilde
+beta.hat["ACT"] + beta.hat["hsGPA"]*delta.tilde["ACT"]
+beta.tilde <- lm(colGPA ~ ACT, data=gpa1)
+```
+
+```{r omittedVariableBias-hint}
+# Parameter estimates for "full" model:
+beta.hat <- coef( lm(..., ...) )
+beta.hat
+# Relation between regressors:
+delta.tilde <- coef( lm(..., ...) )
+delta.tilde
+# Omitted variables formula for beta1.tilde:
+# Use the elements of beta.hat and delta.tilde to add the "true" beta and the bias.
+... + ...*...
+# Biased regression with hsGPA omitted:
+beta.tilde <- lm(colGPA ~ ACT, data=gpa1)
+```
+
+```{r omittedVariableBias-check}
+grade_code()
+```
+

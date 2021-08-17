@@ -1,0 +1,109 @@
+---
+output: slidy_presentation
+runtime: shiny_prerendered
+title: "Chapter 2 \n\n The Simple Regression Model"
+author: "James Bang"
+description: >
+  This tutorial discusses interpretation of the linear coefficients and the properties of the OLS estimator.
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+library(wooldridge)
+wage1 <- wooldridge::wage1
+wage.lm0 <- lm(wage ~ educ - 1, data = wage1)
+wage.lm1 <- lm(wage ~ educ, data = wage1)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Nonlinearities
+
+```{r linearRegression, echo=FALSE}
+question("What do we mean by 'linear regression?'",
+    answer("that the population regression function is linear in the independent variable(s)", message = random_encouragement()),
+    answer("that the true relationship between the variables must be linear", message = random_encouragement()),
+    answer("that the population regression function is linear in the parameters", correct = TRUE,  message = random_praise()),
+    answer("that the regression line minimizes the sum of squared residuals", message = random_encouragement()),
+    allow_retry = TRUE
+  )
+```
+
+## A Simple Regression: Wages and Education
+
+- Estimate a linear model for the log of wages on the level of education and call it lwage.lm1. 
+- Summarize the output
+
+```{r logLinear, exercise = TRUE}
+
+
+```
+
+```{r logLinear-hint}
+# You may use mathematical operators on variables within your formula() argument, e.g. log(wage).
+lwage.lm1 <- lm(..., data = ...) 
+```
+
+```{r logLinear-solution}
+lwage.lm1 <- lm(log(wage) ~ educ, data = wage1)
+summary(lwage.lm1)
+```
+
+```{r logLinear-check}
+grade_code()
+```
+
+## Interpreting Regression Coefficients
+
+```{r betaInterpretationLinear, echo=FALSE}
+question("In the regression, $wage = \\beta_0 + \\beta_1educ + u$, what is the economic interpretation of $\\beta_1$?",
+    answer("that a one-year increase in education leads to a $\\beta_1$ dollar increase in hourly wage on average", correct = TRUE, message = random_praise()),
+    answer("that a one-year increase in education leads to a $\\beta_1$ percent increase in hourly wage on average", message = random_encouragement()),
+    answer("that a one percent increase in education leads to a $\\beta_1$ percent increase in hourly wage on average", message = random_encouragement()),
+    answer("that a one-year increase in education leads to a $\\beta_1$ dollar increase in hourly wage always", message = random_encouragement()),
+    random_answer_order = TRUE,
+    allow_retry = TRUE
+  )
+```
+
+```{r betaInterpretationLogLinear, echo=FALSE}
+question("In the regression, $\\log(wage) = \\beta_0 + \\beta_1educ + u$, what is the economic interpretation of $\\beta_1$?",
+    answer("that a one-year increase in education leads to a $\\beta_1$ dollar increase in hourly wage on average", message = random_praise()),
+    answer("that a one-year increase in education leads to a $\\beta_1$ percent increase in hourly wage on average", correct = TRUE, message = random_encouragement()),
+    answer("that a one percent increase in education leads to a $\\beta_1$ percent increase in hourly wage on average", message = random_encouragement()),
+    answer("the log-linear model is better than the linear model", message = random_encouragement()),
+    random_answer_order = TRUE,
+    allow_retry = TRUE
+  )
+```
+
+## Expected Value of $\hat{\beta}_1$ & $\hat{\beta}_0$
+
+Assumptions: 
+
+- Linearity in Parameters
+- Random Sampling: $(X_i, Y_i)$ are independently and identically distributed
+- Sample Variation: $x_i$s vary - rules out perfect collinearity with constant
+- Zero Conditional Mean of $u$. $$E(u|x) = 0$$
+
+$E(\hat{\beta}_0) = \hat{\beta}_0$ and $E(\hat{\beta}_1) = \hat{\beta}_1$ (Proof in section 2.5)
+
+## Variances of $\hat{\beta}_1$ & $\hat{\beta}_0$
+
+Additional Assumption: 
+
+- Homoskedasticity: $u_i{'s}$ have constant variance regardless of the value of $x$. $$Var(u|x) = 0$$
+
+Standard Error of the Regression: $\hat{\sigma} = \sqrt{ \frac{1}{n-2}\sum_{i=1}^n{u_i^2}}$ - the standard deviation of the residuals
+
+$$ \hat{\sigma}_{\hat{\beta}_1}^2 = \frac{\hat{\sigma}^2}{\sum_{i=1}^n(x_i-\bar{x})^2} = \frac{\hat{\sigma}^2}{(n-1)\hat{\sigma}_x^2}$$
+
+$$ \hat{\sigma}_{\hat{\beta}_0}^2 = \frac{\hat{\sigma}^2\sum_{i=1}^n{x_i^2}}{n\sum_{i=1}^n(x_i-\bar{x})^2}= \frac{\hat{\sigma}^2}{(n-1)\hat{\sigma_x}^2} \cdot\frac{\sum_{i=1}^n{x_i^2}}{n} $$
+
+## Sampling Distribution of $\hat{\beta}_1$ & $\hat{\beta}_0$
+
+$$ \hat{\beta}_1 \sim N(\beta_1, \frac{\sigma^2}{n\sigma_x^2})$$
+
+$$ \hat{\beta}_0 \sim N(\beta_0, \frac{\hat{\sigma}^2\sum_{i=1}^n{x_i^2}}{n(n-1)\hat{\sigma}_x^2})$$
+Note: We don't actually know the true mean of x or the true standard error of the regression. 

@@ -1,0 +1,512 @@
+exit_fade()
+## Not run:
+# Explicitly animate using default (same as just printing the animation)
+animate(anim)
+image_write(animate(p,nframes=200), path = 'ControlingForZ.gif')
+library(gganimate)
+anim.save(animation = animate(p,nframes=200), file = 'ControlingForZ.gif')
+anim_save(animation = animate(p,nframes=200), file = 'ControlingForZ.gif')
+animate(p,nframes=200, renderer = gifski_renderer("ControlingForZ.gif"))
+library(gganimate)
+gifski_renderer
+animate(p,nframes=200, renderer = gifski_renderer("ControlingForZ.gif"))
+gganimate::animate(p,nframes=200, renderer = gifski_renderer("ControlingForZ.gif"))
+anim_save(animate(p,nframes=200), filename = 'controllingForZ.gif')
+animate(p,nframes=200, renderer = magick_renderer("ControlingForZ.gif"))
+install.packages("gifski")
+animate(p,nframes=200, renderer = gifski_renderer("ControlingForZ.gif"))
+install.packages("gapminder")
+?dhyper
+wage1 <- metricsToTheFace::wage1
+wage.lm1 <- lm(wage ~ educ, data = wage1)
+wage.lm2 <- lm(wage ~ educ + exper, data = wage1)
+wage.lm1.tbl <- tbl_regression(wage.lm1)
+wage.lm2.tbl <- tbl_regression(wage.lm2)
+tbl_merge(wage.lm1.tbl, wage.lm2.tbl)
+library(gtsummary)
+wage1 <- metricsToTheFace::wage1
+wage.lm1 <- lm(wage ~ educ, data = wage1)
+wage.lm2 <- lm(wage ~ educ + exper, data = wage1)
+wage.lm1.tbl <- tbl_regression(wage.lm1)
+wage.lm2.tbl <- tbl_regression(wage.lm2)
+tbl_merge(wage.lm1.tbl, wage.lm2.tbl)
+wage1 <- metricsToTheFace::wage1
+wage.lm1 <- lm(wage ~ educ, data = wage1)
+wage.lm2 <- lm(wage ~ educ + exper, data = wage1)
+wage.lm1.tbl <- tbl_regression(wage.lm1)
+wage.lm2.tbl <- tbl_regression(wage.lm2)
+tbl_merge(list(wage.lm1.tbl, wage.lm2.tbl))
+library(parameters)
+install.packages("parameters")
+??parameters
+wage1 <- metricsToTheFace::wage1
+wage.lm1 <- lm(wage ~ educ, data = wage1)
+wage.lm2 <- lm(wage ~ educ + exper, data = wage1)
+wage.lm1.tbl <- tbl_regression(wage.lm1, tidy_fun = parameters::model_parameters())
+wage.lm2.tbl <- tbl_regression(wage.lm2, tidy_fun = parameters::model_parameters())
+tbl_merge(list(wage.lm1.tbl, wage.lm2.tbl))
+parameters::model_parameters(wage.lm1)
+wage1 <- metricsToTheFace::wage1
+wage.lm1 <- lm(wage ~ educ, data = wage1)
+wage.lm2 <- lm(wage ~ educ + exper, data = wage1)
+wage.lm1.tbl <- tbl_regression(wage.lm1, tidy_fun = parameters::model_parameters)
+wage.lm2.tbl <- tbl_regression(wage.lm2, tidy_fun = parameters::model_parameters)
+tbl_merge(list(wage.lm1.tbl, wage.lm2.tbl))
+theme_gtsummary_journal(journal = c("qjecon"), set_theme = TRUE)
+wage.lm1.tbl <- tbl_regression(wage.lm1)
+wage.lm2.tbl <- tbl_regression(wage.lm2)
+tbl_merge(wage.lm1.tbl, wage.lm2.tbl)
+theme_gtsummary_journal(journal = c("qjecon"), set_theme = TRUE)
+wage.lm1.tbl <- tbl_regression(wage.lm1)
+wage.lm2.tbl <- tbl_regression(wage.lm2)
+tbl_merge(list(wage.lm1.tbl, wage.lm2.tbl))
+theme_gtsummary_journal(journal = c("qjecon"), set_theme = TRUE)
+wage.lm1.tbl <- add_n(tbl_regression(wage.lm1))
+wage.lm2.tbl <- add_n(tbl_regression(wage.lm2))
+tbl_merge(list(wage.lm1.tbl, wage.lm2.tbl))
+webshot::install_phantomjs()
+webshot::install_phantomjs(force = TRUE)
+wage.lm6 <- lm(wage ~ exper + educ + tenure, data = wooldridge::wage1)
+summary(wage.lm6)
+summaryTable <- summary(wage.lm6)
+summaryTable$coefficients
+summaryTable$coefficients[2,4]
+summaryTable$coefficients[2,4]/2
+1-summaryTable$coefficients[2,4]/2
+qt(0.025, 522)
+wage.lm6$df.residual
+t.testval <- summary(wage.lm6)$coefficients['exper', 'Std. Error']
+t.testval
+t.testval <- summary(wage.lm6)$coefficients['exper', 't value']
+?polygon
+x <- seq(-3.5,3.5,length=100)
+y <- dnorm(x,0,1)
+t.critval <- qt(0.025, wage.lm6$df.residual)
+t.testval <- summary(wage.lm6)$coefficients['exper', 't value']
+plot(x, y, type="l")
+polygon(c(x[x>=t.critical], max(x), t.critical), c(y[x>=t.critical], 0, 0), col="red", alpha = 0.5)
+polygon(c(x[x>=t.critical], max(x), t.critval), c(y[x>=t.critval], 0, 0), col="red", alpha = 0.5)
+polygon(c(x[x>=t.critval], max(x), t.critval), c(y[x>=t.critval], 0, 0), col="red", alpha = 0.5)
+x <- seq(-3.5,3.5,length=100)
+y <- dnorm(x,0,1)
+t.critval <- qt(0.0975, wage.lm6$df.residual)
+t.testval <- summary(wage.lm6)$coefficients['exper', 't value']
+plot(x, y, type="l")
+polygon(c(x[x>=t.critical], max(x), t.critical), c(y[x>=t.critical], 0, 0), col="red", alpha = 0.5)
+x <- seq(-3.5,3.5,length=100)
+y <- dnorm(x,0,1)
+t.critval <- qt(0.0975, wage.lm6$df.residual)
+t.testval <- summary(wage.lm6)$coefficients['exper', 't value']
+plot(x, y, type="l")
+polygon(c(x[x>=t.critval], max(x), t.critval), c(y[x>=t.critval], 0, 0), col="red", alpha = 0.5)
+x <- seq(-3.5,3.5,length=100)
+y <- dnorm(x,0,1)
+t.critval <- qt(0.975, wage.lm6$df.residual)
+t.testval <- summary(wage.lm6)$coefficients['exper', 't value']
+plot(x, y, type="l")
+polygon(c(x[x>=t.critval], max(x), t.critval), c(y[x>=t.critval], 0, 0), col="red", alpha = 0.5)
+x <- seq(-3.5,3.5,length=1000)
+y <- dnorm(x,0,1)
+t.critval <- qt(0.0975, wage.lm6$df.residual)
+t.testval <- summary(wage.lm6)$coefficients['exper', 't value']
+plot(x, y, type="l")
+polygon(c(x[x>=t.critval], max(x), t.critval), c(y[x>=t.critval], 0, 0), col="red", alpha = 0.5)
+x <- seq(-3.5,3.5,length=1000)
+y <- dnorm(x,0,1)
+t.critval <- qt(0.975, wage.lm6$df.residual)
+t.testval <- summary(wage.lm6)$coefficients['exper', 't value']
+plot(x, y, type="l")
+polygon(c(x[x>=t.critval], max(x), t.critval), c(y[x>=t.critval], 0, 0), col="red", alpha = 0.5)
+x <- seq(-3.5,3.5,length=1000)
+y <- dnorm(x,0,1)
+t.critval <- qt(0.975, wage.lm6$df.residual)
+t.testval <- summary(wage.lm6)$coefficients['exper', 't value']
+plot(x, y, type="l")
+polygon(c(x[x>=t.critval], max(x), t.critval), c(y[x>=t.critval], 0, 0), col="red", density = 1)
+x <- seq(-3.5,3.5,length=1000)
+y <- dnorm(x,0,1)
+t.critval <- qt(0.975, wage.lm6$df.residual)
+t.testval <- summary(wage.lm6)$coefficients['exper', 't value']
+plot(x, y, type="l")
+polygon(c(x[x>=t.critval], max(x), t.critval), c(y[x>=t.critval], 0, 0), col="red", density = 5)
+x <- seq(-3.5,3.5,length=1000)
+y <- dnorm(x,0,1)
+t.critval <- qt(0.975, wage.lm6$df.residual)
+t.testval <- summary(wage.lm6)$coefficients['exper', 't value']
+plot(x, y, type="l")
+polygon(c(x[x>=t.critval], max(x), t.critval), c(y[x>=t.critval], 0, 0), col="red", density = 10)
+# Define values for x and y axes, and the critical and test values.
+x <- seq(-3.5,3.5,length=1000)
+y <- dnorm(x,0,1)
+t.critval <- qt(0.95, wage.lm6$df.residual)
+t.testval <- summary(wage.lm6)$coefficients['exper', 't value']
+# Plot the t distribution with n-k-1 degrees of freedom and sensibly-labeled axes.
+plot(x, y, type="l", ylab = "f(t)", xlab = "t")
+# Add the polygon for the right-tailed, alpha = 0.05 t-critical value.
+polygon(c(x[x>=t.critval], max(x), t.critval), c(y[x>=t.critval], 0, 0), col="red", density = 10)
+# Add the polygon for the p-value.
+polygon(c(x[x>=t.testval], max(x), t.testval), c(y[x>=t.testval], 0, 0), col="blue", density = 10, angle = -0.45)
+question("What is the p-value for a test for $\beta$ with the alternative $\beta > 0$?",
+answer("0.0645"),
+answer("0.9355"),
+answer("0.9678"),
+answer("0.0322", correct = TRUE),
+allow_retry = TRUE
+)
+# Define values for x and y axes, and the critical and test values.
+x <- seq(-3.5,3.5,length=1000)
+y <- dnorm(x,0,1)
+t.critval <- qt(0.95, wage.lm6$df.residual)
+t.testval <- summary(wage.lm6)$coefficients['exper', 't value']
+# Plot the t distribution with n-k-1 degrees of freedom and sensibly-labeled axes.
+plot(x, y, type="l", ylab = "f(t)", xlab = "t")
+# Add the polygon for the right-tailed, alpha = 0.05 t-critical value.
+polygon(c(x[x>=t.critval], max(x), t.critval), c(y[x>=t.critval], 0, 0), col="red", density = 10)
+# Add the polygon for the p-value.
+polygon(c(x[x>=t.testval], max(x), t.testval), c(y[x>=t.testval], 0, 0), col="blue", density = 10, angle = -45)
+summary(wooldridge::ceosal1)
+summary(lm(salary ~ roe + sales + indus + finance + consprod + utility, data = wooldridge::ceosal1))
+summary(lm(salary ~ roe + sales + finance + consprod + utility, data = wooldridge::ceosal1))
+summary(lm(salary ~ roe + finance + consprod + utility, data = wooldridge::ceosal1))
+summary(lm(salary ~ sales + finance + consprod + utility, data = wooldridge::ceosal1))
+summary(lm(lsalary ~ lroe + lsales + finance + consprod + utility, data = wooldridge::ceosal1))
+summary(lm(lsalary ~ roe + lsales + finance + consprod + utility, data = wooldridge::ceosal1))
+qt(0.025, 203)
+qt(0.05, 203)
+summary(lm(lsalary ~ roe + lsales + finance + consprod + utility, data = wooldridge::ceosal1))$coefficients
+summary(lm(lsalary ~ roe + lsales + finance + consprod + utility, data = wooldridge::ceosal1))$coefficients[4, 4]
+summary(lm(lsalary ~ roe + lsales + finance + consprod + utility, data = wooldridge::ceosal1))$coefficients[4, 4]/2
+1-summary(lm(lsalary ~ roe + lsales + finance + consprod + utility, data = wooldridge::ceosal1))$coefficients[4, 4]
+1-summary(lm(lsalary ~ roe + lsales + finance + consprod + utility, data = wooldridge::ceosal1))$coefficients[4, 4]/2
+x <- seq(-3.5,3.5,length=1000)
+y <- dt(x,wage.lm6$df.residual)
+t.critval <- qt(0.95, wage.lm6$df.residual)
+t.testval <- summary(wage.lm6)$coefficients['exper', 't value']
+# Plot the t distribution with n-k-1 degrees of freedom and sensibly-labeled axes.
+plot(x, y, type="l", ylab = "f(t)", xlab = "t")
+# Add the polygon for the right-tailed, alpha = 0.05 t-critical value.
+polygon(c(x[x>=t.critval], max(x), t.critval), c(y[x>=t.critval], 0, 0), col="red", density = 10)
+# Add the polygon for the p-value.
+polygon(c(x[x>=t.testval], max(x), t.testval), c(y[x>=t.testval], 0, 0), col="blue", density = 10, angle = -45)
+summary(wooldridge::ceosal1)
+# Define values for x and y axes, and the critical and test values.
+x <- seq(-3.5,3.5,length=1000)
+y <- dt(x,0,1)
+t.critval <- qt(0.025, wage.lm6$df.residual)
+t.testval <- summary(wage.lm6)$coefficients['exper', 't value']
+# Plot the t distribution with n-k-1 degrees of freedom and sensibly-labeled axes.
+plot(x, y, type="l", ylab = "f(t)", xlab = "t")
+# Define values for x and y axes, and the critical and test values.
+x <- seq(-3.5,3.5,length=1000)
+y <- dt(x,wage.lm6$df.residual)
+t.critval <- qt(0.025, wage.lm6$df.residual)
+t.testval <- summary(wage.lm6)$coefficients['exper', 't value']
+# Plot the t distribution with n-k-1 degrees of freedom and sensibly-labeled axes.
+plot(x, y, type="l", ylab = "f(t)", xlab = "t")
+# Add the polygon for BOTH alpha = 0.05 t-critical values.
+polygon(c(x[x>=t.critval], max(x), t.critval), c(y[x>=t.critval], 0, 0), col="red", density = 10)
+polygon(c(x[x>=-t.critval], max(x), -t.critval), c(y[x>=-t.critval], 0, 0), col="red", density = 10)
+plot(x, y, type="l", ylab = "f(t)", xlab = "t")
+# Add the polygon for BOTH alpha = 0.05 t-critical values.
+polygon(c(x[x>=-t.critval], max(x), -t.critval), c(y[x>=-t.critval], 0, 0), col="red", density = 10)
+polygon(c(x[x<=t.critval], max(x), t.critval), c(y[x<=t.critval], 0, 0), col="red", density = 10)
+# Plot the t distribution with n-k-1 degrees of freedom and sensibly-labeled axes.
+plot(x, y, type="l", ylab = "f(t)", xlab = "t")
+# Add the polygon for BOTH alpha = 0.05 t-critical values.
+polygon(c(x[x>=-t.critval], max(x), -t.critval), c(y[x>=-t.critval], 0, 0), col="red", density = 10)
+polygon(c(x[x<=t.critval], min(x), t.critval), c(y[x<=t.critval], 0, 0), col="red", density = 10)
+# Plot the t distribution with n-k-1 degrees of freedom and sensibly-labeled axes.
+plot(x, y, type="l", ylab = "f(t)", xlab = "t")
+# Add the polygon for BOTH alpha = 0.05 t-critical values.
+polygon(c(x[x>=-t.critval], max(x), -t.critval), c(y[x>=-t.critval], 0, 0), col="red", density = 10)
+polygon(c(min(x), x[x<=t.critval], t.critval), c(y[x<=t.critval], 0, 0), col="red", density = 10)
+# Add the polygons for the p-value.
+polygon(c(x[x>=-t.testval], max(x), -t.testval), c(y[x>=-t.testval], 0, 0), col="blue", density = 10)
+polygon(c(min(x), x[x<=t.testval], t.testval), c(y[x<=t.testval], 0, 0), col="blue", density = 10)
+# Plot the t distribution with n-k-1 degrees of freedom and sensibly-labeled axes.
+plot(x, y, type="l", ylab = "f(t)", xlab = "t")
+# Add the polygons for BOTH alpha = 0.05 t-critical values.
+polygon(c(x[x>=-t.critval], max(x), -t.critval), c(y[x>=-t.critval], 0, 0), col="red", density = 10)
+polygon(c(min(x), x[x<=t.critval], t.critval), c(y[x<=t.critval], 0, 0), col="red", density = 10)
+# Add the polygons for the p-value.
+polygon(c(x[x>=abs(t.testval)], max(x), abs(t.testval)), c(y[x>=abs(t.testval)], 0, 0), col="blue", density = 10)
+polygon(c(min(x), x[x<=-abs(t.testval)], -abs(t.testval)), c(y[x<=-abs(t.testval)], 0, 0), col="blue", density = 10)
+# Plot the t distribution with n-k-1 degrees of freedom and sensibly-labeled axes.
+plot(x, y, type="l", ylab = "f(t)", xlab = "t")
+# Add the polygons for BOTH alpha = 0.05 t-critical values.
+polygon(c(x[x>=-t.critval], max(x), -t.critval), c(y[x>=-t.critval], 0, 0), col="red", density = 10)
+polygon(c(min(x), x[x<=t.critval], t.critval), c(y[x<=t.critval], 0, 0), col="red", density = 10)
+# Add the polygons for the p-value.
+polygon(c(x[x>=abs(t.testval)], max(x), abs(t.testval)), c(y[x>=abs(t.testval)], 0, 0), col="blue", density = 10, angle = -45)
+polygon(c(min(x), x[x<=-abs(t.testval)], -abs(t.testval)), c(y[x<=-abs(t.testval)], 0, 0), col="blue", density = 10, angle = -45)
+# Plot the t distribution with n-k-1 degrees of freedom and sensibly-labeled axes.
+plot(x, y, type="l", ylab = "f(t)", xlab = "t")
+# Add the polygons for the p-value.
+polygon(c(x[x>=abs(t.testval)], max(x), abs(t.testval)), c(y[x>=abs(t.testval)], 0, 0), col="blue", density = 10, angle = -45)
+polygon(c(min(x), x[x<=-abs(t.testval)], -abs(t.testval)), c(y[x<=-abs(t.testval)], 0, 0), col="blue", density = 10, angle = -45)
+# Add the polygons for BOTH alpha = 0.05 t-critical values.
+polygon(c(x[x>=-t.critval], max(x), -t.critval), c(y[x>=-t.critval], 0, 0), col="red", density = 10)
+polygon(c(min(x), x[x<=t.critval], t.critval), c(y[x<=t.critval], 0, 0), col="red", density = 10)
+summary(wage1)
+summary(wooldridge::wage1)
+mean(wooldridge::wage1$profocc)+mean(wooldridge::wage1$clerocc)+mean(wooldridge::wage1$servocc)
+data(mlb1, package='wooldridge')
+# Unrestricted OLS regression:
+res.ur <- lm(log(salary) ~ years+gamesyr+bavg+hrunsyr+rbisyr, data=mlb1)
+# Restricted OLS regression:
+res.r <- lm(log(salary) ~ years+gamesyr, data=mlb1)
+# R2:
+( r2.ur <- summary(res.ur)$r.squared )
+( r2.r <- summary(res.r)$r.squared )
+# F statistic:
+( F <- (r2.ur-r2.r) / (1-r2.ur) * 347/3 )
+# p value = 1-cdf of the appropriate F distribution:
+1-pf(F, 3,347)
+wage1 <- wooldridge::wage1
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure  + clerocc + servocc, data = wage1)
+summary(wage1)
+summary(wage.lm7)
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure  + profocc + clerocc + servocc, data = wage1)
+summary(wage.lm7)
+lht(wage.lm7, "clerocc - servocc", 0)
+library(multcomp)
+lht(wage.lm7, "clerocc - servocc", 0)
+library(car)
+lht(wage.lm7, "clerocc - servocc", 0)
+glht(wage.lm7, linfct = c("profocc = 0", "clerocc = 0", "servocc = 0"))
+glht(wage.lm7, linfct = c("profocc", "clerocc", "servocc") = c(0,0,0))
+glht(wage.lm7, linfct = c("profocc", "clerocc", "servocc")
+)
+glht(wage.lm7, linfct = c("clerocc - servocc = 0")
+)
+summary(glht(wage.lm7, linfct = c("clerocc - servocc = 0")))
+summary(glht(wage.lm7, linfct = "clerocc - servocc = 0"))
+summary(lht(wage.lm7, "clerocc - servocc", 0))
+lht(wage.lm7, "clerocc - servocc", 0)
+summary(library(learnr)
+library(gradethis)
+library(car)
+library(multcomp)
+library(tidyverse)
+library(wooldridge)
+wage1 <- wooldridge::wage1
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)
+wage.lm8 <- lm(wage ~ educ + exper + I(exper^2) + tenure, data = wage1)
+)
+library(learnr)
+library(gradethis)
+library(car)
+library(multcomp)
+library(tidyverse)
+library(wooldridge)
+wage1 <- wooldridge::wage1
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)
+wage.lm8 <- lm(wage ~ educ + exper + I(exper^2) + tenure, data = wage1)
+wage.lm7$df.residual
+# Restricted Model:
+wage.lm8 <- lm(wage ~ educ + exper + I(exper^2) + tenure, data = wage1)
+# Extract the R-squareds:
+( r2.u <- summary(wage.lm7)$r.squared )
+( r2.r <- summary(wage.lm8)$r.squared )
+# F statistic:
+( wage.F.occ <- (r2.u-r2.r) / (1-r2.u) * wage.lm7$df.residual/3 )
+# p value = 1-cdf of the appropriate F distribution:
+1 - pf(wage.F.occ, 3,wage.lm7$df.residual)
+wage.lm7$rank
+wage.lm8$rank
+# F statistic:
+wage.F.occ <- ((r2.u-r2.r)/3) / ((1-r2.u)/wage.lm7$df.residual)
+# p value = 1-cdf of the appropriate F distribution:
+1 - pf(wage.F.occ, 3,wage.lm7$df.residual)
+0.05^3
+1-0.95^3
+ceosal1<-wooldridge::ceosal1
+salary.lm1 <- lm(salary ~  log(sales) + roe + finance + consprod + utility, data = ceosal1)
+summary(salary.lm1)
+bwght <- wooldridge::bwght
+summary(bwght)
+bwght.lm1 <- lm(bwght ~ cigs + faminc, data = bwght)
+bwght.lm2 <- lm(bwghtlbs ~ cigs + faminc, data = bwght)
+bwght.lm3 <- lm(bwght ~ packs + faminc, data = bwght)
+stargazer(bwgtht.lm1, bwgtht.lm2, bwgtht.lm3, type = 'text')
+library(stargazer)
+bwght.lm1 <- lm(bwght ~ cigs + faminc, data = bwght)
+bwght.lm2 <- lm(bwghtlbs ~ cigs + faminc, data = bwght)
+bwght.lm3 <- lm(bwght ~ packs + faminc, data = bwght)
+stargazer(bwgtht.lm1, bwgtht.lm2, bwgtht.lm3, type = 'text')
+stargazer(bwght.lm1, bwght.lm2, bwght.lm3, type = 'text')
+20*0.463
+summary(model.frame(bwght.lm1))
+sd(model.frame(bwght.lm1))
+lapply(model.frame(bwght.lm1), sd)
+summary(bwght)
+(bwght.lm2 <- lm(bwghtlbs ~ cigs + faminc, data = bwght))
+bwght.lm4 <- lm(bwght ~ cigs + faminc, data = bwght)
+bwght.lm5 <- lm(bwghtlbs ~ cigs + faminc, data = bwght)
+bwght.lm6 <- lm(bwght ~ packs + faminc, data = bwght)
+stargazer(bwght.lm4, bwght.lm5, bwght.lm6, type = 'text')
+bwght.lm4 <- lm(scale(bwght) ~ scale(cigs) + scale(faminc), data = bwght)
+bwght.lm5 <- lm(scale(bwghtlbs) ~ scale(cigs) + scale(faminc), data = bwght)
+bwght.lm6 <- lm(scale(bwght) ~ scale(packs) + scale(faminc), data = bwght)
+stargazer(bwght.lm4, bwght.lm5, bwght.lm6, type = 'text')
+sd(bwght.lm1$model$bwght)
+lapply(bwght.lm1$model, sd)
+bwght.lm1$coefficients[,1]
+bwght.lm1$coefficients
+mapply(bwght.lm1$model, sd)
+sapply(bwght.lm1$model, sd)
+vapply(bwght.lm1$model, sd)
+vapply(bwght.lm1$model, sd, FUN.VALUE = 'double')
+vapply(bwght.lm1$model, sd, FUN.VALUE = 'complex')
+sapply(bwght.lm1$model, sd, FUN.VALUE = 'complex')
+sapply(bwght.lm1$model, sd)
+bwght.lm1$coefficients[,1]*sapply(bwght.lm1$model, sd)
+bwght.lm1$coefficients[,1]
+bwght.lm1$coefficients
+bwght.lm1$coefficients[-1]*sapply(bwght.lm1$model, sd)[-1]/sd(bwght.lm1$model$bwght)
+lm(scale(bwght) ~ scale(cigs) + scale(faminc), data = bwght)
+summary(lm(scale(bwght) ~ scale(cigs) + scale(faminc), data = bwght))
+bwght.lm1$coefficients[-1]*sapply(bwght.lm1$model, sd)[-1]/sd(bwght.lm1$model$bwght)
+bwght.lm2$coefficients[-1]*sapply(bwght.lm2$model, sd)[-1]/sd(bwght.lm2$model$bwght)
+bwght.lm3$coefficients[-1]*sapply(bwght.lm3$model, sd)[-1]/sd(bwght.lm3$model$bwght)
+attend <- wooldridge::attend
+summary(attend)
+attend.lm1 <- lm(stndfnl ~ atndrte + priGPA + ACT + I(priGPA^2) + I(ACT^2), data = attend)
+attend.lm2 <- lm(stndfnl ~ atndrte*priGPA + ACT + I(priGPA^2) + I(ACT^2), data = attend)
+stargazer(attend.lm1, attend.lm2, type = 'text')
+attend.lm1$coefficients$atndrte
+attend.lm1$coefficients
+attend.lm1$coefficients['atndrte']
+attend.lm2$coefficients['atndrte'] + attend.lm2$coefficients['atndrte']*mean(attend.lm1$model$priGPA)
+attend.lm2$coefficients['atndrte'] + attend.lm2$coefficients['atndrte:priGPA']*mean(attend.lm1$model$priGPA)
+attend.lm3 <- lm(stndfnl ~ atndrte + priGPA + ACT + I(priGPA^2) + I(ACT^2) + I(scale(atndrte, scale = FALSE)*scale(priGPA, scale = FALSE)), data = attend)
+stargazer(attend.lm1, attend.lm2, typeattend.lm3, type = 'text')
+attend.lm3 <- lm(stndfnl ~ atndrte + priGPA + ACT + I(priGPA^2) + I(ACT^2) + I(scale(atndrte, scale = FALSE)*scale(priGPA, scale = FALSE)), data = attend)
+stargazer(attend.lm1, attend.lm2, attend.lm3, type = 'text')
+AIC
+summary(wage1)
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)
+wage.lm9 <- lm(wage ~ educ + exper + I(exper^2) + tenure + occ, data = wage1)
+stargazer(wage.lm7, wage.lm9, type = 'text')
+wage1$occ <- factor(1 + wage1$profocc + 2*wage1$clerocc + 3*wage1$servocc, levels = c("Manufacturing", "Professional", "Clerical", "Services"))
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)
+wage.lm9 <- lm(wage ~ educ + exper + I(exper^2) + tenure + occ, data = wage1)
+stargazer(wage.lm7, wage.lm9, type = 'text')
+summary(wage1.occ)
+summary(wage1$occ)
+wage1$occ <- factor(1 + wage1$profocc + 2*wage1$clerocc + 3*wage1$servocc, labels =  = c("Manufacturing", "Professional", "Clerical", "Services"))
+wage1$occ <- factor(1 + wage1$profocc + 2*wage1$clerocc + 3*wage1$servocc, labels = c("Manufacturing", "Professional", "Clerical", "Services"))
+summary(wage1$occ)
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)
+wage.lm9 <- lm(wage ~ educ + exper + I(exper^2) + tenure + occ, data = wage1)
+stargazer(wage.lm7, wage.lm9, type = 'text')
+wage.lm9 <- lm(wage ~ educ + exper + I(exper^2) + tenure + female, data = wage1)
+summary(wage.lm9)
+summary(wage1)
+wage.lm11 <- lm(wage ~ educ + exper + tenure + female*married, data = wage1)
+summary(wage.lm11)
+summary(lm(wage ~ female*married, data = wage1))
+summary(lm(lwage ~ female*married, data = wage1))
+wage2 <- wooldridge::wage2
+summary(wage2)
+summary(lm(lwage ~ female*married, data = wage2))
+summary(lm(lwage ~ educ + exper + I(exper^2) + tenure + I(tenure^2) + female*married, data = wage2))
+summary(lm(lwage ~ educ + exper + I(exper^2) + tenure + I(tenure^2) + female*married, data = wage1))
+wage.lm11 <- lm(wage ~ educ + exper + tenure + female*married, data = wage1)
+summary(wage.lm11)
+wage.lm11 <- lm(wage ~ educ + exper + tenure + female*married, data = wage1)
+wage.lm12 <- lm(log(wage) ~ educ + exper + tenure + female*married, data = wage1)
+stargazer(wage.lm11, wage.lm12, type = 'text')
+wage.lm13 <- lm(wage ~ female*educ + exper + tenure, data = wage1)
+summary(wage.lm11)
+wage.lm13 <- lm(wage ~ female*educ + exper + tenure, data = wage1)
+summary(wage.lm13)
+wage.lm13 <- lm(lwage ~ female*educ + exper + tenure, data = wage1)
+summary(wage.lm13)
+wage.lm13 <- lm(wage ~ female*educ + exper + tenure, data = wage1)
+summary(wage.lm13)
+wage.lm13 <- lm(wage ~ female*educ, data = wage1)
+summary(wage.lm13)
+wage.lm13 <- lm(lwage ~ female*educ, data = wage1)
+summary(wage.lm13)
+wage.lm13 <- lm(wage ~ female*educ + exper + tenure, data = wage1)
+summary(wage.lm11)
+wage.lm13 <- lm(wage ~ female*educ + exper + tenure, data = wage1)
+summary(wage.lm13)
+wage.lm13 <- lm(wage ~ female + educ + exper + tenure, data = wage1)
+summary(wage.lm13)
+wage.lm13 <- lm(wage ~ female*educ + exper + tenure, data = wage1)
+summary(wage.lm13)
+crime1 <- wooldridge::crime1
+crime.lm1 <- lm(arr86 ~ pcnv + avgsen + tottime + ptime86 + qemp86, data = crime1)
+summary(crime1)
+crime1 <- wooldridge::crime1
+crime.lm1 <- lm((arr86 > 0) ~ pcnv + avgsen + tottime + ptime86 + qemp86, data = crime1)
+crime1 <- wooldridge::crime1
+crime.lm1 <- lm((narr86 > 0) ~ pcnv + avgsen + tottime + ptime86 + qemp86, data = crime1)
+summary(crime.lm1)
+crime1 <- wooldridge::crime1
+crime.lm1 <- lm((narr86 > 0) ~ pcnv + avgsen + ptime86 + qemp86, data = crime1)
+summary(crime.lm1)
+crime1 <- wooldridge::crime1
+crime.lm1 <- lm((narr86 > 0) ~ pcnv + avgsen + tottime + ptime86 + qemp86, data = crime1)
+summary(crime.lm1)
+library(installr)
+updater()
+install.packages(c("broom", "circlize", "colorspace", "corrplot", "curl", "devtools", "dplyr", "gert", "GGally", "ggplot2", "ggsignif", "gtools", "insight", "lme4", "mime", "network", "networkDynamic", "openxlsx", "proxy", "psych", "quantreg", "ragg", "rbibutils", "rio", "rmarkdown", "statnet.common", "testthat", "textshaping", "wooldridge", "xfun"))
+install.packages(c("broom", "circlize", "colorspace", "corrplot", "curl", "devtools", "dplyr", "gert", "GGally", "ggplot2", "ggsignif", "gtools", "insight", "lme4", "mime", "network", "networkDynamic", "openxlsx", "proxy", "psych", "quantreg", "ragg", "rbibutils", "rio", "rmarkdown", "statnet.common", "testthat", "textshaping", "wooldridge", "xfun"))
+devtools::install_github('rstudio/learnr')
+devtools::install_github('rstudio/gradethis')
+library(learnr)
+library(gradethis)
+setwd("C:/Users/bange/Google Drive/Teaching/Econometrics/metricsToTheFace")
+run_tutorial(Chapter01-1-Tutorial)
+run_tutorial('Chapter01-1-Tutorial')
+setwd("C:/Users/bange/Google Drive/Teaching/Econometrics")
+devtools::install("metricsToTheFace")
+library(metricsToTheFace)
+run_tutorial('Chapter07-1-Tutorial', package = "metricsToTheFace")
+devtools::install("metricsToTheFace")
+setwd("C:/Users/bange/Google Drive/Teaching/Econometrics/metricsToTheFace")
+devtools::document()
+warnings()
+setwd("C:/Users/bange/Google Drive/Teaching/Econometrics")
+devtools::install("metricsToTheFace")
+setwd("C:/Users/bange/Google Drive/Teaching/Econometrics/metricsToTheFace")
+devtools::document()
+devtools::document()
+setwd("C:/Users/bange/Google Drive/Teaching/Econometrics")
+devtools::install("metricsToTheFace")
+setwd("C:/Users/bange/Google Drive/Teaching/Econometrics/metricsToTheFace")
+devtools::document()
+setwd("C:/Users/bange/Google Drive/Teaching/Econometrics")
+devtools::install("metricsToTheFace")
+devtools::install("metricsToTheFace")
+library(metricsToTheFace)
+run_tutorial("Chapter07-1-Tutorial", package = "metricsToTheFace")
+setwd("C:/Users/bange/Google Drive/Teaching/Econometrics/metricsToTheFace")
+devtools::document()
+setwd("C:/Users/bange/Google Drive/Teaching/Econometrics")
+devtools::install("metricsToTheFace")
+library(metricsToTheFace)
+run_tutorial("Chapter07-1-Tutorial", package = "metricsToTheFace")
+setwd("C:/Users/bange/Google Drive/Teaching/Econometrics/metricsToTheFace")
+devtools::document()
+setwd("C:/Users/bange/Google Drive/Teaching/Econometrics")
+devtools::install("metricsToTheFace")
+library(metricsToTheFace)
+run_tutorial("Chapter07-1-Tutorial", package = "metricsToTheFace")
+setwd("C:/Users/bange/Google Drive/Teaching/Econometrics/metricsToTheFace")
+devtools::document()
+setwd("C:/Users/bange/Google Drive/Teaching/Econometrics")
+devtools::install("metricsToTheFace")
+library(metricsToTheFace)
+run_tutorial("Chapter07-1-Tutorial", package = "metricsToTheFace")
+wage1 <- wooldridge::wage1
+wage1$occ <- factor(1 + wage1$profocc + 2*wage1$clerocc + 3*wage1$servocc, levels = c("Manufacturing",
+"Professional", "Clerical", "Services"))
+run_tutorial("Chapter06-1-Tutorial", package = "metricsToTheFace")
+run_tutorial("Chapter06-2-Tutorial", package = "metricsToTheFace")
+run_tutorial("Chapter04-2-Tutorial", package = "metricsToTheFace")
+run_tutorial("Chapter04-1-Tutorial", package = "metricsToTheFace")
+run_tutorial("Chapter07-1-Tutorial", package = "metricsToTheFace")

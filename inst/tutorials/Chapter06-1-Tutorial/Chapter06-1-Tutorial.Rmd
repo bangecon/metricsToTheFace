@@ -1,0 +1,193 @@
+---
+output: slidy_presentation
+runtime: shiny_prerendered
+title: "Chapter 6 \n\n Multiple Regression Analysis - Further Issues"
+author: "James Bang"
+description: >
+  This tutorial discusses issues of model specification.
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+library(wooldridge)
+bwght <- wooldridge::bwght
+bwght.lm1 <- lm(bwght ~ cigs + faminc, data = bwght)
+bwght.lm2 <- lm(bwghtlbs ~ cigs + faminc, data = bwght)
+bwght.lm3 <- lm(bwght ~ packs + faminc, data = bwght)
+bwght.lm4 <- lm(scale(bwght) ~ scale(cigs) + scale(faminc), data = bwght)
+bwght.lm5 <- lm(scale(bwghtlbs) ~ scale(cigs) + scale(faminc), data = bwght)
+bwght.lm6 <- lm(scale(bwght) ~ scale(packs) + scale(faminc), data = bwght)
+bwght.lm7 <- lm(bwght ~ cigs + log(faminc), data = bwght)
+bwght.lm8 <- lm(bwghtlbs ~ cigs + faminc + I(faminc^2), data = bwght)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Data Scaling & Units of Measurement
+
+Estimate and compare the following regressions for a baby's birth weight on an expecting mother's smoking using the $bwght$ data (preloaded with this tutorial):
+
+  - $BirthWeight_{oz} = \beta_0 + \beta_1Cigarettes + \beta_2Income + u \text{ : (bwght.lm1)}$
+  - $BirthWeight_{lbs} = \beta_0 + \beta_1Cigarettes + \beta_2Income + u \text{ : (bwght.lm2)}$
+  - $BirthWeight_{oz} = \beta_0 + \beta_1Packs + \beta_2Income + u \text{ : (bwght.lm3)}$
+
+Where: 
+
+  - $BirthWeight_{oz} = \text{Birthweight in ounces, "bwght"}$
+  - $BirthWeight_{lbs} = \text{Birthweight in pounds, "bwghtlbs"}$
+  - $Cigarettes = \text{Number of cigarettes the mother smoked per day during pregnancy, "cigs"}$
+  - $Packs = \text{Number of packs of cigarettes the mother smoked per day during pregnancy, "packs"}$
+  - $Income = \text{Family Income, "faminc"}$
+
+Summarize your output using $stargazer(..., type = 'text')$
+
+```{r bwght, exercise = TRUE}
+
+
+```
+
+```{r bwght-hint}
+bwght.lm1 <- lm(..., ...)
+bwght.lm2 <- lm(..., ...)
+bwght.lm3 <- lm(..., ...)
+stargazer(..., type = 'text')
+```
+
+```{r bwght-solution}
+bwght.lm1 <- lm(bwght ~ cigs + faminc, data = bwght)
+bwght.lm2 <- lm(bwghtlbs ~ cigs + faminc, data = bwght)
+bwght.lm3 <- lm(bwght ~ packs + faminc, data = bwght)
+stargazer(bwght.lm1, bwght.lm2, bwght.lm3, type = 'text')
+```
+
+```{r bwght-check}
+grade_code()
+```
+
+## Standardized Coefficients and Elasticities
+
+To compare coefficients that have different units or that might be scaled differently, we can standardize the effects in one of two ways: 
+
+  - Pre-standardize all of the variables (X and y) by subtracting the mean and dividing by the standard deviation (using z-scores - this is common in machine learning). 
+  - Calculating the *beta coefficient* for the estimates:
+  
+  $$ \hat{b}_j = \frac{\hat\sigma_{x_j}}{\hat\sigma_y}\hat\beta_j $$
+  
+The result of both approaches gives a coefficient that tells you how many *standard deviations* $y$ will change in response to a one-*standard deviation* change in $x_j$. 
+
+Another approach is to calculate the *elasticities* of your outcome with respect to your variables at some values of X, usually at the means. For a model that is linear in $x_j$, this equals:
+
+  $$ E_{yx_j} = \frac{\text%\Delta{y}}{\text%\Delta{x_j}} = \frac{\Delta{y}/y}{\Delta{x_j}/x_j} = \beta_j(\frac{\bar{x}_j}{\bar{y}}) $$
+
+## Standardizing and Beta Coefficients
+
+Estimate the models bwght.lm1, bwght.lm2, and bwght.lm3 using the standardized transformations of the variables with the $scale()$ function and output all three results with a text $stargazer$ table. Name them $bwght.lm4$, $bwght.lm5$, and $bwght.lm6$. 
+
+```{r scale, exercise = TRUE}
+
+
+```
+
+```{r scale-hint}
+bwght.lm4 <- lm(..., ...)
+bwght.lm5 <- lm(..., ...)
+bwght.lm6 <- lm(..., ...)
+stargazer(..., type = 'text')
+```
+
+```{r scale-solution}
+bwght.lm4 <- lm(scale(bwght) ~ scale(cigs) + scale(faminc), data = bwght)
+bwght.lm5 <- lm(scale(bwghtlbs) ~ scale(cigs) + scale(faminc), data = bwght)
+bwght.lm6 <- lm(scale(bwght) ~ scale(packs) + scale(faminc), data = bwght)
+stargazer(bwght.lm4, bwght.lm5, bwght.lm6, type = 'text')
+```
+
+```{r scale-check}
+grade_code()
+```
+
+## Standardizing and Beta Coefficients
+
+Calculate the beta coefficients for the original coefficients, excluding the intercept. (Hint: $sapply(list, function)$ returns a simple vector you get from *apply*ing a function to an list of variables; $bwght.lm1(model)$ pulls the variables *and observations* included in $bwght.lm1$, including $y$.) 
+
+Do not bother with naming the coefficients, and do not try to calculate the standard errors. 
+
+```{r beta, exercise = TRUE}
+
+
+```
+
+```{r beta-hint}
+# Each model contains a named vector called "coefficients" containint the ... coefficients!
+# Use indexing (square brackets) to include or exclude (using negation, "-") a position. 
+# We wish to exclude the intercept coefficient
+# We also wish to exclude the dependent variable's standard deviation when calculating the vector of x-standard deviations. 
+bwght.lm1$...[...]*sapply(..., sd)[...]/sd(...)
+bwght.lm2$...[...]*sapply(..., sd)[...]/sd(...)
+bwght.lm3$...[...]*sapply(..., sd)[...]/sd(...)
+```
+
+```{r beta-solution}
+bwght.lm1$coefficients[-1]*sapply(bwght.lm1$model, sd)[-1]/sd(bwght.lm1$model$bwght)
+bwght.lm2$coefficients[-1]*sapply(bwght.lm2$model, sd)[-1]/sd(bwght.lm2$model$bwght)
+bwght.lm3$coefficients[-1]*sapply(bwght.lm3$model, sd)[-1]/sd(bwght.lm3$model$bwght)
+```
+
+```{r beta-check}
+grade_code()
+```
+
+## Logs and Quadratics
+
+Interpreting logs: 
+
+  - Log-linear form: $ln(y) = \beta_0 + \beta_1x_1 + controls + u$
+  
+  $$ \beta_1 = \frac{\delta ln(y)}{\delta x_1} = \frac{\delta y/y}{\delta x_1} = \frac{\text%\Delta y}{\Delta x_1} $$
+  
+  - Linear-log form: $y = \beta_0 + \beta_1ln(x_1) + controls + u$
+  
+  $$ \beta_1 = \frac{\delta y}{\delta ln(x_1)} = \frac{\delta y}{\delta x_1/x_1} = \frac{\Delta y}{\text%\Delta x_1} $$
+
+  - Double-log form: $ln(y) = \beta_0 + \beta_1ln(x_1) + controls + u$
+  
+  $$ \beta_1 = \frac{\delta ln(y)}{\delta ln(x_1)} = \frac{\delta y/y}{\delta x_1/x_1} = \frac{\text%\Delta y}{\text%\Delta x_1} = E_{yx} $$
+  
+Interpreting quadratics: $y = \beta_0 + \beta_1x_1 + \beta_2x_1^2 + controls + u$
+
+  - The individual coefficients by themselves do not tell you much about the effect of $x_j$ on $y$ because that effect depends (a lot) on the value of $x_j$. Some calculus shows that: 
+  
+  $$ \frac{\delta{y}}{\delta{x_j}} = \beta_1 + 2\beta_2x_1 $$
+  - This also means that there is a critical value (either a maximum or minimum) in the predicted values of $y$ with respect to $x$. 
+  
+Choice of functional form should be guided by theory as well as the data. 
+  
+## Log and quadratic examples. 
+
+Estimate the birth weight model using: 
+  - The log of family income (bwght.lm7). 
+  - A quadratic of family income (bwght.lm8). 
+  - Output the results using a text $stargazer()$ table.
+
+```{r log-quadratic, exercise = TRUE}
+
+
+```
+
+```{r log-quadratic-hint}
+# Do you remember that we have to use "I()" when we apply exponents inside a formula object? 
+bwght.lm7 <- lm(..., ...)
+bwght.lm8 <- lm(..., ...)
+stargazer(..., type = 'text')
+```
+
+```{r log-quadratic-solution}
+bwght.lm7 <- lm(bwght ~ cigs + log(faminc), data = bwght)
+bwght.lm8 <- lm(bwghtlbs ~ cigs + faminc + I(faminc^2), data = bwght)
+stargazer(bwght.lm7, bwght.lm8, type = 'text')
+```
+
+```{r log-quadratic-check}
+grade_code()
+```

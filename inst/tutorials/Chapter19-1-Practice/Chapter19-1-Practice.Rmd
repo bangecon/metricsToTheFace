@@ -1,0 +1,318 @@
+---
+title: "Chapter 19 Practice"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+library(gtsummary)
+library(corrgram)
+ceosal1 <- metricsToTheFace::ceosal1
+affairs <- metricsToTheFace::affairs
+affairs$haskids <- factor(affairs$kids, labels = c("no","yes"))
+affairs$marriage <- factor(affairs$ratemarr, labels = c("very unhappy","unhappy","average","happy", "very happy"))
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Summarizing an Entire Data Frame
+
+- Calculate the summary statistics for the *salary*, *sales*, *roe*, and *ros* variables. 
+
+```{r multipleSummaryPractice, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r multipleSummaryPractice-hint}
+summary(ceosal1[ , which(names(...) %in% c('...', '...', '...', '...'))])
+```
+
+```{r multipleSummaryPractice-solution}
+summary(ceosal1[ , which(names(ceosal1) %in% c('salary', 'sales', 'roe', 'ros'))])
+```
+
+```{r multipleSummaryPractice-check}
+grade_code()
+```
+
+## Summaries with Categorical Variables
+R handles factors much more intuitively than *Stata* (the original source of the data). The *factor()* function will create a factor from a variable from a variable with discrete values, but there is a slight three-step trick (involving matrix algebra) that you have to do first. 
+- Step 1: Use *cbind* to combine the four mutually-exclusive industry variables into a matrix, *A*. 
+- Step 2: Create a vector, *f*, that takes a discrete number of values equal to the number of factor categories (columns in *A*). We'll use (1, 2, 3, 4), but you could just as validly use four random numbers. 
+- Step 3: Cross multiply *A* and *f*. 
+
+```{r gtsummaryFactors, exercise=TRUE, exercise.eval=TRUE}
+
+
+
+```
+
+```{r gtsummaryFactors-hint}
+# Don't forget to include the data frame when you call each variable, e.g. ceosal1$finance.
+A <- cbind(..., ..., ..., ...) 
+f <- c(1:...)
+industry <- ...
+ceosal1$industry <- factor(..., labels = ...)
+```
+
+```{r gtsummaryFactors-solution}
+A <- cbind(ceosal1$indus, ceosal1$finance, ceosal1$consprod, ceosal1$utility) 
+f <- c(1:ncol(A))
+industry <- A %*% f
+ceosal1$industry <- factor(industry, labels = c('indus', 'finance', 'consprod', 'utility'))
+```
+
+```{r gtsummaryFactors-check}
+grade_code()
+```
+
+## Summary by Categorical Group
+
+Now, summarize your entire dataset *by industry*, and *exclude* the following: 
+
+1. The four individual-industry indicator variables (use the factor variable from the previous step instead).
+
+2. The log of salary and the log of sales.
+
+Use two places after the decimal place for all continuous variables. 
+
+```{r gtsummaryPractice, exercise=TRUE, exercise.eval=TRUE}
+
+
+
+```
+
+```{r gtsummaryPractice-hint}
+# Use column indexing with "which(names()%in%...)" like you did before, but use NEGATION, i.e. "-which(names()%in%...)."
+tbl_summary(ceosal1[, c(...)])
+```
+
+```{r gtsummaryPractice-solution}
+tbl_summary(ceosal1[, -which(names(ceosal1) %in% c('indus', 'finance', 'consprod', 'utility', 'lsalary', 'lsales'))], by = industry, statistic = list(all_continuous() ~ '{mean} ({sd})'), digits = list(all_continuous() ~ c(2,2)))
+```
+
+```{r gtsummaryPractice-check}
+grade_code(correct = paste(random_praise(), "Notice how the result automatically drops the grouping variable, industry."))
+```
+
+## Summarizing Raw Relationships between Variables
+
+Calculate the correlation matrix among **only** *salary*, *sales*, *roe*, and *ros*. 
+
+```{r correlationPractice, exercise=TRUE, exercise.eval=TRUE}
+
+
+```
+
+```{r correlationPractice-hint}
+# Use which(names() %in% ...) to identify a string vector of variable names. 
+cor(...[ , which(names(...) %in% c('...', '...', '...', '...'))])
+```
+
+```{r correlationPractice-solution}
+cor(ceosal1[ , which(names(ceosal1) %in% c('salary', 'sales', 'roe', 'ros'))])
+```
+
+```{r correlationPractice-check}
+grade_code()
+```
+
+## Other "corrgram" Options
+
+If we want to make it look cleaner, we can set the color to black using the *color.regions* function and the *colorRampPalette()* function. Do this for the numerical correlation matrix for the *ceosal1* data that we started in class by adding the appropriate option(s).
+
+```{r corrgramPractice, exercise = TRUE}
+corrgram(ceosal1, panel = panel.cor)
+```
+
+```{r corrgramPractice-hint}
+corrgram(ceosal1, panel = panel.cor, col.regions = colorRampPalette(...))
+```
+
+```{r corrgramPractice-solution}
+corrgram(ceosal1, panel = panel.cor, col.regions = colorRampPalette(c('black'))) 
+```
+
+```{r corrgramPractice-check}
+grade_code()
+```
+
+## Factor Variable Tables
+
+Do the following: 
+- Generate the factor variables "haskids" and "marriage" for kids and ratemarr labels with labels "no"/"yes" and "very unhappy"/"unhappy"/"average"/"happy"/"very happy," respectively.
+- Create a proportions contingency table of whether or not a couple has kids conditional on marital happiness. 
+- Create a proportions contingency table of marital happiness conditional on whether or not a couple has kids. 
+```{r crosstabMargins, exercise=TRUE, exercise.eval=TRUE}
+affairs$haskids <- factor(..., labels = c(...))
+affairs$marriage <- factor(..., labels = c(...))
+
+
+```
+
+```{r crosstabMargins-hint}
+# The margin option helps you specify which variable to condition the proportions on. 
+prop.table(table(..., ...))
+prop.table(table(..., ...))
+```
+
+```{r crosstabMargins-solution}
+prop.table(table(affairs$marriage,affairs$haskids), margin = 1)
+prop.table(table(affairs$marriage,affairs$haskids), margin = 2)
+```
+
+```{r factors-check}
+grade_code()
+```
+
+## Attractive Crosstab Tables
+
+- Replicate the previous tables using "tbl_cross" (using percent to generate percentages instead of proportions) to generate a more attractive layout that you can save as html. 
+- Combine counts and percentages in one table with each cell displaying percentages in parentheses next to its count.
+
+```{r tbl_cross, exercise=TRUE, exercise.eval=TRUE}
+
+
+```
+
+```{r tbl_cross-hint}
+# Typical statistic options are "{n}" (default), "{p}%", or "{n}, ({p}%)". 
+# Typical percent options are "none" (default), "column", "row", or "cell". 
+tbl_cross(..., row = ..., col = ..., statistic = '...', percent = '...')
+```
+
+```{r tbl_cross-solution}
+tbl_cross(affairs, row = marriage, col = haskids)
+tbl_cross(affairs, row = marriage, col = haskids, statistic = "{p}%")
+tbl_cross(affairs, row = marriage, col = haskids, percent = 'cell')
+```
+
+```{r tbl_cross-check}
+grade_code()
+```
+
+## Base Graphics 
+
+Add the following to your plots from the in-class examples: 
+  
+- A *dashed* normal curve over the histogram with mean equal to $\bar{x}_{salary}$ and standard deviation equal to $\hat{\sigma}_{salary}$;
+- *Dotted* vertical and horizontal lines over the scatterplot at the means of CEO salaries and ROE, respectively.
+
+Make sure your plots have descriptive (English) titles: "Histogram of Salary," "Salary versus ROE," "Salary," and "ROE." 
+
+```{r basePlots, exercise=TRUE, exercise.eval=TRUE}
+hist(ceosal1$salary, main = "Histogram of Salary", xlab = "Salary", probability = TRUE)
+# Add your normal curve here. 
+plot(ceosal1$salary, ceosal1$roe, main = "Salary versus ROE", xlab = "Salary", ylab = "ROE")
+# Add your vertical lines here. 
+
+```
+
+```{r basePlots-hint}
+hist(..., main = "...", xlab = "...")
+curve(dnorm(...), add = ...)
+plot(ceosal1$salary, ..., main = "...", xlab = "...", ylab = "...")
+abline(h = mean(ceosal1$roe), lty = "dotted")
+abline(v = mean(ceosal1$salary), lty = "dotted")
+```
+
+```{r basePlots-solution}
+hist(ceosal1$salary, main = "Histogram of Salary", xlab = "Salary", probability = TRUE)
+curve(dnorm(x, mean(ceosal1$salary), sd(ceosal1$salary)), lty = "dashed", add = TRUE)
+plot(ceosal1$salary, ceosal1$roe, main = "Salary versus ROE", xlab = "Salary", ylab = "ROE")
+abline(h = mean(ceosal1$roe), lty = "dotted")
+abline(v = mean(ceosal1$salary), lty = "dotted")
+```
+
+```{r basePlots-check}
+grade_code(correct = "You may actually use lty = 1 for 'solid', lty = 2 for 'dashed', or lty = 3 for 'dotted' but English makes more sense.")
+```
+
+As you can see, CEO salaries are very abnormal! WWWD (what-would-Wooldridge-do)? Take the logs? 
+
+```{r logSalaryPlot}
+hist(log(ceosal1$salary), main = "Histogram of ln(Salary)", xlab = "ln(Salary)", probability = TRUE)
+curve(dnorm(x, mean(log(ceosal1$salary)), sd(log(ceosal1$salary))), lty = "dashed", add = TRUE)
+```
+
+Try Poisson distribution? 
+
+```{r poissonSalaryPlot}
+x <- c(1:15000)
+y <- dpois(x, mean(ceosal1$salary))
+hist(ceosal1$salary, main = "Histogram of Salary", xlab = "Salary", probability = TRUE)
+points(x, y, col = 'red', type = 'h')
+
+```
+
+## Other "corrgram" Options
+
+To really up your game with pairs of variables, you can put everything in a corrgram() plot. Did you notice how the upper-right triangular half of the correlation matrix is the same as the lower-left? What if we could put coefficients in the upper half, scatterplots in the lower half, and histograms (almost) down the diagonal? Let's do that! (And keep the fonts black, please!)
+
+```{r corrgramEverything, exercise = TRUE}
+
+```
+
+```{r corrgramEverything-hint}
+corrgram(ceosal1, 
+         upper.panel = ..., 
+         lower.panel = ..., 
+         diag.panel = ..., 
+         col.regions = ...) 
+```
+
+```{r corrgramEverything-solution}
+corrgram(ceosal1, 
+         upper.panel = panel.cor, 
+         lower.panel = panel.pts, 
+         diag.panel = panel.density, 
+         col.regions = colorRampPalette(c('black'))) 
+```
+
+```{r corrgramEverything-check}
+grade_code()
+```
+
+This uses the built-in 'panel.density' option to approximate the distribution of the x's. For a 'true' histogram, we would have to specify our own function, panel.hist. We can also specify functions to add a regression line, or fancy "spline" fits.
+
+```{r corrgramFancy, exercise = TRUE}
+# Create a user-defined function, panel.hist, to make a histogram along the diagonals.
+panel.hist <- function(x, ...) {
+    usr <- par("usr")
+    on.exit(par(usr))
+    par(usr = c(usr[1:2], 0, 1.5))
+    his <- hist(x, plot = FALSE)
+    breaks <- his$breaks
+    nB <- length(breaks)
+    y <- his$counts
+    y <- y/max(y)
+    rect(breaks[-nB], 0, breaks[-1], y, col = rgb(0, 1, 1, alpha = 0.5), ...)
+}
+# Create a user-defined function, panel.lm, to add a quick regression line to a panel.plot. 
+panel.lm <- function (x, y, corr = NULL, col.regions, cor.method, ...) {
+    if (!is.null(corr)) 
+        return()
+    plot.xy(xy.coords(x, y), type = "p", ...)
+    abline(lm(y ~ x)) # The lm command runs a simple linear regression.
+}
+# Create a user-defined function, panel.spline, to add a fancy kinked linear spline to a panel.plot. 
+panel.spline <- function (x, y, corr = NULL, col.regions, cor.method, ...) {
+    if (!is.null(corr)) 
+        return()
+    plot.xy(xy.coords(x, y), type = "p", ...)
+    lines(smooth.spline(x, y), type = 'l')
+}
+corrgram(ceosal1[, -which(names(ceosal1) %in% 
+                            c('indus', 'finance', 'consprod', 'utility', 'lsalary', 'lsales'))], 
+         upper.panel = panel.cor, 
+         lower.panel = panel.lm, 
+         diag.panel = panel.hist, 
+         text.panel = NULL,
+         cex.cor = 4, # This line gives an error, but does what you want!
+         outer.labels = list(top  = list(names(ceosal1), cex = 1.25, srt = 30), 
+                             left = list(names(ceosal1), cex = 1.25, srt = 30)),
+         col.regions = colorRampPalette(c('black'))) 
+```
+

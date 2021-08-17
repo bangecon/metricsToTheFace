@@ -1,0 +1,80 @@
+---
+title: "Appendix B-2 Practice"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+gradethis_setup()
+tutorial_options(exercise.timelimit = 60)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Appendix B #10
+
+Suppose that at a large university, college GPA and SAT scoreare related by the conditional expectation $E(GPA|SAT) = 0.70 + 0.002 SAT$
+  - Find expected $GPA$ when $SAT = 800$. Find $E(GPA|SAT = 1400)$. 
+  - If average $SAT$ at the university is 1,100, what is the average GPA? 
+
+```{r gpaSAT, exercise=TRUE, exercise.reveal_solution = TRUE}
+
+```
+
+```{r gpaSAT-hint}
+
+```
+
+```{r gpaSAT-solution}
+
+```
+
+```{r gpaSAT-check}
+grade_result() 
+```
+
+```{r singleObservation, echo=FALSE}
+question("If a student's $SAT$ is 1,100, does this mean they will have the same GPA as the previous question?",
+    answer("Yes"),
+    answer("No", correct = TRUE),
+    allow_retry = TRUE
+  )
+```
+
+
+## Correlogram Practice
+
+Make a correlogram of the affairs dataset that includes the following variables: 
+
+  - Age (age)
+  - Years married (yrsmarr)
+  - Years of education (educ)
+  - Number of affairs (naffairs)
+
+Give your corrgram the following panel attributes: 
+  
+  - Scatter plots in the lower panel;
+  - Correlation coefficients in the upper panel;
+  - Estimated empirical uni-variate densities in the diagonal panel; 
+  - Black color palette. 
+
+```{r corrgramPractice, exercise=TRUE, exercise.reveal_solution = TRUE}
+
+```
+
+```{r corrgramPractice-hint}
+
+```
+
+```{r corrgramPractice-solution}
+corrgram(affairs[,which(names(affairs) %in% c('age', 'yrsmarr', 'educ', 'naffairs'))], 
+         upper.panel = panel.cor, 
+         lower.panel = panel.pts, 
+         diag.panel = panel.density, 
+         col.regions = colorRampPalette(c('black'))) 
+```
+
+```{r corrgramPractice-check}
+grade_result() 
+```

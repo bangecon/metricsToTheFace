@@ -1,0 +1,270 @@
+---
+output: slidy_presentation
+runtime: shiny_prerendered
+title: "Chapter 4 \n\n Multiple Regression Analysis - Inference"
+author: "James Bang"
+description: >
+  This tutorial introduces linear estimation with multiple variables.
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+library(tidyverse)
+library(gganimate)
+library(gifski)
+library(ggthemes)
+library(wooldridge)
+wage1 <- wooldridge::wage1
+wage.lm6 <- lm(wage ~ exper + educ + tenure, data = wage1)
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure  + clerocc + servocc, data = wage1)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Gauss-Markov Theorem - A Note
+
+$$ y = \beta_0 + \beta_1x_1 + \beta_2x_2 + ... + \beta_kx_k + u $$
+
+::: {.left style="float:left;width:48%"}
+Assumptions of the Gauss-Markov Theorem
+
+-   Linear in the parameters
+-   Random Sampling
+-   Zero conditional mean of errors
+-   Homoskedasticity
+-   No Perfect Multicollinearity
+-   Large Outliers are Unlikely
+:::
+
+::: {.right style="float:right;width:48%"}
+Assumptions of the Classical Linear Model (CLM)
+
+-   Linear in the parameters
+-   Random Sampling
+-   Zero conditional mean of errors
+-   Homoskedasticity
+-   No Perfect Multicollinearity
+-   Large Outliers are Unlikely
+-   $E(y|X) \sim N(\beta_0 + \beta_1x_1 + \beta_2x_2 + ... + \beta_kx_k, \sigma^2)$
+:::
+
+Under these assumptions, OLS is not only \textcolor{blue}{BLUE} but MVUE - minimum variance among *all* unbiased estimators, not just linear ones.
+
+## Sampling Distribution of $\hat\beta$
+
+Under the assumptions of the CLM,
+
+$$ \hat\beta_j \sim N(\beta_j, Var(\hat\beta_j)) $$ When $\sigma^2$ is known,
+
+$$ (\hat\beta_j - \beta_j)/\sigma_{\hat\beta_j} \sim N(0,1) $$ When $\sigma^2$ is unknown,
+
+$$ (\hat\beta_j - \beta_j)/s_{\hat\beta_j} \sim t_{n-k-1} = t_{df} $$
+
+## Steps to Testing a Hypothesis
+
+1.  State the Null & Alternative Hypotheses
+
+2.  Determine the Significance Level ($\alpha$)
+
+3.  Calculate the parameters and the test statistic
+
+4.  Calculate the critical value or p-value
+
+5.  Make a Rejection Decision
+
+## Note on Determining $\alpha$
+
+Type I and Type II Errors
+
+|                      |              | Null Hypothesis: |               |
+|----------------------|--------------|------------------|---------------|
+|                      |              | True             | False         |
+| **Data Conclusion:** | Accept $H_0$ | No Error         | Type II Error |
+|                      | Reject $H_0$ | Type I Error     | No Error      |
+
+Significance ($\alpha$) measures the probability of observing data different from $H_0$ when $H_0$ is true. $$\alpha = P[\hat{T}> T_c| H_0] = P[\text{Type I Error}]$$ Power ($B$) measures the probability of observing data different from $H_0$ when $H_1$ is true. $$B = P[\hat{T} > T_c | H_1] = 1 - P[\text{Type II Error}] = 1 - F(T_c - \frac{\beta_{H_1}}{s_{\hat\beta}}) $$
+
+For a given magnitude difference between $\beta_{H_0}$ and $\beta_{H_1}$ and a given sample size, there is a tradeoff between achieving a lower significance level and achieving a higher power.
+
+Survey designs typically determine their minimum sample size by calculating the number of observations required to detect a predetermined minimum effect size to be considered "important" at a predetermined highest-acceptable significance level (usually 0.05) at a predetermined lowest-acceptable power (often 0.8)
+
+## Hypothesis Testing Example 1
+
+Using *wage1*, regress *wage* on *exper*, controlling for *educ* and *tenure*. Call the output *wage.lm6* and print a *summary()* of the results.
+
+```{r experTest, exercise = TRUE}
+
+
+```
+
+```{r experTest-hint}
+# In the solution, exper is the first variable since it's common to put variables of interest in the first position.  
+wage.lm6 <- lm(..., ...)
+summary(...)
+```
+
+```{r experTest-solution}
+wage.lm6 <- lm(wage ~ exper + educ + tenure, data = wage1)
+summary(wage.lm6)
+```
+
+```{r experTest-check}
+grade_code()
+```
+
+## Right-Side t-Test
+
+$$ H_0: \beta = 0 $$ $$ H_1: \beta > 0 $$
+
+```{r rightSideCritical, echo=FALSE}
+  question("What is the t-critical value for a test for whether the effect of experience is *greater than* zero and a significance of 0.05?",
+    answer("1.645", correct = TRUE),
+    answer("-1.645"),
+    answer("1.965"),
+    answer("-1.965"),
+    allow_retry = TRUE
+  )
+```
+
+```{r rightSidePVal, echo=FALSE}
+  question("What is the p-value?",
+    answer("0.0645"),
+    answer("0.9355"),
+    answer("0.9678"),
+    answer("0.0322", correct = TRUE),
+    allow_retry = TRUE
+  )
+```
+
+## Right-Tailed Significance, Critical Values, and P-Values
+
+```{r, echo = TRUE}
+# Define values for x and y axes, and the critical and test values. 
+x <- seq(-3.5,3.5,length=1000)
+y <- dt(x,wage.lm6$df.residual)
+t.critval <- qt(0.95, wage.lm6$df.residual)
+t.testval <- summary(wage.lm6)$coefficients['exper', 't value']
+# Plot the t distribution with n-k-1 degrees of freedom and sensibly-labeled axes.
+plot(x, y, type="l", ylab = "f(t)", xlab = "t")
+# Add the polygon for the right-tailed, alpha = 0.05 t-critical value. 
+polygon(c(x[x>=t.critval], max(x), t.critval), c(y[x>=t.critval], 0, 0), col="red", density = 10)
+# Add the polygon for the p-value. 
+polygon(c(x[x>=t.testval], max(x), t.testval), c(y[x>=t.testval], 0, 0), col="blue", density = 10, angle = -45)
+```
+
+## Hypothesis Testing Example 2
+
+-   Using *ceosal1*, regress the log of *salary* on log of *sales*, controlling for *roe* and firm industry group (industry, finance, consumer product, or utility)
+-   Look out for perfect multicollinearity and leave on group - industry - out!).
+-   Call the output *salary.lm1* and print a *summary()* of the results.
+
+```{r financeTest, exercise = TRUE}
+
+
+```
+
+```{r financeTest-hint}
+salary.lm1 <- lm(..., ...)
+summary(...)
+```
+
+```{r financeTest-solution}
+salary.lm1 <- lm(salary ~  log(sales) + roe + finance + consprod + utility, data = ceosal1)
+summary(salary.lm1)
+```
+
+```{r financeTest-check}
+grade_code()
+```
+
+## Two-Sided t-Test
+
+$$ H_0: \beta = 0 $$ $$ H_1: \beta \ne 0 $$
+
+```{r twoSideCritical, echo=FALSE}
+  question("What is the t-critical value of a test for whether the salaries of CEOs in finance firms differ from those of the baseline group (indistrial firms) at the 0.05 level?",
+    answer("$-1.652$"),
+    answer("$\\pm 1.652$"),
+    answer("$\\pm 1.972$", correct = TRUE),
+    answer("-1.972"),
+    allow_retry = TRUE
+  )
+```
+
+```{r twoSidePVal, echo=FALSE}
+  question("What is the p-value?",
+    answer("0.914"),
+    answer("0.362", correct = TRUE),
+    answer("0.05"),
+    answer("0.025"),
+    allow_retry = TRUE
+  )
+```
+
+## Two-Tailed Significance, Critical Values, and P-Values
+
+```{r, echo = TRUE}
+# Define values for x and y axes, and the critical and test values. 
+x <- seq(-3.5,3.5,length=1000)
+y <- dt(x,wage.lm6$df.residual)
+t.critval <- qt(0.025, wage.lm6$df.residual)
+t.testval <- summary(wage.lm6)$coefficients['exper', 't value']
+# Plot the t distribution with n-k-1 degrees of freedom and sensibly-labeled axes.
+plot(x, y, type="l", ylab = "f(t)", xlab = "t")
+# Add the polygons for the p-value. 
+polygon(c(x[x>=abs(t.testval)], max(x), abs(t.testval)), c(y[x>=abs(t.testval)], 0, 0), col="blue", density = 10, angle = -45)
+polygon(c(min(x), x[x<=-abs(t.testval)], -abs(t.testval)), c(y[x<=-abs(t.testval)], 0, 0), col="blue", density = 10, angle = -45)
+# Add the polygons for BOTH alpha = 0.05 t-critical values. 
+polygon(c(x[x>=-t.critval], max(x), -t.critval), c(y[x>=-t.critval], 0, 0), col="red", density = 10)
+polygon(c(min(x), x[x<=t.critval], t.critval), c(y[x<=t.critval], 0, 0), col="red", density = 10)
+```
+
+## Confidence Intervals
+
+The 95% confidence interval for $\hat\beta_j$ solves
+
+$$ P(\hat{\beta_j}-t_{0.025}^c \cdot s_{\hat{\beta_j}} \le \mu \le \hat{\beta_j}+t_{0.025}^c \cdot s_{\hat{\beta_j}}) = 0.95 $$
+
+```{r rStudio, echo=FALSE}
+  question("The bounds of the confidence interval for $\\hat\\beta_j$ are:",
+    answer("Random.", correct = TRUE, ),
+    answer("Centered around the true value of $\beta$"),
+    answer("Centered around zero."),
+    answer("Centered around the null-hypothesized value of $\\beta_j$, $\\beta_0."),
+    allow_retry = TRUE
+  )
+```
+
+## Example
+
+-   Using the $wage1$ data, regress wage on education, experience, experience squared, tenure, and occupation (profesional services, professional occupations, clerical occupations, and service occupations).
+-   Name the result $wage.lm7$ and summarize the results using $summary()$.
+-   Calculate 95-percent confidence intervals for the coefficients using the $confint(...)$ function.
+-   Calculate 99-percent confidence intervals for the coefficients.
+
+```{r confint, exercise = TRUE}
+
+
+```
+
+```{r confint-hint}
+# Getting r to show some functions can be tricky, and polynomials are among them. 
+# To operate an numerical exponent on a variable in your formula, you need to apply the I(...)operator.
+wage.lm7 <- lm(..., ...)
+summary(...)
+# The default confidence level is 0.95; for other confidence levels, adjust the "level" option.
+confint(...)
+confint(..., level = ...)
+```
+
+```{r confint-solution}
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure  + clerocc + servocc, data = wage1)
+summary(wage.lm7)
+confint(wage.lm7)
+confint(wage.lm7, level = 0.99)
+```
+
+```{r confint-check}
+grade_code()
+```
