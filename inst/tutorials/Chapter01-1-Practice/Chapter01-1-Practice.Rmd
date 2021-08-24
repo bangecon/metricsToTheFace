@@ -121,8 +121,8 @@ Load the RData file, "BeerData" into your workspace, then import the CSV file by
 ```
 
 ```{r Import-solution}
-load("BeerData.RData")
-BeerDataCSV <- read.csv("BeerData.csv")
+load("https://github.com/bangecon/metricsToTheFace/tree/master/inst/tutorials/Chapter01-1-Practice/BeerData.RData")
+BeerDataCSV <- read.csv("https://github.com/bangecon/metricsToTheFace/tree/master/inst/tutorials/Chapter01-1-Practice/BeerData.csv")
 ```
 
 ```{r Import-code-check}
