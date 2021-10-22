@@ -1,10 +1,10 @@
 ---
 output: slidy_presentation
 runtime: shiny_prerendered
-title: "Chapter 15 \n\n Instrumental Variables Estimation"
+title: "Chapter 14 \n\n Advanced Panel Data Methods"
 author: "James Bang"
 description: >
-  This tutorial introduces instrumental variables. 
+  This tutorial introduces advanced panel methods. 
 ---
 
 ```{r setup, include=FALSE}
