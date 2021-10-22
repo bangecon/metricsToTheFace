@@ -1,10 +1,10 @@
 ---
 output: slidy_presentation
 runtime: shiny_prerendered
-title: "Chapter 7 \n\n Regression with Qualitative Information"
+title: "Chapter 13 \n\n Pooled Cross Sections and \n\n Difference-in-Differences Estimation"
 author: "James Bang"
 description: >
-  This tutorial introduces binary regressors (dummy variables).
+This tutorial provides practice excercies on simple panel data methods.  
 ---
 
 ```{r setup, include=FALSE}
