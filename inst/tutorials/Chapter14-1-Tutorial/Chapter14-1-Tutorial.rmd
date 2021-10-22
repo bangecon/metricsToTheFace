@@ -1,10 +1,10 @@
 ---
 output: slidy_presentation
 runtime: shiny_prerendered
-title: "Chapter 7 \n\n Regression with Qualitative Information"
+title: "Chapter 14 \n\n Advanced Panel Data Methods"
 author: "James Bang"
 description: >
-  This tutorial introduces binary regressors (dummy variables).
+  This tutorial introduces fixed effects and random effects panel methods. 
 ---
 
 ```{r setup, include=FALSE}
