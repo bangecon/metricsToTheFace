@@ -4,7 +4,7 @@ runtime: shiny_prerendered
 title: "Chapter 13 \n\n Pooled Cross Sections and \n\n Difference-in-Differences Estimation"
 author: "James Bang"
 description: >
-  This tutorial introduces binary regressors (dummy variables).
+  This tutorial introduces simple panel methods.
 ---
 
 ```{r setup, include=FALSE}
