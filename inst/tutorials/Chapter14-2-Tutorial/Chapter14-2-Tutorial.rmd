@@ -1,0 +1,21 @@
+---
+output: slidy_presentation
+runtime: shiny_prerendered
+title: "Chapter 15 \n\n Instrumental Variables Estimation"
+author: "James Bang"
+description: >
+  This tutorial introduces instrumental variables. 
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(wooldridge)
+library(stargazer)
+wage1 <- wooldridge::wage1
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)
+wage.lm9 <- lm(wage ~ educ + exper + tenure + female, data = wage1)
+wage.lm11 <- lm(wage ~ educ + exper + tenure + female*married, data = wage1)
+wage.lm12 <- lm(log(wage) ~ educ + exper + tenure + female*married, data = wage1)
+wage.lm13 <- lm(wage ~ educ + exper + tenure + female*educ, data = wage1)
+knitr::opts_chunk$set(echo = FALSE)
+```
