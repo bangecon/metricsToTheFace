@@ -1,0 +1,22 @@
+---
+title: "Chapter 2-1 Practice"
+author: "Jim Bang"
+output: pdf_document
+classoption: landscape
+---
+
+```{r setup, include=FALSE}
+
+```
+
+## CEO Salaries and Return on Equity
+
+Regress CEO salary on: 
+1. ROE (with a constant - name this $salary.lm1$); 
+2. ROE (without a constant - $salary.lm2$); 
+3. Only a constant($salary.lm3$). Plot all three regression lines with a scatterplot of salary on ROE. 
+
+## Plotting the Regression Line
+
+Plot the data for the previous exercise along with all three of the estimated regression lines. 
+

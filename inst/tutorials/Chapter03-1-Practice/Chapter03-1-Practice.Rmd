@@ -17,10 +17,10 @@ knitr::opts_chunk$set(echo = FALSE)
 ## Exercise
 
 Using the $gpa1$ dataset do the following: 
-  - Regress college GPA ($colGPA$) on ACT score($ACT$) and name the result $GPA.lm1$; 
-  - Regress college GPA on high school GPA ($hsGPA$) and ACT score, and name the result $GPA.lm2$. 
+1. Regress college GPA ($colGPA$) on ACT score($ACT$) and name the result $GPA.lm1$; 
+2. Regress college GPA on high school GPA ($hsGPA$) and ACT score, and name the result $GPA.lm2$. 
 
-```{r colGPA, exercise=TRUE, exercise.reveal_solution = TRUE}
+```{r colGPA, exercise=TRUE, exercise.reveal_solution = FALSE}
 
 ```
 
@@ -44,14 +44,14 @@ grade_code()
 
 Use partitioned regression to partial out the effect of a company's matching rate to their employees' 401k plan on the plan's participation rates, controlling for the plan's age. Recall that to do this you need to: 
 
-  - Regress the outcome ($prate$) on the control ($age$) and extract the residuals ($prate.u$);
-  - Regress the treatment ($mrate$) on the control ($age$) and extract the residuals ($mrate.u$); 
-  - Regress the residuals of participation on the residuals of matching (name this $prate.lm1$ and note that the coefficient matches the $mrate$ coefficient in example 3.3 in the book); 
-  - Summarize the final residual regression. 
-  - Plot the outcome residuals ($prate.u$) on the treatment residuals ($mrate.u$)
-  - Add the regression line. 
+1. Regress the outcome ($prate$) on the control ($age$) and extract the residuals ($prate.u$);
+2. Regress the treatment ($mrate$) on the control ($age$) and extract the residuals ($mrate.u$); 
+3. Regress the residuals of participation on the residuals of matching (name this $prate.lm1$ and note that the coefficient matches the $mrate$ coefficient in example 3.3 in the book); 
+4. Summarize the final residual regression. 
+5. Plot the outcome residuals ($prate.u$) on the treatment residuals ($mrate.u$)
+6. Add the regression line. 
 
-```{r k401k, exercise=TRUE, exercise.reveal_solution = TRUE}
+```{r k401k, exercise=TRUE, exercise.reveal_solution = FALSE}
 
 ```
 
@@ -62,15 +62,6 @@ prate.lm1 <- lm(prate.u ~ mrate.u)
 summary(prate.lm1)
 plot(mrate.u, prate.u)
 abline(prate.lm1)
-```
-
-```{r k401k-hint}
-prate.u <- lm(..., ...)$...
-mrate.u <- lm(..., ...)$...
-prate.lm1 <- lm(...)
-summary(...)
-plot(..., ...)
-abline(...)
 ```
 
 ```{r k401k-check}

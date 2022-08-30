@@ -1,0 +1,20 @@
+---
+title: "Chapter 4-1 Practice"
+author: "Jim Bang"
+output: pdf_document
+classoption: landscape
+---
+
+```{r setup, include=FALSE}
+library(wooldridge)
+crime2 <- wooldridge::crime2
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Population Density and Crime 
+
+1. Estimate the following model using the `crime2` dataset. Name your model `crime.lm1`.
+$$\begin{aligned}ln(CrimeRate) ={} &\ \beta_0 + \beta_1ln(LawExpendPC) + \beta_2ln(IncomePC) + \beta_3ln(PopulationDensity) + \\ &\ \beta_4West + \beta5Northeast + \beta_6South + u \end{aligned}$$
+2. Test whether population density significantly impacts crime at the 0.05 level. Report the critical value for the test. 
+3. Construct a 99% confidence interval for the expenditure elasticity of crime rate using .
+

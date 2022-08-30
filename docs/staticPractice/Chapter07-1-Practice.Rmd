@@ -1,0 +1,38 @@
+---
+title: "Chapter 6-1 Practice"
+author: "Jim Bang"
+output: pdf_document
+classoption: landscape
+---
+
+```{r setup, include=FALSE}
+library(stargazer)
+gpa2 <- wooldridge::gpa2
+colgpa.lm1 <- lm(colgpa ~ athlete + female + I(1-white) + hsize + I(hsize^2) + hsperc + sat, data = gpa2)
+colgpa.lm2 <- lm(colgpa ~ athlete + female + I(athlete*female) + I(1-white) + hsize + I(hsize^2) + hsperc + sat, data = gpa2)
+apple <- wooldridge::apple
+apple.lm1 <- lm((ecolbs > 0) ~ ecoprc + regprc + faminc + hhsize + educ + age, data = apple)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## College GPAs
+
+Estimate the following models using the `gpa2` dataset: 
+
+$$\begin{aligned}College\text{ }GPA ={} &\beta_0 + \beta_1Athlete + \beta_2Female + \beta_3HS\text{ }Size + \beta_4HS\text{ }Size^2 + \beta_5HS\text{ }Percentile + \beta_6SAT + \\ & \beta_7Nonwhite \text{ : (gpa.lm1)} \end{aligned}$$ 
+
+$$\begin{aligned}College\text{ }GPA ={} &\beta_0 + \beta_1Athlete + \beta_2Female + \beta_3HS\text{ }Size + \beta_4HS\text{ }Size^2 + \beta_5HS\text{ }Percentile + \beta_6SAT + \\ & \beta_7Nonwhite + \beta_1Athlete \times Female \text{ : (gpa.lm1)} \end{aligned}$$
+
+$$\begin{aligned}College\text{ }GPA ={} &\beta_0 + \beta_1Athlete + \beta_2Female + \beta_3HS\text{ }Size + \beta_4HS\text{ }Size^2 + \beta_5HS\text{ }Percentile + \beta_6SAT + \\ & \beta_7Nonwhite + \beta_1Athlete \times HS\text{ }Percentile \text{ : (gpa.lm1)} \end{aligned}$$ 
+
+Present your results side-by-side using $stargazer()$. 
+
+## Demand for Eco-Friendly Apples
+
+Estimate the following model using the `apple` dataset: 
+
+$$ Buy\text{ }Eco\text{-}Freindly = \beta_0 + \beta_1Price_{Eco} + \beta_2Price_{Reg} + \beta_3Income + \beta_4HH\text{ }Size + \beta_5Education + \beta_6Age + u $$ 
+
+Summarize this estimation using the $summary()$ function. 
+
+Interpret the coefficient on the price of eco-friendly apples. 

@@ -7,94 +7,59 @@ runtime: shiny_prerendered
 ```{r setup, include=FALSE}
 library(learnr)
 library(gradethis)
+library(wooldridge)
 ceosal1 <- wooldridge::ceosal1
-vote1 <- wooldridge::vote1
-
+salary.lm1 <- lm(salary ~ roe, data = ceosal1)
+salary.lm2 <- lm(salary ~ 0 + roe, data = ceosal1)
+salary.lm3 <- lm(salary ~ 1, data = ceosal1)
 gradethis_setup()
 tutorial_options(exercise.timelimit = 60)
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## Exercise
+## CEO Salaries and Return on Equity
 
-The $ceosal1$ dataset contains data on CEO salaries with characteristics of the CEOs and the companies they run. Calculate the following: 
-  
-  - The means and variances of salary and roe, and the covariance between salary and roe.
-  - Use the covariance-variance formula (equations 2.17 and 2.19 in Wooldridge) to obtain the OLS estimates for $\hat\beta_0$ and $\hat\beta_1$ for a simple regression model of the relationship between CEO salary ($salary$) and return on equity ($roe$), $Salary = \beta_0 + \beta_1ROE + u$. Name these estiamtes b1hat and b0hat, and print them as a vector using c(..., ...).
-  - Use the $lm()$ function to get the estimates for comparison.
-  - Tip: When working with the same data frame for multiple operations, you may use "attach" to tell R to recognize the named elements in it (variable columns) without repeatedly calling the data frame. Try this for this exercise. 
-  
-```{r lmPractice1, exercise=TRUE, exercise.reveal_solution = TRUE}
+Regress CEO salary on: 
+1. ROE (with a constant - name this $salary.lm1$); 
+2. ROE (without a constant - $salary.lm2$); 
+3. Only a constant($salary.lm3$). Plot all three regression lines with a scatterplot of salary on ROE. 
+
+```{r lmPractice, exercise=TRUE, exercise.reveal_solution = FALSE}
 
 ```
 
-```{r lmPractice1-solution}
-attach(ceosal1)
-# Means, variances, and covariance.
-mean(salary)
-mean(roe)
-var(salary)
-var(roe)
-cov(roe,salary)
-# Estimate b1 and b0 
-b1hat <- cov(roe,salary)/var(roe) 
-b0hat <- mean(salary) - b1hat*mean(roe) 
-c(b1hat, b0hat)
-lm( salary ~ roe)
-# "detach" the data frame
-detach(ceosal1)
+```{r lmPractice-solution-1}
+salary.lm1 <- lm(salary ~ roe, data = ceosal1)
+salary.lm2 <- lm(salary ~ 0 + roe, data = ceosal1)
+salary.lm3 <- lm(salary ~ 1, data = ceosal1)
 ```
 
-```{r lmPractice1-hint}
-attach(...)
-# Means, variances, and covariance.
-mean(...)
-mean(...)
-var(...)
-var(...)
-cov(...,...)
-# Estimate b1 and b0 
-b1hat <- cov(...,...)/var(...) 
-b0hat <- mean(....) - b1hat*mean(...) 
-c(..., ...)
-lm( ...)
-# "detach" the data frame
-detach(...)
+```{r lmPractice-solution-2}
+salary.lm1 <- lm(salary ~ roe, data = ceosal1)
+salary.lm2 <- lm(salary ~ roe - 1, data = ceosal1)
+salary.lm3 <- lm(salary ~ 1, data = ceosal1)
 ```
 
-```{r lmPractice1-check}
+```{r lmPractice-check}
 grade_code()
 ```
 
-
-
 ## Plotting the Regression Line
 
-Estimate the percentage voting for candidate A ($voteA$) as a linear function of the share of expenditures spent on candidate A ($shareA$). Name your result $vote.lm$. 
+Plot the data for the previous exercise along with all three of the estimated regression lines. 
 
-Plot the votes for candidate A (on the y-axis) on their expenditure share (on the x-axis), and add the regression line using $abline$. 
-
-```{r lmPractice2, exercise=TRUE, exercise.reveal_solution = TRUE}
+```{r plotPractice, exercise=TRUE, exercise.reveal_solution = FALSE}
 
 ```
 
-```{r lmPractice2-solution}
-attach(vote1)
-vote.lm <- lm(voteA ~ shareA, data=vote1)
-plot(vote1$shareA, vote1$voteA)
-abline(vote.lm)
-detach(vote1)
+```{r plotPractice-solution}
+plot(ceosal1$roe, ceosal1$salary, xlab = "Return on Equity", ylab = "Salary")
+abline(salary.lm1)
+abline(salary.lm2)
+abline(salary.lm3)
 ```
 
-```{r lmPractice2-hint}
-attach(...)
-vote.lm <- lm(...)
-plot(..., ...)
-abline(...)
-detach(...)
-```
-
-```{r lmPractice2-check}
+```{r plotPractice-check}
 grade_code()
 ```
 

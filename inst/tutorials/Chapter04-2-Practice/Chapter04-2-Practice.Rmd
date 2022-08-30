@@ -15,10 +15,10 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## Exercise
 
-Estimate the following model from the previous practice exercises with and without region variables. Name your models $crime.lm1$ (unrestricted model with regions) $crime.lmr$ (restricted model without regions): 
-
-  - Calculate the test statistic for the presence of risk-adjusted (controlling for other factors) regional differences in crime rates *by hand* using the restricted and unrestricted $R^2$. 
-  - Calculate the corresponding p-value. 
+1. Estimate the model from the previous practice exercises *with and without region variables*. Name your models `crime.lm1` (unrestricted model with regions) `crime.lmr` (restricted model without regions). 
+$$\begin{align}ln(CrimeRate) ={} & \beta_0 + \beta_1ln(LawExpendPC) + \beta_2ln(IncomePC) + \beta_3ln(PopulationDensity) \\& + \beta_4West + \beta5Northeast + \beta_6South + u\end{align}$$  
+2. Calculate the test statistic for the presence of risk-adjusted (controlling for other factors) regional differences in crime rates *by hand* using the restricted and unrestricted $R^2$. 
+3. Calculate the corresponding p-value. 
 
 ```{r crime, exercise=TRUE, exercise.reveal_solution = TRUE}
 
@@ -31,15 +31,6 @@ r2.ur <- summary(crime.lm1)$r.squared
 r2.r <- summary(crime.lmr)$r.squared 
 F <- (r2.ur-r2.r) / (1-r2.ur) * crime.lm1$df.residual/crime.lm1$rank
 1-pf(F, crime.lm1$rank, crime.lm1$df.residual)
-```
-
-```{r crime-hint}
-crime.lm1 <- lm(..., ...)
-crime.lmr <- lm(..., ...)
-r2.ur <- summary(...)$... 
-r2.r <- summary(...)$... 
-F <- ((...-...)/...) / ((...)/...)
-1-pf(..., ..., ...)
 ```
 
 ```{r crime-check}

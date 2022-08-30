@@ -1,0 +1,36 @@
+---
+title: "Appendix B-2 Practice"
+author: "Jim Bang"
+output: pdf_document
+classoption: landscape
+---
+
+```{r setup, include=FALSE}
+library(corrgram)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Appendix B #10
+
+Suppose that at a large university, college GPA and SAT score are related by the conditional expectation $E(GPA|SAT) = 0.70 + 0.002 SAT$
+  - Find expected $GPA$ when $SAT = 800$. Find $E(GPA|SAT = 1400)$. 
+  - If average $SAT$ at the university is 1,100, what is the average GPA? 
+
+If an individual student's $SAT$ is 1,100, does this mean they will have the same GPA as the previous question?
+
+## Correlogram Practice
+
+Make a correlogram of the affairs dataset that includes the following variables: 
+
+  - Age (age)
+  - Years married (yrsmarr)
+  - Years of education (educ)
+  - Number of affairs (naffairs)
+
+Give your corrgram the following panel attributes: 
+  
+  - Scatter plots in the lower panel;
+  - Correlation coefficients in the upper panel;
+  - Estimated empirical uni-variate densities in the diagonal panel; 
+  - Black color palette. 
+

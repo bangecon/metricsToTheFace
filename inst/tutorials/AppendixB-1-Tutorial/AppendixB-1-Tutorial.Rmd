@@ -1,21 +1,49 @@
 ---
-output: slidy_presentation
-runtime: shiny_prerendered
-title: "Appendix B \n\n Fundamentals of Probability" 
-description: >
-  This tutorial reviews some basic concepts about probability and probability distributions.
+output: 
+  learnr::tutorial:
+    progressive: true
+title: "Appendix B Fundamentals of Probability" 
+author: Jim Bang
+description: "This tutorial reviews some basic concepts about probability and probability distributions."
 ---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+<script language="JavaScript">
+$(function() {
+   var editor;
+   $('.ace_editor').each(function( index ) {
+     editor = ace.edit(this);
+     editor.setFontSize("16px");
+   });
+})
+</script>
 
 ```{r setup, include=FALSE}
 library(learnr)
 library(gradethis)
+ceosal1 <- wooldridge::ceosal1
+affairs <- wooldridge::affairs
+attach(ceosal1) 
+E_sal.roe <- mean(salary*roe)
+E_sal.E_roe <- mean(salary)*mean(roe)
+affairs$haskids <- factor(affairs$kids, labels = c("no","yes"))
+affairs$marriage <- factor(affairs$ratemarr, labels = c("very unhappy","unhappy","average","happy", "very happy"))
 gradethis::gradethis_setup()
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## Probability Distribution of a Discrete Random Variable
+## Probability Distributions 
 
-Probability mass function, Pr(x), maps all possible values of X into the probabilities that X = x.
+### Probability Mass Functions of Discrete Random Variables
+
+Probability mass function, $Pr(x)$, maps all possible values of $X$ into the probabilities that $X = x$.
 
 +----------------+--------------------------+--------------------------+--------------------------+--------------------------+
 | Name           | PMF [$Pr(x=x)$]          | CDF [$P(x<=x)$]          | Quantile [$P^{-1}(p)$]   | Random \#s               |
@@ -33,9 +61,10 @@ Probability mass function, Pr(x), maps all possible values of X into the probabi
 
 : Discrete Probability Distributions in R: x is the value of the variable; p is the cumulative probability; and R is the number of random draws. Other arguments represent parameters of the distribution.
 
-## Probability Density of a Continuous Random Variable
+\newpage
+### Probability Density Functions of Continuous Random Variables
 
-Probability density function, f(x), measures how tightly packed the probability is around x, not the probability at a point ($Pr[X=x]=0$).
+Probability density function, $f(x)$, measures how tightly packed the probability is around $x$, *not* the probability at that point ($Pr[X=x]=0$).
 
 +---------------+----------------------------+----------------------------+----------------------------+----------------------------+
 | Name          | PMF [$f(x)$]               | CDF [$P(x<=x)$]            | Quantile [$P^{-1}(p)$]     | Random \#s                 |
@@ -59,9 +88,10 @@ Probability density function, f(x), measures how tightly packed the probability 
 | *F*           | df(x, *df*~1~, *df*~2~)    | pf(x, *df*~1~, *df*~2~)    | qf(p, *df*~1~, *df*~2~)    | rf(R, *df*~1~, *df*~2~)    |
 +---------------+----------------------------+----------------------------+----------------------------+----------------------------+
 
-: Discrete Probability Distributions in R: x is the value of the variable; p is the cumulative probability; and R is the number of random draws. Other arguments represent parameters of the distribution.
+: Coninuous Probability Distributions in R: x is the value of the variable; p is the cumulative probability; and R is the number of random draws. Other arguments represent parameters of the distribution.
 
-## Probability Distribution of a Random Variable
+\newpage
+### Cumulative Probability Distribution of a Random Variable
 
 Cumulative probabilities for a discrete R.V.
 
@@ -73,207 +103,152 @@ $$P(X \le x^*)= F(x^*) = \int_{-\infty}^{x^*}f(x)dx$$ = The area under f to the 
 
 $$P(X = x^*) = \int_{x^*}^{x^*}f(x)dx = F(x^*) - F(x^*) = 0$$
 
-## Expected Value of a Discrete Random Variable
+\newpage
+## Expected Value 
+
+The first moment of *X* is $E[X]$, or $\mu$. 
+
+### Discrete Random Variable
 
 $$E(X)= \sum_{x=-\infty}^{\infty}xp(x)= \vec{x} \cdot \vec{p}(x)$$
 
-For a random variable, z, defined on a uniform *discrete* distribution, pz, from zero to ten, calculate:
-
-  -   $E(z)$
-  -   $E(z)^2$
-  -   $E(z^2)$
+For a random variable, y, defined on a uniform *discrete* distribution, py, from zero to ten, calculate $E(y)$.
 
 ```{r discreteEz, exercise = TRUE}
-# Define z
 
-# Define p(z) 
-
-# Calculate E(z), E(z)^2, and E(z^2) - do not worry about storing them as objects
-
-```
-
-```{r discreteEz-hint}
-# The ":" operator indicates a sequence "through" the number before and after it.
-z <- c(...:...)
-# The "rep" function repeats a value a specified number of times. 
-# Careful! How many values exist on the interval [0, 10]?
-# To be sure, use length(x) in your formula for p(x).
-pz <- rep(1/n, n)
-# Use the matrix multiplication operator %*% to calculate the cross-product.
-...%*%... # (E(x))
-...       # (E(x)^2)
-...%*%... # (E(x^2))
 ```
 
 ```{r discreteEz-solution}
-# Define x 
-z <- c(0:10)
-# Define p(x) 
-pz <- rep(1/length(z), length(z))
-# Calculate E(z), E(z)^2, and E(z^2)
-z%*%pz
-(z%*%pz)^2
-z^2%*%pz
+y <- c(0:10)
+py <- rep(1/length(y), length(y))
+y%*%py
 ```
 
 ```{r discreteEz-check}
 grade_code()
 ```
 
-## Expected Value of a Continuous Random Variable
-
-Expected Value of a continuous R.V.
+### Continuous Random Variable
 
 $$E(X) = \int_{-\infty}^{\infty}xf(x)dx$$
 
-For a random variable, x, defined on a uniform *continuous* distribution between zero and ten:
-
--   E(x)
--   E(x)\^2
--   E(x\^2)
+For a random variable, x, defined on a uniform *continuous* distribution between zero and ten, calculate $E(x)$.
 
 ```{r continuousEx, exercise = TRUE}
-# Define f(x), xf(x), and x^2f(x) 
 
-# Calculate E(x), E(x)^2, and E(x^2)
-
-```
-
-```{r continuousEx-hint}
-# The "function" function lets you define a mathematical function of a continuous real valued-x. 
-f.x <- function(x) {...}
-xf.x <- function(x) {...}
-x2f.x <- function(x) {...}
-# Use the "integrate" function to calculate the appropriate integrals (add up the itty bits).
-integrate(xf.x, 0, 10)
-integrate(xf.x, 0, 10)^2
-integrate(x2f.x, 0, 10)
 ```
 
 ```{r continuousEx-solution}
-# Define f(x) 
-f.x <- function(x) {(1/10)}
-# Calculate E(x), E(X)^2, and E(X^2)
-x%*%p(x)
-mu.x^2
-x^2%*%p(x)
+integrate(function(x) x/10, 0, 10)
 ```
 
 ```{r continuousEx-check}
-grade_code("Notice that $E(X^2) > E(X)^2$. This because x^2 is a convex function, and this property is known as Jensen’s Inequality.")
+grade_code()
 ```
 
-## Expected Value of a Function of a R.V.
+Notice that $E(X^2) > E(X)^2$. This because x^2 is a convex function, and this property is known as Jensen’s Inequality.
+
+### Expected Value of a Function of a Random Variable
 
 Linear functions and expectation
 
--   You can split addition.
--   Constants "pass through" the expectation
--   If the function, *f*, that you pass to x is *linear*, then $E[g(X)] = g[E(X)]$, i.e. for constants a and b, $$E(a + bX) = a + bE(X)$$
+1. Constants can factor out of the expectation: $E(c) = c$ for any constant, $c$. 
+2. Addition is separable inside expectation: $E(X + Y) = E(X) + E(Y)$. 
+3. For any *linear* function, $f$, $E[f(X)] = f[E(X)]$, i.e. $E(a + bX) = a + bE(X)$ for any constants, $a$ and $b$.
+4. For any *convex* function, $f$, $E[f(X)] > f[E(X)]$, e.g. $E(X^2) > E(X)^2$; <br>
+   For any *concave* function, $f$, $E[f(X)] < f[E(X)]$, e.g. $E[ln(X)] < ln[E(X)]$. 
 
-## Law of Iterated Expectations
+For a random variable, x, defined on a uniform *continuous* distribution between zero and ten, calculate $E(x)^2$ and $E(x^2)$.
 
--   For any function, *f*, $$E[f(X)|X] = f(X)$$
--   For *linear* functions, *g* and *h*, $$E[a(X)Y + b(X) | X] $$ For example, $$E(xY + 2x^2 | x) = xE(Y|x) + 2X^2$$
--   If *X* and *Y* are independent, $$E(Y|X) = E(Y)$$
+```{r JensensInequality, exercise = TRUE}
 
-<html>
-
-<blockquote class="twitter-tweet">
-
-<p lang="und" dir="ltr">
-
-<a href="https://twitter.com/hashtag/metricstotheface?src=hash&amp;ref_src=twsrc%5Etfw">\#metricstotheface</a> <a href="https://t.co/iJogWqNLot">pic.twitter.com/iJogWqNLot</a>
-
-</p>
-
---- Jeffrey Wooldridge (@jmwooldridge) <a href="https://twitter.com/jmwooldridge/status/1374558461095206917?ref_src=twsrc%5Etfw">March 24, 2021</a>
-
-</blockquote>
-
-```{=html}
-<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 ```
-</html>
 
+```{r JensensInequality-solution}
+# Calculate E(x), E(X)^2, and E(X^2)
+integrate(function(x) x/10, 0, 10)$value^2
+integrate(function(x) (x^2)/10, 0, 10)$value
+```
+
+```{r JensensInequality-check}
+grade_code()
+```
+
+### Mean, Median, and Mode
+
+An important property of the mean is that the estimator for it represents the parameter that minimizes the squared differences of the observed data from it. 
+
+$$\hat\mu = \underset{\theta}{\operatorname{argmin}} \bigg\{\sum_{i = 1}^n(x_i - \theta)^2\bigg\}$$
+
+We can rewrite this property as the minimum of the squared absolute values (it doesn't change anything because the squared deviations are already positive).
+
+$$\hat\mu = \underset{\theta}{\operatorname{argmin}} \bigg\{\sum_{i = 1}^n|x_i - \theta|^2\bigg\}$$
+
+We learn the *median* as the value of $x$ that "splits" the distribution (or population or sample) in half. An interesting property of the median is that it minimizes the *absolute* differences (to the first power) of the observed data from itself. 
+
+$$\tilde\mu = \underset{\theta}{\operatorname{argmin}} \bigg\{\sum_{i = 1}^n|x_i - \theta|\bigg\}$$
+
+The *mode* measures the most frequent or most likely value of $x$. An interesting property of the mode is that it minimizes the *absolute* differences of the observed data from itself *raised to the zero power*.
+
+$$\mathring\mu = \underset{\theta}{\operatorname{argmin}} \bigg\{\sum_{i = 1}^n|x_i - \theta|^0\bigg\}$$
+
+Notice that the distance function, $|x_i - \theta|^0$ equals $0$ if $x_i = \theta$ and $1$ if $x_i \neq \theta$, so assigning $\theta$ equal to the most frequent value minimizes the sum of these distances by setting the most values to zero instead of one. 
+
+Summarizing, 
+
+1. Mode: $\mathring\mu = \underset{\theta}{\operatorname{argmin}} \bigg\{\sum_{i = 1}^n|x_i - \theta|^0\bigg\}$
+2. Median: $\tilde\mu = \underset{\theta}{\operatorname{argmin}} \bigg\{\sum_{i = 1}^n|x_i - \theta|^1\bigg\}$
+3. Mean: $\hat\mu = \underset{\theta}{\operatorname{argmin}} \bigg\{\sum_{i = 1}^n|x_i - \theta|^2\bigg\}$
+
+\newpage
 ## Variance and Standard Deviation
 
-The second moment of *X* is $E[X^2]$ The second central moment of *X* is $E[(X – \mu)^2]$ - For the discrete uniform distribution of $Z$ from the previous exercise, calculate $Var(Z)$.
+The second moment of *X* is $E[X^2]$; the second *central* moment of *X* around its mean is $E[(X – \mu)^2]$, also known as $V(X)$ or $\sigma_x^2$ (the first central moment, $E[X - \mu]$ is always zero). 
 
-```{r discreteVz, exercise = TRUE}
+The standard deviation is the square root of the variance, or $\sigma_x$. 
 
+### Discrete Random Variable
 
-```
-
-```{r discreteVz-hint}
-
-...%*%... # (E(x^2))
-```
+For a discrete uniform random variable from zero to ten, $Z$, calculate $Var(Z)$.
 
 ```{r discreteVz-solution}
-# Define x 
-z <- c(0:10)
-# Define p(x) 
-pz <- rep(1/length(z), length(z))
-# Calculate E(z), E(z)^2, and E(z^2)
-z%*%pz
-(z%*%pz)^2
-z^2%*%pz
+y <- c(0:10)
+py <- rep(1/length(y), length(y))
+(y - c(y%*%py))^2%*%py
 ```
 
-```{r discreteVz-check}
-grade_code()
-```
+### Continuous Random Variable
 
-Variance of a continuous R.V.
-
-```{r continuousVx, exercise = TRUE}
-# Define f(x), xf(x), and x^2f(x) 
-
-# Calculate E(x), E(x)^2, and E(x^2)
-
-```
-
-```{r continuousVx-hint}
-# The "function" function lets you define a mathematical function of a continuous real valued-x. 
-f.x <- function(x) {...}
-xf.x <- function(x) {...}
-x2f.x <- function(x) {...}
-# Use the "integrate" function to calculate the appropriate integrals (add up the itty bits).
-integrate(xf.x, ..., ...)
-integrate(xf.x, ... = , ...)^2
-integrate(x2f.x, ..., ...)
-```
+For a *continuous* uniform random variable from zero to ten, $X$, calculate $Var(Z)$.
 
 ```{r continuousVx-solution}
-# Define f(x) 
-f.x <- function(x) {1/10}
-xf.x <- function(x) {x/10}
-x2f.x <- function(x) {x^2/10}
-# Calculate E(x), E(X)^2, and E(X^2)
-integrate(xf.x, 0, 10)
-integrate(xf.x, 0, 10)^2
-integrate(x2f.x, 0, 10)
+mu <- integrate(function(x) x/10, 0, 10)$value
+integrate(function(x) (x - mu)^2/10, 0, 10)
 ```
 
-```{r continuousVx-check}
-grade_code()
-```
+### Variance and Standard Deviation of a Linear Function of a Random Variable
 
-## Variance and Standard Deviation of a Linear Function of a Random Variable
+Linear functions and variance.
 
-Variance and constants Intercept terms "drop out" because constants have no variance. Slope terms are squared for the variance.
+1. Constants have zero variance: $V(c) = 0$ for any constant, $c$. 
+2. Addition distributes within the variance: $V(X + Y) = V(X) + V(Y) + 2COV(XY)$. 
+3. Coefficients factor out as squared values: $V(cX) = c^2V(X)$.
+4. For any *linear* function, $f$, $V(a + bX) = b^2V(X)$ for any constants, $a$ and $b$.
 
+In the case of standard deviation, taking square roots gives: (1) $\sigma_c = 0$; (2) $\sigma_{(x+y)} = \sqrt{\sigma_x^2 + \sigma_y^2 + 2\sigma_{sy}}$; 3. $\sigma_{cX} = c\sigma_x$; and 4. $\sigma_{(a + bX)} = b\sigma_x$. 
+
+\newpage
 ## Other Moments of a Random Variable
 
--   Skewness
+### Skewness
 
-    -   3rd moment: $E[X^3]$;
-    -   3rd central moment: $E[(X – \mu)^3]$;
-    -   3rd standardized moment: $E[(\frac{X – \mu}{\sigma})^3]$
+-   3rd moment: $E[X^3]$
+-   3rd *central* moment: $E[(X – \mu)^3]$
+-   3rd *standardized* moment: $E[(\frac{X – \mu}{\sigma})^3]$
 
--   Kurtosis
+### Kurtosis
 
-    -   4th moment: $E[X^4]$;
-    -   4th central moment: $E[(X – \mu)^4]$;
-    -   4th standardized moment: $E[(\frac{X – \mu}{\sigma})^4]$
+-   4th moment: $E[X^4]$
+-   4th *central* moment: $E[(X – \mu)^4]$
+-   4th *standardized* moment: $E[(\frac{X – \mu}{\sigma})^4]$
+

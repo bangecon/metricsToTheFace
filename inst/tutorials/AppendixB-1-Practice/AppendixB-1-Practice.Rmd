@@ -18,8 +18,8 @@ knitr::opts_chunk$set(echo = FALSE)
 
 Prior to jury selection for O.J Simpson's murder trial in 1995, a poll found that about 20% of the adult population believed Simpson was innocent (after much of the physical evidence in the case had been revealed to the public). Assume that the 12 jurors were selected randomly and independently from the population (although this turned out not to be true). 
 
-  - Calculate the probability that the jury had at least one member who believed in Simpson's innocence prior to jury selection. 
-  - Calculate the probability that the jury had at least two members who believed in Simpson's innocence.
+1. Calculate the probability that the jury had at least one member who believed in Simpson's innocence prior to jury selection. 
+2. Calculate the probability that the jury had at least two members who believed in Simpson's innocence.
 
 ```{r OJ, exercise=TRUE, exercise.reveal_solution = TRUE}
 
@@ -32,8 +32,6 @@ Prior to jury selection for O.J Simpson's murder trial in 1995, a poll found tha
 ```{r OJ-hint}
 # The number of jurors out of 12 who believe Simpson is innocent follows a binomial distribution.
 # P{X >= 1) = 1 - P(X < 1); P(X >= 2) = 1 - P(X < 2)
-1 - pbinom(..., ..., ...)
-1 - pbinom(..., ..., ...)
 ```
 
 ```{r OJ-check}
@@ -43,7 +41,7 @@ Prior to jury selection for O.J Simpson's murder trial in 1995, a poll found tha
 
 ## Exercise
 
-Let X denote the prison sentence, in years, for people convicted of auto theft in a particular state in the United States. Suppose that the pdf of X is given by: 
+Let X denote the prison sentence, in years (up to a hypothetical three-year maximum sentence), for people convicted of auto theft in a particular state in the United States. Suppose that the pdf of X is given by: 
 $$ f(x) = (1/9)x^2, \text{ } 0 < x < 3 $$
 Find the expected value and standard deviation of the prison sentence. 
 
@@ -58,13 +56,9 @@ Find the expected value and standard deviation of the prison sentence.
 ```{r prison-hint}
 # E(x) = integral over sample space of x*f(x), so you will first need to define xf(x). 
 # You will also need to define x^2*f(x) to get the variance. 
-xf.x <- function(x) {...}
-x2f.x <- function(x) {...}
 # Use "integrate(function, lower bound, upper bound)" to get the integral
-integrate(..., ..., ...)
 # V(X) = E(X-mu)^2 = E(X^2) - E(X)^2
 # To take the square root of the value of the integral instead of the full result (which includes the error tolerance), extract the $value element from it.
-sqrt(integrate(..., ..., ...)$... - integrate(..., ..., ...)$...)
 ```
 
 ```{r prison-check}

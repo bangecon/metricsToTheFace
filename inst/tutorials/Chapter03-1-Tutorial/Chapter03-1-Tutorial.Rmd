@@ -1,25 +1,50 @@
 ---
-output: slidy_presentation
+output: 
+  learnr::tutorial: 
+    progressive: true
 runtime: shiny_prerendered
-title: "Chapter 3 \n\n Multiple Regression Analysis - Estimation"
+title: "Chapter 3: Multiple Regression Analysis - Estimation"
 author: "James Bang"
 description: >
   This tutorial introduces linear estimation with multiple variables.
 ---
 
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+<script language="JavaScript">
+$(function() {
+   var editor;
+   $('.ace_editor').each(function( index ) {
+     editor = ace.edit(this);
+     editor.setFontSize("16px");
+   });
+})
+</script>
+
 ```{r setup, include=FALSE}
 library(learnr)
 library(gradethis)
 library(stargazer)
+library(xfun)
+library(htmltools)
 library(wooldridge)
+tutorial_options(exercise.eval = TRUE, exercise.reveal_solution = TRUE)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE)
 wage1 <- wooldridge::wage1
 wage.lm1 <- lm(wage ~ educ, data = wage1)
 wage.lm2 <- lm(wage ~ educ + exper, data = wage1)
-gradethis::gradethis_setup()
-knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## A Simple Regression Redux: Wages and Education AND MORE!
+## Multiple Regression
+
+### Wages and Education AND MORE!
 
 - Using the wage1 data, regress wages on education (with an intercept). 
 
@@ -36,10 +61,6 @@ Name this wage.lm1
 
 ```{r multipleLM-hint}
 # The "lm" function requires two main arguments: function (y ~ x1 + x2...) and data (a data frame) 
-wage.lm1 <- lm(..., ...)
-wage.lm2 <- lm(..., ...)
-summary(...)
-summary(...)
 ```
 
 ```{r multipleLM-solution}
@@ -53,7 +74,7 @@ summary(wage.lm2)
 grade_code()
 ```
 
-## Table Output for Nested Regressions
+### Table Output for Regressions
 
 - Display a *stargazer* object of each of the previous regressions using the *stargazer* function in the *stargazer* package. 
 - Display the output without assigning it to a named object 
@@ -64,7 +85,7 @@ grade_code()
 ```
 
 ```{r gtLM-hint}
-stargazer(..., ..., type = 'text')
+# Use the `type = 'text'` option to display a readable text table. 
 ```
 
 ```{r gtLM-solution}
@@ -75,62 +96,93 @@ stargazer(wage.lm1, wage.lm2, type = 'text')
 grade_code()
 ```
 
-## Stargazer Output (using $type = \text{'html'}$)
+### Raw Stargazer HTML Output 
 
-<html>
-<table style="text-align:center"><tr><td colspan="3" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td colspan="2"><em>Dependent variable:</em></td></tr>
-<tr><td></td><td colspan="2" style="border-bottom: 1px solid black"></td></tr>
-<tr><td style="text-align:left"></td><td colspan="2">wage</td></tr>
-<tr><td style="text-align:left"></td><td>(1)</td><td>(2)</td></tr>
-<tr><td colspan="3" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">educ</td><td>0.541<sup>***</sup></td><td>0.644<sup>***</sup></td></tr>
-<tr><td style="text-align:left"></td><td>(0.053)</td><td>(0.054)</td></tr>
-<tr><td style="text-align:left"></td><td></td><td></td></tr>
-<tr><td style="text-align:left">exper</td><td></td><td>0.070<sup>***</sup></td></tr>
-<tr><td style="text-align:left"></td><td></td><td>(0.011)</td></tr>
-<tr><td style="text-align:left"></td><td></td><td></td></tr>
-<tr><td style="text-align:left">Constant</td><td>-0.905</td><td>-3.391<sup>***</sup></td></tr>
-<tr><td style="text-align:left"></td><td>(0.685)</td><td>(0.767)</td></tr>
-<tr><td style="text-align:left"></td><td></td><td></td></tr>
-<tr><td colspan="3" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Observations</td><td>526</td><td>526</td></tr>
-<tr><td style="text-align:left">R<sup>2</sup></td><td>0.165</td><td>0.225</td></tr>
-<tr><td style="text-align:left">Adjusted R<sup>2</sup></td><td>0.163</td><td>0.222</td></tr>
-<tr><td style="text-align:left">Residual Std. Error</td><td>3.378 (df = 524)</td><td>3.257 (df = 523)</td></tr>
-<tr><td style="text-align:left">F Statistic</td><td>103.363<sup>***</sup> (df = 1; 524)</td><td>75.990<sup>***</sup> (df = 2; 523)</td></tr>
-<tr><td colspan="3" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td colspan="2" style="text-align:right"><sup>*</sup>p<0.1; <sup>**</sup>p<0.05; <sup>***</sup>p<0.01</td></tr>
-</table>
-<\html>
+```{r, echo = TRUE}
+stargazer(wage.lm1, wage.lm2, type = 'html')
+```
 
-## Assumptions of the Classical Regression Model
+### Formatted Stargazer HTML Output 
 
-- Linear in the parameters
-- Random Sampling: $(X_i, Y_i)$ are independently and identically distributed
-- No Perfect Multicollinearity
-- E[u|x] = 0
-- Homoskedasticity: $u_i{'s}$ have constant variance regardless of the value of $x$
-- Large Outliers are Unlikely: $X$ and $Y$ have finite fourth moments
-$$E(X^4)< \infty$$
-$$E(Y^4)< \infty$$
+You can directly insert a `stargazer` table in an `html` Rmarkdown document. One is to include the command that generates the `html` in an `R` chunk (with the option `results='asis'`) that itself is inside an `html` code chunk.  
 
-<html>
-<blockquote class="twitter-tweet" data-partner="tweetdeck"><p lang="en" dir="ltr">As a follow-up, I don&#39;t believe in laying out all assumptions at once. I only make an assumption when it&#39;s needed for a result. This way, students are forced to learn which assumps are used to obtain which results. It pays dividends later.</p>&mdash; Jeffrey Wooldridge (@jmwooldridge) <a href="https://twitter.com/jmwooldridge/status/1405604458432798721?ref_src=twsrc%5Etfw">June 17, 2021</a></blockquote>
-<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-</html>
+```{r, echo = TRUE, eval=FALSE}
+stargazer(
+  wage.lm1,
+  wage.lm2,
+  title = "Education and Wages",
+  type = "html",
+  float = TRUE,
+  no.space = TRUE,
+  header = FALSE,
+  covariate.labels = c("Education", "Experience")
+)
+```
 
-Oops! Looks like I've disappointmented to our econometric sensei!
+```{=html}
+```{r, results='asis'}
+stargazer(
+  wage.lm1,
+  wage.lm2,
+  title = "Education and Wages",
+  type = "html",
+  float = TRUE,
+  no.space = TRUE,
+  header = FALSE,
+  covariate.labels = c("Education", "Experience")
+)
+```
+<br>
+```
+
+Alternately, you might want to run your code from a `R` source file, save your pretty tables as html files, and include the content of those files in your `html` (or other) document. 
+
+One way to achieve this is to insert a code chunk with the `htmltools::includeHTML()` function: 
+
+```{r results='asis'}
+includeHTML('output/wage.html')
+```
+<br>
+
+Equivalently, you could do the same thing using the `xfun::file_string()` function: 
+
+```{r echo = TRUE, results='asis'}
+file_string('output/wage.html')
+```
+<br>
+
+Since this tutorial knits as an `html` document I needed to use some extra tricks. More commonly, you would knit your document as a `pdf`, and in this case you would want to leave out the `html` wrap, and set `type = "latex"`. 
 
 ## Implementing Regression
 
-Least Squares Redux
+### Assumptions of the Classical Regression Model
 
-- One variable
+1. Linear in the parameters
+2. Random Sampling: $(X_i, Y_i)$ are independently and identically distributed
+3. No Perfect Multicollinearity
+4. $E[u|x] = 0$
+5. Homoskedasticity: $u_i{'s}$ have constant variance regardless of the value of $x$
+6. Large Outliers are Unlikely: $X$ and $Y$ have finite fourth moments
+$$E(X^4)< \infty$$
+$$E(Y^4)< \infty$$
+
+### Deriving the OLS Estimator
+
+One variable
+
 $$ \min_{\hat\beta_0,\hat\beta_1} \sum_{i=1}^n{(y_i-\hat{\beta}_0-\hat{\beta}_1x_{i1})^2} $$
-- Two variables
-$$ \min_{\hat\beta_0,\hat\beta_1,\hat\beta_2} \sum_{i=1}^n{(y_i-\hat{\beta}_0-\hat{\beta}_1x_{i1}-\hat{\beta}_2x_{i2})^2} $$
-- $k$ variables
-$$ \min_{\hat\beta_0,\hat\beta_1,...,\hat\beta_k} \sum_{i=1}^n{(y_i-\hat{\beta}_0-\hat{\beta}_1x_{i1}-...-\hat{\beta}_kx_{ik})^2} $$
-Taking the derivative with respect to each of the ${\beta}'s$ separately yields a system of equations equal to the number of ${\beta}\text{'s }(k + 1)$ and an equal number of parameters to solve for. 
 
-## Interpretation
+Two variables
+
+$$ \min_{\hat\beta_0,\hat\beta_1,\hat\beta_2} \sum_{i=1}^n{(y_i-\hat{\beta}_0-\hat{\beta}_1x_{i1}-\hat{\beta}_2x_{i2})^2} $$
+
+$k$ variables
+
+$$ \min_{\hat\beta_0,\hat\beta_1,...,\hat\beta_k} \sum_{i=1}^n{(y_i-\hat{\beta}_0-\hat{\beta}_1x_{i1}-...-\hat{\beta}_kx_{ik})^2} $$
+
+Taking the derivative with respect to each of the $\hat{\beta}$'s separately yields a system of equations equal to the number of $\hat{\beta}$'s {$k + 1$). 
+
+### Interpretating the Coefficients
 
 Predicted values of y:
 $$\hat{wage}=\hat{\beta}_0+\hat{\beta}_1educ+\hat{\beta}_2exper$$
@@ -141,42 +193,50 @@ $$ \Delta \hat{wage}=0+\hat{\beta}_1 \Delta educ+\hat{\beta}_2 (0)$$
 $$ \Delta \hat{wage}=\hat{\beta}_1 \Delta educ $$
 The predicted change in wage is $\hat\beta_1$ dollars per hour *for each additional year of education*. 
 
-## Optimization by Hand Demo
+### Optimization by Hand Demo
 
 The following code very closely replicates the method used in the $lm$ function for minimizing the sum of squared residuals.
 
 ```{r optimDemo, echo = TRUE}
 ssr <- function(b, y, x1, x2) {
-    b1 <- b[1]
-    b2 <- b[2]
-    b0 <- b[3]
-    sum((y - b0 - b1*x1 - b2*x2)^2)
+  b1 <- b[1]
+  b2 <- b[2]
+  b0 <- b[3]
+  sum((y - b0 - b1 * x1 - b2 * x2) ^ 2)
 }
-b.ols <- optim(par = c(mean(wage1$wage),0,0), fn = ssr, method = "BFGS", y = wage1$wage, x1 = wage1$educ, x2 = wage1$exper)
+b.ols <-
+  optim(
+    par = c(mean(wage1$wage), 0, 0),
+    fn = ssr,
+    method = "BFGS",
+    y = wage1$wage,
+    x1 = wage1$educ,
+    x2 = wage1$exper
+  )
 b.ols$par
-sqrt(b.ols$value/(length(wage1$wage)-length(b.ols$par)))
+sqrt(b.ols$value / (length(wage1$wage) - length(b.ols$par)))
 ```
 
-Note: the value of the function at the minimum is the SSR, so $\hat\sigma^2 = sqrt(b.ols\$value/(n-k))$
+Note: the value of the function at the minimum is the SSR, so $\hat\sigma^2 = b.ols\$value/(n-k)$
 
-## Partialing Out Control Variables
+## Partition Regression
+
+### Partialing Out Control Variables
 
 Regress wages on experience and then education on experience. 
 
 Name the results $wage.p$ and $educ.p$
 
-```{r partials, exercise = TRUE}
+```{r partials, exercise = TRUE, exercise.reveal_solution = FALSE}
 
 
 ```
 
 ```{r partials-hint}
 # The "lm" function requires two main arguments: function (y ~ x1 + x2...) and data (a data frame) 
-wage.p <- lm(..., ...)
-educ.p <- lm(..., ...)
 ```
 
-```{r partials-solution}
+```{r partials-solution, exercise.reveal_solution = FALSE}
 wage.p <- lm(wage~exper, data = wage1)
 educ.p <- lm(educ~exper, data = wage1)
 ```
@@ -184,6 +244,8 @@ educ.p <- lm(educ~exper, data = wage1)
 ```{r partials-check}
 grade_code()
 ```
+
+### Regressing the Residuals
 
 Summarize the regression of the residuals of these regressions on each other and compare the effects of education to the summary of $wage.lm2$. 
 
@@ -193,12 +255,10 @@ Summarize the regression of the residuals of these regressions on each other and
 ```
 
 ```{r residReg-hint}
-# We do not need to store the argument. We can just nest the lm() function inside summary()
-summary(lm(..., ...))
-summary(...)
+# We do not need to store the argument. We can just nest or pipe the lm() function with summary()
 ```
 
-```{r residReg-solution}
+```{r residReg-solution, exercise.reveal_solution = FALSE}
 summary(lm(wage.p$resid~educ.p$residuals))
 summary(wage2.lm2)
 ```
@@ -218,8 +278,3 @@ grade_code("Notice that the coefficients are identical! The standard error of re
 - Goodness of Fit, $R^2 = SSE/SST = 1 - SSR/SST$
 
 We will discuss issues with using the (unadjusted) $R^2$ more in Chapter 6. 
-
-<html>
-<blockquote class="twitter-tweet" data-partner="tweetdeck"><p lang="en" dir="ltr">If I had my way, any R-squared reported with linear estimation would be computed only after we net out factors that required no imagination our our part. In time series, y(t) would be detrended and/or deasonalized -- depending on what&#39;s being controlled for.<a href="https://twitter.com/hashtag/metricstotheface?src=hash&amp;ref_src=twsrc%5Etfw">#metricstotheface</a></p>&mdash; Jeffrey Wooldridge (@jmwooldridge) <a href="https://twitter.com/jmwooldridge/status/1374502138714279949?ref_src=twsrc%5Etfw">March 23, 2021</a></blockquote>
-<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-</html>

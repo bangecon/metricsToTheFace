@@ -1,6 +1,8 @@
 ---
 title: "Chapter 19 Practice"
-output: learnr::tutorial
+output: 
+  learnr::tutorial:
+    progressive: true
 runtime: shiny_prerendered
 ---
 
@@ -9,15 +11,17 @@ library(learnr)
 library(gradethis)
 library(gtsummary)
 library(corrgram)
-ceosal1 <- metricsToTheFace::ceosal1
-affairs <- metricsToTheFace::affairs
+ceosal1 <- wooldridge::ceosal1
+affairs <- wooldridge::affairs
 affairs$haskids <- factor(affairs$kids, labels = c("no","yes"))
 affairs$marriage <- factor(affairs$ratemarr, labels = c("very unhappy","unhappy","average","happy", "very happy"))
 gradethis::gradethis_setup()
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## Summarizing an Entire Data Frame
+## Summarizing Data
+
+### Summarizing an Entire Data Frame
 
 - Calculate the summary statistics for the *salary*, *sales*, *roe*, and *ros* variables. 
 
@@ -34,19 +38,37 @@ summary(ceosal1[ , which(names(ceosal1) %in% c('salary', 'sales', 'roe', 'ros'))
 ```
 
 ```{r multipleSummaryPractice-check}
-grade_code()
+grade_this({
+  # is the answer a table?
+  if (!inherits(.result, "table")) {
+    fail("Your answer should be a table.")
+  }
+
+  # from now on we know that .result is a tibble...
+  if (length(.result) != 24) {
+    fail("Your table should have a length of 24. Make sure you summarize the variables specified.")
+  }
+
+  # all of the above checks have passed now.
+  pass()
+})
 ```
 
 ## Summaries with Categorical Variables
-R handles factors much more intuitively than *Stata* (the original source of the data). The *factor()* function will create a factor from a variable from a variable with discrete values, but there is a slight three-step trick (involving matrix algebra) that you have to do first. 
-- Step 1: Use *cbind* to combine the four mutually-exclusive industry variables into a matrix, *A*. 
-- Step 2: Create a vector, *f*, that takes a discrete number of values equal to the number of factor categories (columns in *A*). We'll use (1, 2, 3, 4), but you could just as validly use four random numbers. 
-- Step 3: Cross multiply *A* and *f*. 
+R handles factors much more intuitively than *Stata* (the original source of the data). The *factor()* function will create a factor from a variable from a variable with discrete values, but it can help (or not) to break the process into separate steps first. 
 
-```{r gtsummaryFactors, exercise=TRUE, exercise.eval=TRUE}
+- Step 1: Use *cbind* to combine the four mutually-exclusive industry variables (`indus`, `finance`, `consprod`, and `utility`) into a matrix, *A*. 
+- Step 2: Create a vector, *f*, that takes a discrete number of values equal to the number of factor categories (columns in *A*, one through four). 
+- Step 3: Apply `factor()` to the cross-multiplication of *A* and *f* (`%*%`) with the `labels` option set as a character vector taking the names of the four individual industry indicators. 
+
+This approach is only a suggestion (and one that might help you "see" what you're doing to construct the new variable). As you might expect, there are multiple ways to get this result, and you can even achieve the end result in one line of code if you are a little clever. 
+
+```{r gtsummaryFactors, exercise=TRUE, exercise.eval=FALSE}
+# Create a factor variable for the industry
 
 
-
+# Summarize it with `summary()`
+summary(ceosal1$industry)
 ```
 
 ```{r gtsummaryFactors-hint}
@@ -55,17 +77,22 @@ A <- cbind(..., ..., ..., ...)
 f <- c(1:...)
 industry <- ...
 ceosal1$industry <- factor(..., labels = ...)
+summary(ceosal1$industry)
 ```
 
 ```{r gtsummaryFactors-solution}
 A <- cbind(ceosal1$indus, ceosal1$finance, ceosal1$consprod, ceosal1$utility) 
 f <- c(1:ncol(A))
-industry <- A %*% f
-ceosal1$industry <- factor(industry, labels = c('indus', 'finance', 'consprod', 'utility'))
+ceosal1$industry <- factor(A %*% f, labels = c('indus', 'finance', 'consprod', 'utility'))
+summary(ceosal1$industry)
 ```
 
 ```{r gtsummaryFactors-check}
-grade_code()
+grade_this(if (identical(.result, .solution)) {
+    pass(random_praise())
+  } {
+  fail(random_encouragement)
+})
 ```
 
 ## Summary by Categorical Group
@@ -97,7 +124,7 @@ tbl_summary(ceosal1[, -which(names(ceosal1) %in% c('indus', 'finance', 'consprod
 grade_code(correct = paste(random_praise(), "Notice how the result automatically drops the grouping variable, industry."))
 ```
 
-## Summarizing Raw Relationships between Variables
+## Summarizing Relationships between Variables
 
 Calculate the correlation matrix among **only** *salary*, *sales*, *roe*, and *ros*. 
 
@@ -146,8 +173,6 @@ Do the following:
 - Create a proportions contingency table of whether or not a couple has kids conditional on marital happiness. 
 - Create a proportions contingency table of marital happiness conditional on whether or not a couple has kids. 
 ```{r crosstabMargins, exercise=TRUE, exercise.eval=TRUE}
-affairs$haskids <- factor(..., labels = c(...))
-affairs$marriage <- factor(..., labels = c(...))
 
 
 ```
@@ -197,6 +222,7 @@ grade_code()
 
 Add the following to your plots from the in-class examples: 
   
+- Set the number of breaks or bins to 30;
 - A *dashed* normal curve over the histogram with mean equal to $\bar{x}_{salary}$ and standard deviation equal to $\hat{\sigma}_{salary}$;
 - *Dotted* vertical and horizontal lines over the scatterplot at the means of CEO salaries and ROE, respectively.
 
@@ -219,7 +245,7 @@ abline(v = mean(ceosal1$salary), lty = "dotted")
 ```
 
 ```{r basePlots-solution}
-hist(ceosal1$salary, main = "Histogram of Salary", xlab = "Salary", probability = TRUE)
+hist(ceosal1$salary, breaks = 30, main = "Histogram of Salary", xlab = "Salary", freq = FALSE)
 curve(dnorm(x, mean(ceosal1$salary), sd(ceosal1$salary)), lty = "dashed", add = TRUE)
 plot(ceosal1$salary, ceosal1$roe, main = "Salary versus ROE", xlab = "Salary", ylab = "ROE")
 abline(h = mean(ceosal1$roe), lty = "dotted")
@@ -233,7 +259,7 @@ grade_code(correct = "You may actually use lty = 1 for 'solid', lty = 2 for 'das
 As you can see, CEO salaries are very abnormal! WWWD (what-would-Wooldridge-do)? Take the logs? 
 
 ```{r logSalaryPlot}
-hist(log(ceosal1$salary), main = "Histogram of ln(Salary)", xlab = "ln(Salary)", probability = TRUE)
+hist(log(ceosal1$salary), breaks = 30, main = "Histogram of ln(Salary)", xlab = "ln(Salary)", freq = FALSE)
 curve(dnorm(x, mean(log(ceosal1$salary)), sd(log(ceosal1$salary))), lty = "dashed", add = TRUE)
 ```
 
@@ -242,7 +268,7 @@ Try Poisson distribution?
 ```{r poissonSalaryPlot}
 x <- c(1:15000)
 y <- dpois(x, mean(ceosal1$salary))
-hist(ceosal1$salary, main = "Histogram of Salary", xlab = "Salary", probability = TRUE)
+hist(ceosal1$salary, breaks = 30, main = "Histogram of Salary", xlab = "Salary", freq = FALSE)
 points(x, y, col = 'red', type = 'h')
 
 ```
@@ -283,7 +309,7 @@ panel.hist <- function(x, ...) {
     usr <- par("usr")
     on.exit(par(usr))
     par(usr = c(usr[1:2], 0, 1.5))
-    his <- hist(x, plot = FALSE)
+    his <- hist(x, plot = FALSE, breaks = 30)
     breaks <- his$breaks
     nB <- length(breaks)
     y <- his$counts

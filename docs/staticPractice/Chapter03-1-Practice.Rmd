@@ -1,0 +1,30 @@
+---
+title: "Chapter 3-1 Practice"
+author: "Jim Bang"
+output: pdf_document
+classoption: landscape
+---
+
+```{r setup, include=FALSE}
+gpa1 <- wooldridge::gpa1
+k401k <- wooldridge::k401k
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Exercise
+
+Using the $gpa1$ dataset do the following: 
+1. Regress college GPA ($colGPA$) on ACT score($ACT$) and name the result $GPA.lm1$; 
+2. Regress college GPA on high school GPA ($hsGPA$) and ACT score, and name the result $GPA.lm2$. 
+
+## Partition Regression
+
+Use partitioned regression to partial out the effect of a company's matching rate to their employees' 401k plan on the plan's participation rates, controlling for the plan's age. Recall that to do this you need to: 
+
+1. Regress the outcome ($prate$) on the control ($age$) and extract the residuals ($prate.u$);
+2. Regress the treatment ($mrate$) on the control ($age$) and extract the residuals ($mrate.u$); 
+3. Regress the residuals of participation on the residuals of matching (name this $prate.lm1$ and note that the coefficient matches the $mrate$ coefficient in example 3.3 in the book); 
+4. Summarize the final residual regression. 
+5. Plot the outcome residuals ($prate.u$) on the treatment residuals ($mrate.u$)
+6. Add the regression line. 
+

@@ -1,0 +1,199 @@
+---
+output: pdf_document
+classoption: landscape
+title: "Chapter 6 \n\n Multiple Regression Analysis - Further Issues"
+author: "Jim Bang"
+description: "This tutorial discusses issues of model specification."
+---
+
+```{r setup, include=FALSE}
+library(wooldridge)
+library(marginaleffects)
+library(stargazer)
+bwght <- wooldridge::bwght
+bwght.lm1 <- lm(bwght ~ cigs + faminc, data = bwght)
+bwght.lm2 <- lm(bwghtlbs ~ cigs + faminc, data = bwght)
+bwght.lm3 <- lm(bwght ~ packs + faminc, data = bwght)
+bwght.lm4 <- lm(scale(bwght) ~ scale(cigs) + scale(faminc), data = bwght)
+bwght.lm5 <- lm(scale(bwghtlbs) ~ scale(cigs) + scale(faminc), data = bwght)
+bwght.lm6 <- lm(scale(bwght) ~ scale(packs) + scale(faminc), data = bwght)
+bwght.lm7 <- lm(bwght ~ cigs + log(faminc), data = bwght)
+bwght.lm7 <- lm(log(bwght) ~ cigs + faminc, data = bwght)
+bwght.lm8 <- lm(bwght ~ cigs + log(faminc), data = bwght)
+bwght.lm9 <- lm(log(bwght) ~ cigs + log(faminc), data = bwght)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Data Scaling & Units of Measurement
+
+### Smoking and Birthweight
+Estimate and compare the following regressions for a baby's birth weight on an expecting mother's smoking using the $bwght$ data (preloaded with this tutorial):
+
+1. $BirthWeight_{oz} = \beta_0 + \beta_1Cigarettes + \beta_2Income + u$: `(bwght.lm1)`
+2. $BirthWeight_{lbs} = \beta_0 + \beta_1Cigarettes + \beta_2Income + u$: `(bwght.lm2)`
+3. $BirthWeight_{oz} = \beta_0 + \beta_1Packs + \beta_2Income + u$: `(bwght.lm3)`
+
+Where:
+
+$BirthWeight_{oz}$ Birthweight in ounces, `bwght`
+
+$BirthWeight_{lbs}$ Birthweight in pounds, `bwghtlbs`
+
+$Cigarettes$ Cigarettes the mother smoked per day during pregnancy, `cigs`
+
+$Packs$ Packs of cigarettes the mother smoked per day during pregnancy, `packs`
+
+$Income$ Family Income, `faminc`
+
+Summarize your output in a text table using `stargazer()`
+
+```{r bwght-solution}
+bwght.lm1 <- lm(bwght ~ cigs + faminc, data = bwght)
+bwght.lm2 <- lm(bwghtlbs ~ cigs + faminc, data = bwght)
+bwght.lm3 <- lm(bwght ~ packs + faminc, data = bwght)
+stargazer(bwght.lm1, bwght.lm2, bwght.lm3, type = 'text')
+```
+
+\newpage 
+## Standardized Coefficients and Elasticities
+
+To compare coefficients that have different units or that might be scaled differently, we can interpret the results a few different ways: 
+
+1. Transform the raw data (X and y) as zscores (subtract the mean and dividing by the standard deviation). 
+2. Calculate the standardied coefficients: 
+
+$$\hat{b}_j = \frac{\hat{\sigma}_{x_j}}{\hat{\sigma}_y}\hat{\beta}_j$$
+
+3. Calculate the elasticities: 
+
+$$E_{yx_j} = \frac{\%\Delta y}{\%\Delta x_j} = \frac{\Delta y/y}{\Delta x_j/x_j} = \beta_j\Bigg{(}\frac{\bar{x}_j}{\bar{y}}\Bigg{)}$$
+
+Note: (1) and (2) are numerically equivalent. Also, in all of the cases, we can standardize partially, which usually means standardizing the $x$ variable(s), but not $y$.
+
+### Standardizing Variables
+
+Estimate the models bwght.lm1, bwght.lm2, and bwght.lm3 using the standardized transformations of the variables with the $scale()$ function and output all three results with a text $stargazer$ table. Name them $bwght.lm4$, $bwght.lm5$, and $bwght.lm6$. 
+
+```{r scale-solution}
+bwght.lm4 <- lm(scale(bwght) ~ scale(cigs) + scale(faminc), data = bwght)
+bwght.lm5 <- lm(scale(bwghtlbs) ~ scale(cigs) + scale(faminc), data = bwght)
+bwght.lm6 <- lm(scale(bwght) ~ scale(packs) + scale(faminc), data = bwght)
+stargazer(bwght.lm4, bwght.lm5, bwght.lm6, type = 'text')
+```
+
+### Standardizing Coefficients
+
+Calculate the beta coefficients for the original coefficients, excluding the intercept. <br>
+(Hint: `sapply(list, function)` returns a simple vector you get from *apply*ing a function to an list of variables; `bwght.lm1(model)` pulls the variables *and observations* included in `bwght.lm1`, including `y`.) 
+
+```{r beta-solution}
+bwght.lm1$coefficients[-1]*sapply(bwght.lm1$model, sd)[-1]/sd(bwght.lm1$model$bwght)
+bwght.lm2$coefficients[-1]*sapply(bwght.lm2$model, sd)[-1]/sd(bwght.lm2$model$bwght)
+bwght.lm3$coefficients[-1]*sapply(bwght.lm3$model, sd)[-1]/sd(bwght.lm3$model$bwght)
+```
+
+### Elasticities *at the Mean*
+
+The simplest way to calculate the elasticity is to note that: 
+
+$$E = \frac{dy/y} {dx/x} = \frac{dy}{dx} \cdot \frac{x}{y}$$
+
+Evaluating this expression at the sample means of $x$ and $y$ gives 
+
+$$E_{MEM} = \frac{dy}{dx}\cdot \frac{\bar{x}}{\bar{y}}$$
+
+which is a good approximation of the elasticity called the *marginal effect at the mean (MEM)*. The (right-hand side) partial elasticity using the MEM formula would be: 
+
+$$E_{MEM} = \frac{dy}{dx/\bar{x}} = \frac{dy}{dx}\cdot \bar{x}.$$
+
+Calculate the full and partial elasticities for `bwght.lm1` using the `sapply` function (except applying the mean to the model data frame instead of standard deviation).
+
+```{r eMeans-solution}
+bwght.lm1$coefficients[-1]*sapply(bwght.lm1$model, mean)[-1]/mean(bwght.lm1$model$bwght)
+bwght.lm1$coefficients[-1]*sapply(bwght.lm1$model, mean)[-1]
+```
+
+### *Average* Elasticities 
+
+A better calculation of the elasticity for a model estimated in levels uses the concept of the *average marginal effect (AME)*.
+
+Implementing AME starts from the same point, 
+
+$$E = \frac{dy/y}{dx/x} = \frac{dy}{dx} \cdot \frac{x}{y},$$
+
+but then inserts each individual observation's *observed* value, 
+
+$$E_i = \frac{d\hat{y}_i}{dx_i}\cdot \frac{x_i}{\hat{y}_i},$$
+
+and averages them:
+
+$$E_{AME} = \sum_{i=1}^{n} \frac{d\hat{y}_i}{dx_i}\cdot \frac{x_i}{\hat{y}_i}$$
+
+The (right-hand side) partial elasticities would be: 
+
+$$E_{AME} = \sum_{i=1}^{n} \frac{d\hat{y}_i}{dx_i}\cdot x_i$$
+
+Estimate the full and partial elasticities for the `bwght.lm1` estimates using `marginaleffects::marginaleffects()`. 
+
+```{r eAME-solution}
+marginaleffects(bwght.lm1, slope = 'eyex')
+marginaleffects(bwght.lm1, slope = 'dyex')
+```
+
+Note: Calculating standard errors for nonlinear functions of multiple parameters ($\hat{\beta}, \bar{x}, \bar{y}$) is a little tricky, and I won't address it. If you're interested a couple of methods include the delta method (which is more theoretically-grounded and used by `marginaleffects`) and the bootstrap. 
+
+\newpage
+## Interpreting Effects for Transformed Variables
+
+Choice of functional form should be guided by theory as well as the data. 
+
+### Logs 
+
+1. Log-linear form: $ln(y) = \beta_0 + \beta_1x_1 + controls + u$
+  
+$$\beta_1 = \frac{\delta ln(y)}{\delta x_1} = \frac{\delta y/y}{\delta x_1} = \frac{\%\Delta y}{\Delta x_1}$$
+  
+2. Linear-log form: $y = \beta_0 + \beta_1ln(x_1) + controls + u$
+  
+$$\beta_1 = \frac{\delta y}{\delta ln(x_1)} = \frac{\delta y}{\delta x_1/x_1} = \frac{\Delta y}{\%\Delta x_1}$$
+
+3. Double-log form: $ln(y) = \beta_0 + \beta_1ln(x_1) + controls + u$
+  
+$$\beta_1 = \frac{\delta ln(y)}{\delta ln(x_1)} = \frac{\delta y/y}{\delta x_1/x_1} = \frac{\%\Delta y}{\%\Delta x_1} = E_{yx}$$
+  
+### Family Income and Birthweight 
+
+Estimate the birth weight model using: 
+1. The log of *birthweight* and levels of the explanatory variables (`bwght.lm7`)
+2. The log of *family income* and levels of birthweight and other variables (`bwght.lm8`) 
+3. The logs of birthweight *and* family income (`bwght.lm9`) 
+
+Output the results using a text `stargazer` table.
+
+```{r log-solution}
+bwght.lm7 <- lm(log(bwght) ~ cigs + faminc, data = bwght)
+bwght.lm8 <- lm(bwght ~ cigs + log(faminc), data = bwght)
+bwght.lm9 <- lm(log(bwght) ~ cigs + log(faminc), data = bwght)
+stargazer(bwght.lm7, bwght.lm8, bwght.lm9, type = 'text')
+```
+
+### Quadratics
+
+The coefficients themselves do not reveal the effect of $x_j$ on $y$ because that effect depends on the value of $x_j$. Some calculus shows that 
+
+$$\frac{\delta{y}}{\delta{x_j}} = \beta_1 + 2\beta_2x_1$$
+
+This also means that there is a value of $x$ that maximizes or minimizes the predicted value of $y$. 
+  
+Choice of functional form should be guided by theory as well as the data. 
+  
+\newpage
+## Family Income and Birthweight
+
+Estimate the birth weight model using a quadratic of family income (`bwght.lmX`) and summarize the results with `summary()`. 
+Calculate the effect of a \$1,000/year increase in family income for a family with a median income level (the units for `faminc` are in \$1,000/year). 
+
+```{r log-quadratic-solution}
+bwght.lmX <- lm(bwghtlbs ~ cigs + faminc + I(faminc^2), data = bwght)
+summary(bwght.lmX)
+```

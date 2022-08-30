@@ -1,0 +1,12 @@
+---
+title: "Appendix C \n\n Fundamentals of Mathematical Statistics"
+author: "Jim Bang"
+output: pdf_document
+classoption: landscape
+---
+
+```{r setup, include=FALSE}
+```
+
+## Exercise
+

@@ -1,0 +1,18 @@
+---
+title: "Chapter 3-2 Practice"
+author: "Jim Bang"
+output: pdf_document
+classoption: landscape
+---
+
+```{r setup, include=FALSE}
+library(wooldridge)
+gpa1 <- wooldridge::gpa1
+k401k <- wooldridge::k401k
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Exercise
+
+Using the matrix formula for calculating the coefficients and their variance matrix, estimate the regression coefficients and their standard errors for the regression of college GPA on high school GPA ($hsGPA$) and ACT score ($ACT$) using the $gpa1$ dataset. 
+

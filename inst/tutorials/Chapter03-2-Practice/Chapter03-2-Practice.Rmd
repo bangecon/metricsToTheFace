@@ -7,6 +7,7 @@ runtime: shiny_prerendered
 ```{r setup, include=FALSE}
 library(learnr)
 library(gradethis)
+library(wooldridge)
 gpa1 <- wooldridge::gpa1
 k401k <- wooldridge::k401k
 gradethis_setup()
@@ -36,19 +37,9 @@ se <- sqrt( diag(Vbetahat) )
 ```
 
 ```{r colGPA-hint}
-n <- nrow(...)
-y <- ...
-X <- cbind(..., ..., ...)
-k <- ncol(...) - ...
 # To transpose a matrix, use the function t(); to calculate the matrix product use %*%; and to invert a matrix use the solve() function.
-bhat <- solve(...%*%... ) %*% ...%*%...
-uhat <- y - X %*% bhat
 # when you calculate sigsqhat define the results as a scalar number using as.numeric().
-sigsqhat <- as.numeric( ... %*% ... / (...) )
-SER <- sqrt(...)
-Vbetahat <- ... * solve( ...%*%... )
 # The variances of the betas are on the diagonal of the variance matrix; the standard errors are their square root. 
-se <- sqrt( ... )
 ```
 
 ```{r colGPA-check}

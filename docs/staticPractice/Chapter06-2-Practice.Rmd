@@ -1,0 +1,25 @@
+---
+title: "Chapter 6-2 Practice"
+author: "Jim Bang"
+output: pdf_document
+classoption: landscape
+---
+
+```{r setup, include=FALSE}
+library(stargazer)
+hprice1 <- wooldridge::hprice1
+hprice.lm1 <- lm(price ~ lotsize + sqrft + bdrms, data = hprice1)
+hprice.lm2 <- lm(price ~ lotsize + sqrft + bdrms + I(sqrft*bdrms), data = hprice1)
+hprice.lm3 <- lm(price ~ lotsize + sqrft + bdrms + I((sqrft-mean(sqrft))*(bdrms-mean(bdrms))), data = hprice1)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Square Footage, Bedrooms, and Home Prices 
+
+Estimate the following models using the housing price dataset (`hprice1` - note that this is *not* the same dataset as the tutorial!).
+
+1. $Price = \beta_0 + \beta_1Lot\text{ }Size + \beta_2Square\text{ }Feet + \beta_3Bedrooms + u \text{ : (hprice.lm1)}$
+2. $Price = \beta_0 + \beta_1Lot\text{ }Size + \beta_2Square\text{ }Feet + \beta_3Bedrooms + \beta4Square\text{ }Feet \cdot Bedrooms + u \text{ : (hprice.lm2)}$
+3. $Price = \beta_0 + \beta_1Lot\text{ }Size + \beta_2Square\text{ }Feet + \beta_3Bedrooms + \beta4(Square\text{ }Feet - \mu_{Sq.\text{ }Ft.}) \cdot (Bedrooms - \mu_{Bedrooms}) + u \text{ : (hprice.lm3)}$
+
+Present all three sets of estimates in the same **text** table using `stargazer.`

@@ -1,0 +1,35 @@
+---
+title: "Chapter 6-1 Practice"
+author: "Jim Bang"
+output: pdf_document
+classoption: landscape
+---
+
+```{r setup, include=FALSE}
+library(stargazer)
+hprice2 <- wooldridge::hprice2
+hprice.lm1 <- lm(price ~ nox + crime + rooms + dist + stratio, data = hprice2)
+hprice.lm2 <- lm(scale(price) ~ scale(nox) + scale(crime) + scale(rooms) + scale(dist) + scale(stratio), data = hprice2)
+hprice.lm3 <- lm(scale(price) ~ 0 + scale(nox) + scale(crime) + scale(rooms) + scale(dist) + scale(stratio), data = hprice2)
+lnhprice.lm1 <- lm(log(price) ~ log(nox) + log(crime) + rooms + I(rooms^2) + log(dist) + log(stratio), data = hprice2)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Crime and House Prices
+
+### Standardized Coefficients
+
+1. Estimate the following model using the `hprice2` dataset as `hprice.lm1`: 
+$$Price = \beta_0 + \beta_1NO2 + \beta_2Crime + \beta_3Rooms + \beta4Employer\text{ }Distance + \beta_5Student\text{-}Teacher\text{ }Ratio + u \text{ : (hprice.lm1)}$$ 
+2. Reestimate the same model *with and without a constant* using the `scale` function in your formula argument to estimate the standardized coefficients (`hprice.lm2` and `hprice.lm3`). 
+
+### Elasticities
+
+3. Calculate the elasticities for the model estimated in (1) as `hprice.eyex1`.
+4. Present the estimates in the same text table using `stargazer.`
+
+### Log Transofrmation
+
+1. Estimate the following model using `hprice2`.
+$$ln(Price) = \beta_0 + \beta_1ln(NO2) + \beta_2ln(Crime) + \beta_3Rooms + \beta_4Rooms^2 + \beta5Employer\text{ }Distance + \beta_5Student\text{-}Teacher\text{ }Ratio + u \text{ : (lnhprice.lm1)}$$ 
+2. Summarize this estimation using the $summary()$ function. 

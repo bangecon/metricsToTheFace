@@ -1,18 +1,39 @@
 ---
-output: slidy_presentation
+output: 
+  learnr::tutorial:
+    progressive: true
 runtime: shiny_prerendered
-title: "Chapter 6 \n\n Multiple Regression Analysis - Further Issues"
-author: "James Bang"
-description: >
-  This tutorial discusses interactions and other issues of model specification.
+title: "Chapter 6 Multiple Regression Analysis - Further Issues"
+author: "Jim Bang"
+description: "This tutorial discusses interactions and other issues of model specification."
 ---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+<script language="JavaScript">
+$(function() {
+   var editor;
+   $('.ace_editor').each(function( index ) {
+     editor = ace.edit(this);
+     editor.setFontSize("16px");
+   });
+})
+</script>
 
 ```{r setup, include=FALSE}
 library(learnr)
 library(gradethis)
 library(wooldridge)
+library(stargazer)
 library(tidyverse)
 library(gganimate)
+library(gifski)
 library(ggthemes)
 attend <- wooldridge::attend
 attend.lm1 <- lm(stndfnl ~ atndrte + priGPA + ACT + I(priGPA^2) + I(ACT^2), data = attend)
@@ -22,46 +43,54 @@ gradethis::gradethis_setup()
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## Interactions between Continous Variables
+## Interactions between Variables
+
+### Interactions between Continous Variables
 
 Suppose we want to estimate the following model of (standardized) final exam scores: 
 
 $$ Final = \beta_0 + \beta_1Attendance + \beta_2PriorGPA + \beta_3ACT + \beta_4PriorGPA^2 + \beta_5ACT^2$$
-Where: 
+where: 
 
-  - $Attendance = \text{percentage of classes the student attended, } atndrte$
-  - $PriorGPA = \text{student's GPA in previous classes, } priGPA$
-  - $ACT = \text{student's ACT score, } ACT$
+$Attendance =$ percentage of classes the student attended, `atndrte`<br>
+$PriorGPA =$ student's GPA in previous classes, `priGPA`<br>
+$ACT =$ student's ACT score, `ACT`<br>
 
-Now, suppose we suspect that the effect of attendance might itself depend on - or, be *moderated by* - prior GPA: Attendance might not matter that much for students who do perform well generally. Then, 
+We may suspect that the *effect* of attendance depends on, or is *moderated by*, prior GPA: Attendance might not matter as much for students who do perform well generally. Then, 
 
 $$ Final = \beta_0 + \beta_1Attendance + \beta_2PriorGPA + \beta_3ACT + \beta_4PriorGPA^2 + \beta_5ACT^2 + \beta_6PriorGPA \cdot Attendance + u $$
-  - Interpretation of $\hat\beta_1$: The effect of attendance on final performance *when prior GPA equals zero*. 
-  - What we (probably) want to know: The effect of attendance on final performance *at the mean* (of prior GPA and other variables): $\frac{\delta{Final}}{\delta{Attendance}}\Big\rvert_{PriorGPA = \bar{x}_{PriorGPA}} = \beta_1 + \beta_6 \cdot \bar{x}_{PriorGPA}$ 
-  
-## Implementation
+$\hat\beta_1 =$ effect of attendance on final performance *when prior GPA equals zero*. 
 
-  - Execute the two regressions from the previous slide using the "attend" dataset that is pre-loaded with this tutorial. 
-  - Name them $attend.lm1$ and $attend.lm2$, and summarize them using a stargazer text table. 
-  - Calculate $\frac{\delta{Final}}{\delta{Attendance}}\Big\rvert_{PriorGPA = \bar{x}_{PriorGPA}}$ for each model without storing the results.
+What we (probably) want to know: The effect of attendance on final performance *at the mean* (of prior GPA and other variables): $\frac{\delta{Final}}{\delta{Attendance}}\Big\rvert_{PriorGPA = \bar{x}_{PriorGPA}} = \beta_1 + \beta_6 \cdot \bar{x}_{PriorGPA}$ 
+  
+### Interactions in `R`
+
+1. Estimate the above regressions using the (pre-loaded) `attend` dataset (`attend.lm1` and `attend.lm2`). 
+2. Summarize the results in a `stargazer` text table. 
+3. Calculate $\frac{\delta{Final}}{\delta{Attendance}}\Big\rvert_{PriorGPA = \bar{x}_{PriorGPA}}$ for each model.
 
 ```{r attend, exercise = TRUE}
 
 
 ```
 
-```{r attend-hint}
-attend.lm1 <- lm(..., data = ...)
+```{r attend-hint1}
 # Using the "*" operator on two variables in the formula gives the linear components as well as the interaction. 
-attend.lm2 <- lm(..., data = ...)
-attend.lm1$...['...']
+
+```
+
+```{r attend-hint2}
+# One thing R doesn't read well inside the lm command formula argument is exponents ("^"). In order for R to read these properly, you need to use "I(x^2)" instead of just "x^2".
+```
+
+```{r attend-hint3}
 # Always use the relevant sample for the estimation to calculate marginal effects in case the model had to omit observations due to missing data. Calculate the mean based on attend.lm2$model$variable. 
-attend.lm2$...['...'] + attend.lm2$...['...'] * mean(...)
+
 ```
 
 ```{r attend-solution}
 attend.lm1 <- lm(stndfnl ~ atndrte + priGPA + ACT + I(priGPA^2) + I(ACT^2), data = attend)
-attend.lm2 <- lm(stndfnl ~ atndrte + priGPA + ACT + I(priGPA^2) + I(ACT^2) + I(atndrte*priGPA), data = attend)
+attend.lm2 <- lm(stndfnl ~ atndrte*priGPA + ACT + I(priGPA^2) + I(ACT^2), data = attend)
 attend.lm1$coefficients['atndrte']
 attend.lm2$coefficients['atndrte'] + attend.lm2$coefficients['atndrte:priGPA'] * mean(attend.lm1$model$priGPA)
 ```
@@ -70,12 +99,12 @@ attend.lm2$coefficients['atndrte'] + attend.lm2$coefficients['atndrte:priGPA'] *
 grade_code()
 ```
 
-## Centering Continous Interactions
+### Centering Continous Interactions
 
 A trick to make things less cumbersome is to *center* the variables in the interaction. This estimates: 
 $$ Final = \beta_0 + \beta_1Attendance + \beta_2PriorGPA + \beta_3ACT + \beta_4PriorGPA^2 + \beta_5ACT^2 + \beta_6(PriorGPA - \mu_{PriorGPA}) \cdot (Attendance - \mu_{Attendance}) + u $$
 
-Try this using the $scale()$ function (set the option $scale = FALSE$ to preserve the units of measurement). Call this $attend.lm3$.
+Re-estimate `attend.lm2` using the `scale()` function with `scale = FALSE` and call it `attend.lm3`.
 
 Summarize all three $attend$ models using the stargazer command. 
 
@@ -85,15 +114,13 @@ Summarize all three $attend$ models using the stargazer command.
 ```
 
 ```{r attend-scale-hint}
-# To only get the interaction term (not the linear components of the variables as well) we can use the "I()" operator.
-attend.lm3 <- lm(..., data = attend)
-stargazer(attend.lm1, attend.lm2, typeattend.lm3, type = 'text')
+# Interacting variables within the scale() function is also tricky. You have to use the I() function again, and you have to add the linear variables  separately.
 
 ```
 
 ```{r attend-scale-solution}
 attend.lm3 <- lm(stndfnl ~ atndrte + priGPA + ACT + I(priGPA^2) + I(ACT^2) + I(scale(atndrte, scale = FALSE)*scale(priGPA, scale = FALSE)), data = attend)
-stargazer(attend.lm1, attend.lm2, typeattend.lm3, type = 'text')
+stargazer(attend.lm1, attend.lm2, attend.lm3, type = 'text')
 ```
 
 ```{r attend-scale-check}
@@ -102,15 +129,47 @@ grade_code()
 
 ## Comparing Specifications
 
-Adjusted $R^2$
+### Adjusted $R^2$
 
-  - $\bar{R}^2 = 1 - \Big[\frac{SSR/(n-k-1)}{SST/(n-1)}\Big] = 1 - \Big[\frac{\hat\sigma^2}{SST/(n-1)}\Big]$
-  - Useful for comparing nonnested models, e.g. switching one control for another, and alternate forms of the dependent variable. 
+$$\bar{R}^2 = 1 - \frac{SSR/(n-k-1)}{SST/(n-1)} = 1 - \frac{\hat\sigma_u^2}{\hat\sigma_y^2}$$
 
-## Controlling for Colliders
+Useful for comparing nonnested models, e.g. switching one control for another, and alternate forms of the dependent variable. 
 
-  - Be careful adding controls! If you add a control that either *causes* or is *caused by* your treatment (and not just correlated with it), and that variable also causes the outcome, you may mask the effect of your treatment. 
-  - Controlling for a variable that causes your treatment introduces *collider bias*. 
+### Information Criteria for Nested Models
+
+Choose the *Lowest*-Valued Specification
+
+Akaike Information Criteria (Normal Error Distribution): <br>
+  $-2\frac{\ell}{n} + 2\frac{k}{n} = C + ln(\frac{\sum_{i=1}^n{u_i^2}}{n}) + 2\frac{k}{n}$
+
+Bayes/Schwartz Information Criteria (Normal Error Distribution): <br>
+  $-2\frac{\ell}{n} + ln(n)\frac{k}{n} = C + ln(\frac{\sum_{i=1}^n{u_i^2}}{n}) + ln(n)\frac{k}{n}$
+
+## Inappropriate Controls 
+
+Adding a control that directly causes $y$ and is *uncorrelated* with $x$ generally helps by reducing $\hat\sigma_u^2$.
+
+Adding a control that directly causes $y$ and is *correlated* with $x$ is tricky: 
+1. Adding the control helps by reducing omitted-variable bias; 
+2. Adding the control hurts by increasing the variance. 
+
+Things get even trickier when the control only *indirectly* causes $y$ through $x$ (collider bias), or when $x$ inflences the control on the way to causing the outcome (post-treatment effect bias). 
+
+Be careful adding controls! 
+
+### Overfitting
+
+Controlling for too many things risks overfitting the sample (and threatens exteernal validity). 
+
+1. Forward/Backward Stepwise Regression
+2. Ridge Regression
+3. Least-Angle Regression (LARS)
+4. Least Absolute Shrinkage & Selection Operator (LASSO)
+5. Validation Sample/Cross-Validation
+
+### Colliders
+
+Controlling for a variable that *causes* your treatment introduces *collider bias*. 
 
 ```{r, echo = FALSE}
 df <- data.frame(X = rnorm(200)+1,Y=rnorm(200)+1,time="1") %>%
@@ -149,9 +208,9 @@ p <- ggplot(dffull,aes(y=Y,x=X,color=as.factor(C)))+geom_point()+
 animate(p,nframes=200)
 ```
 
-## Controlling for Post-Treatment Effects
+### Post-Treatment Effects
 
-  - Controlling for a variable that is caused by your treatment introduces post-treatment effect bias. 
+Controlling for a variable that is *caused by* the treatment and subsequently causes the outcome introduces post-treatment effect bias. 
 
 ```{r, echo = FALSE}
 df <- data.frame(X = rnorm(200)+1,Y=rnorm(200)+1,time="1") %>%

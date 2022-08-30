@@ -1,0 +1,68 @@
+---
+output: slidy_presentation
+runtime: shiny_prerendered
+title: "Chapter 15 \n\n Alternatives to Instrumental Variables"
+author: "James Bang"
+description: >
+  This tutorial introduces matching and balancing methods. 
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(haven)
+library(stargazer)
+library(MatchIt)
+library(cem)
+library(estimatr)
+library(gtsummary)
+
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Simple Mean Comparison
+
+Question: Were first-class passengers more likely to survive on the Titanic? 
+
+```{r simpleMeans, echo = TRUE}
+titanic <- read_dta("https://raw.github.com/scunning1975/mixtape/master/titanic.dta") 
+titanic$FirstClass <- (titanic$class == 1)
+titanic$age <- (titanic$age == 1)
+titanic$sex <- (titanic$sex == 0)
+titanic$survived <- (titanic$survived == 1)
+colnames(titanic) <- c("Class", "Adult", "Female", "Survived", "FirstClass")
+add_p(tbl_summary(titanic[,2:5], by = FirstClass))
+```
+
+## Controlled Least-Squares Comparison
+
+Using OLS and controlling for age (adult versus child) and gender tells a slightly different story: 
+
+```{r controlledOLS, echo = TRUE, results = 'asis'}
+titanic.lm <- lm(Survived ~ FirstClass + Adult + Female, data = titanic)
+stargazer(titanic.lm, type = 'html')
+```
+
+## Matching: A Brief Overview of Methods
+
+1. Propensity Scores
+2. Distance Matching
+    - Euclidian Distance
+    - Mahalanobis Distance
+3. Exact Matching
+4. Coarsened Exact Matching
+
+Most matching mixes a combination of these. 
+
+Sometimes, we even use a controlled regression *after* matching on some of the observables.
+
+## Matched Mean Comparison
+
+Matching (exactly) according to age (adult versus child) and gender tells an even more different story: 
+
+```{r matchedMeans, echo = TRUE}
+classMatch <- matchit(FirstClass ~ Adult + Female, data = titanic, method = 'nearest')
+titanic.matchit  <- match.data(classMatch)
+add_p(tbl_summary(titanic.matchit[,2:5], by = FirstClass))
+```
+

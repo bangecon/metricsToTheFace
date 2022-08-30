@@ -1,0 +1,104 @@
+---
+output: slidy_presentation
+runtime: shiny_prerendered
+title: "Chapter 13 \n\n Pooled Cross Sections and \n\n Difference-in-Differences Estimation"
+author: "James Bang"
+description: > 
+  This tutorial provides practice excercies on simple panel data methods.
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(wooldridge)
+library(plm)
+library(gtsummary)
+library(stargazer)
+library(gradethis)
+gradethis_setup()
+traffic1 <- wooldridge::traffic1
+traffic1.long <- reshape(traffic1[,1:9], varying = c('admn90', 'admn85', 'open90', 'open85', 'dthrte90', 'dthrte85', 'speed90', 'speed85'), timevar = 'year', idvar = 'state', direction = 'long', sep = '')
+traffic1.long$time <- traffic1.long$year/5
+traffic1.lm1 <- lm(dthrte ~ open + admn + factor(year) + factor(state), data = traffic1.long)
+traffic1.pdata <- pdata.frame(traffic1.long, index = c('state', 'time'))
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Two-Period Panal Data Analysis Using First Differences
+
+Create a panel from the state id, administrative per se law dummy, open-container law dummy, and year id variables in the traffic1 data, and name it traffic1.pdata
+  1. Use $reshape$ to convert the $admn$, $open$, $speed$, and $dthrte$ variables (rows 1 through 9, including the state id variable) from wide (separate columns for 1985 and 1990) to long (stacked rows) format ($traffic1.long$). 
+  2. Use $pdata.frame$ to convert the structure from pooled cross sections to panel format ($i = state$, $t = year$: $traffic1.pdata$).
+
+```{r reshape, exercise = TRUE}
+
+```
+
+```{r reshape-hint}
+traffic1.long <- reshape(data[rows, columns], varying = variable.names, timevar = newname, idvar = oldname, direction, sep)
+traffic1.pdata <- pdata.frame(traffic1.pdata, index = c('state', 'year'))
+```
+
+```{r reshape-solution, exercise.reveal_solution = FALSE}
+traffic1.long <- reshape(traffic1[,1:9], varying = c('admn90', 'admn85', 'open90', 'open85', 'dthrte90', 'dthrte85', 'speed90', 'speed85'), timevar = 'year', idvar = 'state', direction = 'long', sep = '')
+traffic1.long$time <- traffic1.long$year/5
+traffic1.pdata <- pdata.frame(traffic1.long, index = c('state', 'time'))
+```
+
+```{r reshape-check}
+grade_code()
+```
+
+Estimate the following: 
+
+  1. $DeathRate_{it} = \beta_0 + \beta_1OpenContainerLaw_{it} + \beta_2Administrative_{it} + \delta_t + a_i + u_{it}$ using the $lm$ function ($death.lm1$).
+  2. $\Delta DeathRate_{it} = \beta_0 + \beta_1\Delta beta_1OpenContainerLaw_{it} + \beta_2Administrative_{it} + \Delta u_{it}$ using the $lm$ function ($death.lm2$).
+  3. $CrimeRate_{it} = \beta_0 + \beta_1OpenContainerLaw_{it} + \beta_2Administrative_{it} + u_{it}$ using the first-differences ($'fd'$) model option of the $plm(formula, pdata, model)$ function ($death.plm1$).
+  
+Summarize all three models in text format using the $stargazer$ function. Omit the year and id dummy variables from the first specification. 
+
+```{r death, exercise = TRUE}
+
+```
+
+```{r death-hint}
+
+```
+
+```{r death-solution, exercise.reveal_solution = FALSE}
+death.lm1 <- lm(dthrte ~ open + admn + factor(year) + factor(state), data = traffic1.long)
+traffic1.pdata$ddthrte <- diff(traffic1.pdata$dthrte)
+traffic1.pdata$dadmn <- diff(traffic1.pdata$admn)
+traffic1.pdata$dopen <- diff(traffic1.pdata$open)
+death.lm2 <- lm(ddthrte ~ dopen + dadmn, data = traffic1.pdata)
+death.plm1 <- plm(dthrte ~ open + admn, data = traffic1.pdata, model = 'fd')
+stargazer(death.lm1, death.lm2, death.plm1, type = 'text', omit = c('year', 'state'))
+```
+
+```{r death-check}
+grade_code()
+```
+
+## Differencing More than Two Time Periods
+
+Estimate the following specification using the $mathpnl$ dataset: 
+
+$$MathPassRate_{it} = \beta_0 + \beta_1ln(RealExpPerStudent_{it}) + \beta_2ln(Enrollment_{it}) + \beta_3LunchRate_{it} + \delta_t + \alpha_i + u_{it}$$
+Then, create a $pdata.frame$ object ($mathpnl.pdata$) to estimate the analogous model using first differences and compare the results using a stargazer text table. 
+
+```{r math, exercise = TRUE}
+
+```
+
+```{r math-hint}
+```
+
+```{r math-solution, exercise.reveal_solution = FALSE}
+math.lm1 <- lm(math4 ~ log(rexpp) + log(enrol) + lunch + factor(year) + factor(distid), data = mathpnl)
+mathpnl.pdata <- pdata.frame(mathpnl, index = c('distid', 'year'))
+math.plm1 <- plm(math4 ~ log(rexpp) + log(enrol) + lunch, data = mathpnl, model = 'fd')
+stargazer(math.lm1, math.plm1, type = 'text', omit = c('year', 'distid'))
+```
+
+```{r fd-check}
+grade_code("These aren't necessarily the same with T > 2!")
+```

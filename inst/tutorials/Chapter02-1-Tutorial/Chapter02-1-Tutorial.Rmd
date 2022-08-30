@@ -1,14 +1,20 @@
 ---
-output: slidy_presentation
-runtime: shiny_prerendered
-title: "Chapter 2 \n\n The Simple Regression Model"
+title: "Chapter 2 "
+subtitle: "The Simple Regression Model"
 author: "James Bang"
+date: "`r Sys.Date()`"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
 description: >
   This tutorial introduces the basic concepts of linear regression with one variable.
 ---
 
 ```{r setup, include=FALSE}
 library(learnr)
+library(shiny)
+library(tidyverse)
 library(gradethis)
 library(wooldridge)
 wage1 <- wooldridge::wage1
@@ -18,34 +24,330 @@ gradethis::gradethis_setup()
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 12pt}
+</style>
+
+<script language="JavaScript">
+$(function() {
+   var editor;
+   $('.ace_editor').each(function( index ) {
+     editor = ace.edit(this);
+     editor.setFontSize("16px");
+   });
+})
+</script>
+
+## Ocular Estimation
+
+```{r, echo=FALSE}
+sidebarPanel(
+  em("Guess the intercept and slope the best fit line"),
+  br(),
+  numericInput(
+    "intercept",
+    "Intercept:",
+    min = -Inf,
+    max = Inf,
+    value = 30
+  ),
+  numericInput(
+    "slope",
+    "Slope:",
+    min = -Inf,
+    max = Inf,
+    value = 1.5
+  ),
+  br(),
+  actionButton("button_go", "Go!"),
+  br(),
+  strong(textOutput("guess")),
+  em(textOutput("intercept_guess")),
+  em(textOutput("slope_guess")),
+  em(textOutput("MSE_guess")),
+  br(),
+  actionButton("button_show", "Show me the answer"),
+  br(),
+  strong(textOutput("ols")),
+  em(textOutput("intercept_true")),
+  em(textOutput("slope_true")),
+  em(textOutput("MSE_true")),
+  br(),
+  actionButton("button_clear", "Start again"),
+  br(),
+  br(),
+  actionButton("button_refresh", "Fresh data please!")
+)
+mainPanel(plotOutput("fitPlot"))
+```
+
+```{r, context="server"}
+n <- 20
+v <- reactiveValues(
+  p1 = NULL,
+  p2 = NULL,
+  p3 = NULL,
+  p4 = NULL,
+  dat = NULL,
+  MSE_guess = NULL,
+  MSE_true = NULL,
+  guess = NULL,
+  intercept_guess = NULL,
+  slope_guess = NULL,
+  ols = NULL,
+  intercept_true = NULL,
+  slope_true = NULL
+)
+## Create some x values
+x <- runif(n = n, min = 5, max = 95)
+## Create a y variable
+# y = beta_0 + beta_1*x + noise
+# pick a random number for the intercept
+beta_0 <- rnorm(n = 1, mean = 0, sd = 100)
+# pick a random number for the slope
+beta_1 <- rnorm(n = 1, mean = 0, sd = 2)
+# Create some individual-level "noise"
+noise <- rnorm(n = n,
+               mean = 0,
+               sd = 25 * abs(beta_1))
+# Create the y values
+y <- beta_0 + (beta_1 * x) + noise
+dat <- bind_cols(x = x, y = y)
+# Run a linear regression of y on x using lm()
+fit <- lm(y ~ x, data = dat)
+intercept_true <- coef(fit)[1]
+slope_true <- coef(fit)[2]
+# Plot our data and save as an object called "p"
+p <- dat %>%
+  ggplot(aes(x = x,
+             y = y)) +
+  geom_point(size = 4) +
+  labs(x = "",
+       y = "") +
+  xlim(0, 100) +
+  ylim(min(y) - sd(y),
+       max(y) + sd(y)) +
+  theme(text = element_text(size = 20)) +
+  coord_cartesian(expand  = FALSE)
+datx <- dat %>%
+  mutate(y_hat = intercept_true + (slope_true * x),
+         pred_error = y - y_hat)
+MSE_true <- mean(datx$pred_error ^ 2)
+v$p1 <- p
+observeEvent(input$button_go, {
+  dat <- dat %>%
+    mutate(y_hat = input$intercept + (input$slope * x),
+           pred_error = y - y_hat)
+  v$MSE_guess <- mean(dat$pred_error ^ 2)
+  v$p2 <- geom_abline(
+    intercept = input$intercept,
+    slope = input$slope,
+    color = "blue",
+    lwd = 3
+  )
+  v$p3 <- geom_segment(
+    data = dat,
+    aes(
+      x = x,
+      xend = x,
+      y = y,
+      yend = y_hat
+    ),
+    color = "red",
+    lty = "dotted",
+    lwd = 1
+  )
+})
+observeEvent(input$button_clear, {
+  v$p2 <- NULL
+  v$p3 <- NULL
+  v$p4 <- NULL
+  v$MSE_guess <- NULL
+  v$MSE_true <- NULL
+  v$intercept_true <- NULL
+  v$slope_true <- NULL
+  v$intercept_guess <- NULL
+  v$slope_guess <- NULL
+  v$guess <- NULL
+  v$ols <- NULL
+})
+
+observeEvent(input$button_show, {
+  v$MSE_true <- MSE_true
+  
+  v$p4 <- geom_abline(
+    intercept = intercept_true,
+    slope = slope_true,
+    color = "darkgrey",
+    lwd = 3
+  )
+  
+  v$ols <- "OLS coefficients"
+  v$intercept_true <- intercept_true
+  v$slope_true <- slope_true
+})
+observeEvent(input$button_refresh, {
+  session$reload()
+})
+output$fitPlot <- renderPlot({
+  v$p1 + v$p2 + v$p3 + v$p4
+})
+output$guess <- renderText(if (is.null(v$MSE_guess)) {
+}
+else{
+  "Your guess"
+})
+output$intercept_guess <- renderText(if (is.null(v$MSE_guess)) {
+}
+else{
+  paste0(
+    "Intercept: ",
+    prettyNum(
+      input$intercept,
+      big.mark = ",",
+      digits = 3,
+      scientific = FALSE
+    )
+  )
+})
+output$slope_guess <- renderText(if (is.null(v$MSE_guess)) {
+}
+else{
+  paste0("Slope: ",
+         prettyNum(
+           input$slope,
+           big.mark = ",",
+           digits = 3,
+           scientific = FALSE
+         ))
+})
+output$MSE_guess  <- renderText(if (is.null(v$MSE_guess)) {
+}
+else{
+  paste0(
+    "Mean squared error: ",
+    prettyNum(
+      v$MSE_guess,
+      big.mark = ",",
+      digits = 1,
+      scientific = FALSE
+    )
+  )
+})
+output$MSE_true  <- renderText(if (is.null(v$MSE_true)) {
+}
+else{
+  paste0(
+    "Mean squared error: ",
+    prettyNum(
+      v$MSE_true,
+      big.mark = ",",
+      digits = 1,
+      scientific = FALSE
+    )
+  )
+})
+output$ols <- renderText(v$ols)
+output$intercept_true <- renderText(if (is.null(v$intercept_true)) {
+}
+else{
+  paste0(
+    "Intercept: ",
+    prettyNum(
+      v$intercept_true,
+      big.mark = ",",
+      digits = 3,
+      scientific = FALSE
+    )
+  )
+})
+output$slope_true <- renderText(if (is.null(v$slope_true)) {
+}
+else{
+  paste0("Slope: ",
+         prettyNum(
+           v$slope_true,
+           big.mark = ",",
+           digits = 3,
+           scientific = FALSE
+         ))
+})
+```
+
+<style type="text/css">
+body{font-size: 16pt}
+</style>
+
 ## Regression Lines
 
-```{r installRStudio, echo=FALSE}
+```{r bestFit, echo=FALSE}
 question("Which of the following graphs the best-fit regression linefor the following data? ![](images/Ellipse0.png)",
     answer("![](images/Ellipse1.png)", message = random_encouragement()),
-    answer("![](images/Ellipse2.png)", correct = TRUE, message = random_praise()),
-    answer("![](images/Ellipse3.png)", message = random_encouragement()),
+    answer("![](images/Ellipse3.png)", correct = TRUE, message = random_praise()),
+    answer("![](images/Ellipse4.png)", message = random_encouragement()),
     allow_retry = TRUE
   )
 ```
 
-## A Simple Regression: Wages and Education
 
-Regression concepts
+## A Simple Regression
 
-- Population Regression Function: $wage = \beta_0 + \beta_1educ + u$
-  - $\beta_0$ and $\beta_1$ are *parameters* - the true (but unknown) values for the intercept and the slope. 
-  - $u$ is the *error* - the true, random variation of wages that education doesn't capture. 
-- Estimated Regression Line: $wage = \hat{\beta}_0 + \hat{\beta}_1educ + \hat{u}$
-  - $\hat{\beta}_0$ and $\hat{\beta}_1$ are *estimators* - the derived methods for estimating the intercept and the slope (e.g. OLS estimators). 
-  - $\hat{u}$ is the *residual* - the observable deviations from the predicted wage and the actual wage fore each observation. 
-  - If we focus on the predictions, $\hat{wage} = \hat{\beta}_0 + \hat{\beta}_1educ$
-  - $\hat{wage}$ is the predicted wage
+### Regression concepts
 
-## Example
+- Population Regression Function: $Wage = \beta_0 + \beta_1Education + u$<br>
+  $\beta_0$ and $\beta_1$ represent *parameters* - the true (but unknown) values for the intercept and the slope, respectively.<br>
+  $u$ is the *error* - the true, random variation of wages that education doesn't capture.<br>
+  $Wage$ is the *endogenous* variable (or dependent variable/explained variable/predicted variable/response/regressand).<br>
+  $Education$ is assumed to be an *exogenous* variable (or independent variable/explanatory variable/predictor/control/regressor).<br>
+- Estimated Regression Line: $Wage = \hat{\beta}_0 + \hat{\beta}_1Education + \hat{u}$<br>
+  $\hat{\beta}_0$ and $\hat{\beta}_1$ represent *estimators* - the derived methods for estimating the intercept and the slope (e.g. OLS estimators).<br>
+  $\hat{u}$ is the *residual* - the observable deviations from the predicted wage and the actual wage for each observation.<br>
+  If we focus on the predictions, $\hat{wage} = \hat{\beta}_0 + \hat{\beta}_1educ$<br>
+  $\hat{wage}$ is the predicted wage
 
-- Using the wage1 data (pre-loaded with this tutorial), regress wages on education (and an intercept). Name this wage.lm1
-- Summarize the regression object using "summary()"
+### Assumptions
+
+1. Errors have mean equal to zero, $E(u) = 0$.
+2. Errors and $X$ are independent, $E(u|X) = E(u) = 0$. 
+
+$E(u|X) = E(u) = 0 \Rightarrow Cov(u,X) = 0 \Rightarrow E(uX) = 0$
+
+<details style="line-height:105%"><summary>Click here to see the proof that $E(u|X) = 0 \Rightarrow E(ux) = 0$.</summary>
+
+$$Cov(u,X) = E[(u - E(u))(X - E(X))] = =E(uX) - E(u)E(X)$$
+
+Since $E(u) = 0$, showing $Cov(u,X) = 0$ requires showing $E(uX) = 0$.
+
+$$E_{u,X}(uX) = E_X(E_{u|X}(uX|X))$$
+by the Law of Iterated Expectations (in reverse?). 
+
+$$E(E(uX|X)) = \int{f_X(X)\int{uXf_{u|X}(u|X)du}dx} = \int{Xf_X(X)\int{uf_{u|X}(u|X)du}dx} = E_X(XE(u|X))$$
+$$E_X(XE(u|X)) = E(X)E(u) = 0$$
+by the Law of Iterated Expectations (again) and since $E(u) = 0$. 
+
+Note that even if $E(u) \ne 0$, $E(u|X) = 0 \Rightarrow Cov(u,X) = 0$ since $E(uX) = E(u)E(X)$. 
+
+</details>
+
+$$E(y|x) = E(\beta_0 + \beta_1x + u) = \beta_0 + \beta_1 E(x|x) + E(u|x)$$
+
+The zero conditional mean condition guarantees that: 
+
+$$E(y|x) = \beta_0 + \beta_1 x.$$
+
+This also guarantees that: 
+
+$$\Delta E(y|x) = \beta_1 \Delta x.$$
+
+
+## Wages and Education
+
+1. Using the `wage1` data, regress wages on education (and an intercept). Name this `wage.lm1`
+2. Summarize the regression object using `summary()`
 
 ```{r simpleLM, exercise = TRUE}
 
@@ -54,8 +356,6 @@ Regression concepts
 
 ```{r simpleLM-hint}
 # The "lm" function requires two main arguments: function (y ~ x1 + x2...) and data (a data frame) 
-wage.lm1 <- lm(..., ...)
-summary(...)
 ```
 
 ```{r simpleLM-solution}
@@ -67,7 +367,36 @@ summary(wage.lm1)
 grade_code()
 ```
 
-- Duplicate this regression *without an intercept* and name it wage.lm0
+### Regression without an Intercept
+
+Duplicate this regression *without an intercept* and name it wage.lm0
+
+```{r nointerceptLM, exercise = TRUE}
+
+
+```
+
+```{r nointerceptLM-hint}
+# By default lm() includes an intercept, which is essentially a variable defined as a column of ones.
+# To exclude the constant, subtract this column of ones from your formula. 
+```
+
+```{r nointerceptLM-solution}
+wage.lm0 <- lm(wage ~ educ - 1, data = wage1)
+summary(wage.lm0)
+```
+
+```{r nointerceptLM-check}
+grade_code()
+```
+
+### Plotting the Regression Line
+
+Plot the following with base R graphics. 
+
+1. A scatter of the data for wage against education 
+2. The linear fit for the simple regression of wages on education *with* an intercept (dashed)
+3. The linear fit for the simple regression of wages on education *without* an intercept (dotted)
 
 ```{r abline, exercise = TRUE}
 
@@ -75,15 +404,13 @@ grade_code()
 ```
 
 ```{r abline-hint}
-# By default lm() includes an intercept, which is essentially a variable defined as a column of ones.
-# To exclude the constant, subtract this column of ones from your formula. 
-wage.lm1 <- lm(..., ...)
-summary(...)
+# The abline() function lets you add a line with a given slope and intercept, or corresponding to a given regression result, or horizontal/vertical bars. 
 ```
 
 ```{r abline-solution}
-wage.lm0 <- lm(wage ~ educ - 1, data = wage1)
-summary(wage.lm0)
+plot(wage1$educ, wage1$wage)
+abline(wage.lm1)
+abline(wage.lm0)
 ```
 
 ```{r abline-check}
@@ -92,53 +419,40 @@ grade_code()
 
 ## Properties of OLS
 
-- $\sum_{i=1}^{n}{\hat{u}_i = 0}$
-- $\sum_{i=1}^{n}{x_i\hat{u_i} = 0}$
-- The *Total* Sum of Squares, $SST = \sum_{i=1}^n{(y_i-\bar{y})^2}$
-- The *Explained* Sum of Squares, $SSE = \sum_{i=1}^n{(\hat{y}_i-\bar{y})^2}$
-- The *Residual* Sum of Squares, $SSR = \sum_{i=1}^n{(y_i-\hat{y})^2}$
-- SST = SSE + SSR (see section 2.3 for proof)
-- Goodness of Fit, $R^2 = SSE/SST = 1 - SSR/SST$
-- For simple regression it is literally true that $R^2 = r^2$, where r is the simple correlation coefficient between x and y. 
-
-<html>
-<blockquote class="twitter-tweet"><p lang="en" dir="ltr">Analogy I use in my prog eval class:<br>Regress pain on being kicked in the face. You will find a very significant p-value, and a tiny R^2. This is because being kicked in the face really hurts, but few people are kicked in the face, and lots of other things can cause pain.</p>&mdash; Brian Kisida (@BrianKisida) <a href="https://twitter.com/BrianKisida/status/1366863555665006593?ref_src=twsrc%5Etfw">March 2, 2021</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-</html>
-
-## Plotting the Regression Line
-
-Plot the following with base R graphics. 
-
-- A scatter of the data for wage against education (solid) 
-- The linear fit for the simple regression of wages on education *with* an intercept (dashed)
-- The linear fit for the simple regression of wages on education *without* an intercept (dotted)
-
-```{r nointerceptLM, exercise = TRUE}
-
-
-```
-
-```{r nointerceptLM-hint}
-plot(..., ...)
-# The abline() function lets you add a line with a given slope and intercept, or corresponding to a given regression result, or horizontal/vertical bars. 
-abline(wage.lm1)
-abline(wage.lm0)
-```
-
-```{r nointerceptLM-solution}
-plot(wage1$educ, wage1$wage)
-abline(wage.lm1)
-abline(wage.lm0)
-```
-
-```{r nointerceptLM-check}
-grade_code()
-```
+1. $\sum_{i=1}^{n}{\hat{u}_i = 0}$
+2. $\sum_{i=1}^{n}{x_i\hat{u_i} = 0}$
+3. The *Total* Sum of Squares, $SST = \sum_{i=1}^n{(y_i-\bar{y})^2}$
+4. The *Explained* Sum of Squares, $SSE = \sum_{i=1}^n{(\hat{y}_i-\bar{y})^2}$
+5. The *Residual* Sum of Squares, $SSR = \sum_{i=1}^n{(y_i-\hat{y})^2}$
+6. SST = SSE + SSR (see book section 2.3 for proof)
+7. Goodness of Fit, $R^2 = SSE/SST = 1 - SSR/SST$
+8. For simple regression it is literally true that $R^2 = r^2$, where r is the simple correlation coefficient between x and y. 
 
 ## OLS Estimation
 
 How do we find the best estimate for b0 and b1?
 
-- Minimize the sum of the squared errors of the fitted regression:
-	$$\min_\hat{\beta}{\sum_{i=1}^n(wage_i – \hat{\beta}_0 – \hat{\beta}_1educ_i)^2} $$
+### Method of Moments
 
+1. $E(u) = 0 \Rightarrow E(y - \beta_0 - \beta_1x) = 0$
+2. $E(u|X) = 0 \Rightarrow E[x(y - \beta_0 - \beta_1x)] = 0$
+
+By (1), $\beta_0 = E(y) - \beta_1 E(x)$, or in terms of the sample $\hat{\beta_0} = \bar{y} - \hat{\beta_1} \bar{x}$.
+
+By (2), $\frac{1}{n} \sum_{i=1}^n x_i(y_i - \hat{\beta_0} - \hat{\beta_1} x_i) = 0$
+
+Substituting for $\hat{\beta_0}$, we get $\frac{1}{n} \sum_{i=1}^n x_i(y_i - (\bar{y} - \hat{\beta_1} \bar{x}) - \hat{beta_1} x_i) = 0$
+
+Solving for $\hat{\beta_1}$, we have $\hat{\beta_1} = \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^n (x_i - \bar{x})^2}$, or $\frac{Cov(xy)}{Var(x)}$. 
+
+We can further simplify the first formula for $\hat{\beta_1}$ as $\hat{\beta_1} = \frac{\sum_{i=1}^n (x_i - \bar{x})y_i}{\sum_{i=1}^n (x_i - \bar{x})^2}$
+
+### Ordinary Least Squares:
+
+$$\sum_{i=1}^n\hat{u}^2 = \sum_{i=1}^n(y_i – \hat{\beta}_0 – \hat{\beta}_1x_i)^2$$
+
+The first order condition with respect to $\beta_1$ is $\sum_{i=1}^n 2(y_i – \hat{\beta}_0 – \hat{\beta}_1 x_i)x_i = 0$.
+
+Dividing by 2 and rearranging slightly, $\sum_{i=1}^n x_i(y_i – \hat{\beta}_0 – \hat{\beta}_1 x_i) = 0$.
+
+This is identical to the condition for the method of moments estimator above.

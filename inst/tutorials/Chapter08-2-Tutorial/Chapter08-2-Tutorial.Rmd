@@ -1,0 +1,83 @@
+---
+title: "Chapter 8-2: Estimation with Heteroskedasticity"
+author: Jim Bang
+description: "Consequences of heterodkedasticity and testing for heteroskedasticity"
+output: 
+  learnr::tutorial: 
+    progressive: true
+runtime: shiny_prerendered
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+<script language="JavaScript">
+$(function() {
+   var editor;
+   $('.ace_editor').each(function( index ) {
+     editor = ace.edit(this);
+     editor.setFontSize("16px");
+   });
+})
+</script>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+library(lmtest)
+library(sandwich)
+library(car)
+library(stargazer)
+tutorial_options(exercise.timelimit = 60, exercise.reveal_solution = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Robust Standard Errors, Revisited
+
+Recall that $Var(\hat\beta) = (X'X)^{-1}X'X(X'X)^{-1}\sigma_\hat{u}^2$, <br>
+which we can rewrite as $(X'X)^{-1}X'(\sigma_\hat{u}^2I)X(X'X)^{-1}$.
+
+Some people make an analogy for this form to a "sandwich" with an outer "bread" consisting of the invers of the sums of squares and cross-products, $(X'X)^-1$, and "meat" consisting of $X'\hat\sigma_\hat{u}^2IX$.
+
+We can rewrite the "meat" as $\Omega$, and $Var(\hat\beta)$ as $(X'X)^{-1}\Omega(X'X)^{-1}$ Fixes for heteroskedasticity focus on the structure of the "meat."
+
+There are many types of robust, or *heteroskedasticity-consistent* - standard errors. 
+
+### Basic, `HC1`-type, Heteroskdasticity-Robust $Var(\hat\beta)$
+
+
+
+Estimate the log wage equation with (`wage.lm14`) and without (from the book. 
+
+```{r robustHC1, exercise = TRUE}
+
+```
+
+```{r robustHC1-solution}
+wage.lm14 <-
+  lm(
+    log(wage) ~ I(married * (1 - female)) + I(married * female) + 
+      I((1 - married) * female) + educ + exper + I(exper ^ 2) + tenure + 
+      I(tenure ^ 2), data = wage1
+  )
+wage.lm14r <-
+  coeftest(wage.lm14, vcov = vcovHC(wage.lm14, type = "HC1"))
+stargazer(wage.lm14, wage.lm14r, type = 'text', digits = 4)
+```
+
+```{r robustHC1-check}
+grade_code()
+```
+
+### The `sandwich::vcovHC` Default: $HC3$
+
+
+
+## Weighted Least Squares
+
+

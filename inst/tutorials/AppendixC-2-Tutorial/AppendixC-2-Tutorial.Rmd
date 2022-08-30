@@ -1,6 +1,4 @@
 ---
-output: slidy_presentation
-runtime: shiny_prerendered
 title: "Appendix C \n\n Fundamentals of Mathematical Statistics"
 author: "James Bang"
 description: >
@@ -8,7 +6,29 @@ description: >
 editor_options: 
   markdown: 
     wrap: 72
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
 ---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+<script language="JavaScript">
+$(function() {
+   var editor;
+   $('.ace_editor').each(function( index ) {
+     editor = ace.edit(this);
+     editor.setFontSize("16px");
+   });
+})
+</script>
 
 ```{r setup, include=FALSE}
 library(learnr)
@@ -18,79 +38,34 @@ avgy<- mean(audit$y)
 n   <- length(audit$y)
 sdy <- sd(audit$y)
 se  <- sdy/sqrt(n)
-c05   <- abs(qt(.025))
-c01   <- abs(qt(.005))
-gradethis::gradethis_setup()
+c05   <- abs(qt(.025, n-1))
+c01   <- abs(qt(.005, n-1))
+gradethis::gradethis_setup(exercise.reveal_solution = TRUE)
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
 ## Approaches to Parameter Estimation
 
--   Ordinary Least Squares (OLS):
-    $$\min_{\hat{\beta}}{\sum_{i=1}^{n}(Y_i – \beta_0 – \beta_1X_i)^2}$$
+### Ordinary Least Squares (OLS)
 
-    <html>
+$$\min_{\hat{\beta}}{\sum_{i=1}^{n}(Y_i – \beta_0 – \beta_1X_i)^2}$$
 
-    <blockquote class="twitter-tweet">
+### Least/Minimum Absolute Deviations (LAD/MAD)
 
-    <p lang="en" dir="ltr">
+$$\min_{\hat{\beta}}{\sum_{i=1}^{n}|Y_i – \beta_0 – \beta_1X_i|}$$
 
-    It seems like every week, if not more frequently, I learn something
-    new about a basic estimation method -- OLS, 2SLS, and offshoots. My
-    students seem skeptical when I tell them this but it's
-    true.<br><br>This week: centering before creating squares and
-    interactions.<a href="https://twitter.com/hashtag/metricstotheface?src=hash&amp;ref_src=twsrc%5Etfw">\#metricstotheface</a>
+### Maximum likelihood (MLE)
 
-    </p>
+$$\max_{\hat{\beta}}{\prod_{i=1}^{n}f(Y_i – \beta_0 – \beta_1X_i)}$$
 
-    --- Jeffrey Wooldridge (@jmwooldridge)
-    <a href="https://twitter.com/jmwooldridge/status/1385968870415114244?ref_src=twsrc%5Etfw">April
-    24, 2021</a>
+where $f(\cdot)$ is the probability distribution of the errors (e.g. Normal, logistic, Poisson)
 
-    </blockquote>
+### Method of Moments 
 
-    ```{=html}
-    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-    ```
-    </html>
+$$E(Xu) = 0$$
+$$ \sum_{i=1}^n{X_i(Y_i-\beta_0-\beta_1X_i)} = 0 $$ 
 
--   Least Absolute Deviations (LAD):
-    $$\min_{\hat{\beta}}{\sum_{i=1}^{n}|Y_i – \beta_0 – \beta_1X_i|}$$
-
--   Maximum likelihood (MLE):
-    $$\max_{\hat{\beta}}{\prod_{i=1}^{n}f(Y_i – \beta_0 – \beta_1X_i)}$$
-    where $f(\cdot)$ is the probability distribution of the errors (e.g.
-    Normal, logistic, Poisson)
-
--   Method of Moments $$E(Xu) = 0$$
-    $$ \sum_{i=1}^n{X_i(Y_i-\beta_0-\beta_1X_i)} = 0 $$ If the
-    assumptions of the Classical Regression Model hold, all four of
-    these methods are equivalent.
-
-    <html>
-
-    <blockquote class="twitter-tweet">
-
-    <p lang="en" dir="ltr">
-
-    Is there a word more confounding in econometrics than "generalized"?
-    For starters,<br><br>generalized least squares<br>generalized method
-    of moments<br>generalized instrumental variables<br>generalized
-    linear models<br>generalized estimating
-    equations<a href="https://twitter.com/hashtag/metricstotheface?src=hash&amp;ref_src=twsrc%5Etfw">\#metricstotheface</a>
-
-    </p>
-
-    --- Jeffrey Wooldridge (@jmwooldridge)
-    <a href="https://twitter.com/jmwooldridge/status/1387386684061405185?ref_src=twsrc%5Etfw">April
-    28, 2021</a>
-
-    </blockquote>
-
-    ```{=html}
-    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-    ```
-    </html>
+If the assumptions of the Classical Regression Model hold, all four of these methods are equivalent.
 
 ## Interval Estimation
 
@@ -100,41 +75,31 @@ Since the sampling distribution of $\bar{x}$ is normal and the sampling
 distribution of $s_{\bar{x}}^2$ is $\chi^2$, this involves inverting the
 t-distribution (normal divided by the square root of $\chi^2$).
 
-## Example
+### Example
 
 Using the $audit$ data from the $wooldridge$, calculate the 95% confidence interval *by hand* by calculating the following (and naming them): 
 
-- the mean of $y$ (call it $avgy$);
-- the number of observations in ($length()$ of) $y$ ($n$);
-- the standard deviation of $y$ ($sdy$)
-- the standard error of $\bar{y}$ ($sdy$)
-- the two-sided critical value for $\alpha = 0.05$ ($c05$) 
-- the 95% confidence-interval bounds as a vector (lower bound, upper bound)
+1. the mean of `y` (call it `avgy`);
+2. the number of observations in (`length()` of) `y` (`n`);
+3. the standard deviation of `y` (`sdy`)
+4. the standard error of $\bar{y}$ (`sdy`)
+5. the two-sided critical value for $\alpha = 0.05$ (`c05`) 
+6. the 95% confidence-interval bounds as a vector (lower bound, upper bound)
 
 ```{r intervalEst, exercise = TRUE}
+# Ingredients to CI formula: avgy, n, sdy, se, c05
 
 
-```
-
-```{r intervalEst-hint}
-# Ingredients to CI formula
-avgy<- mean(...)
-n   <- length(...)
-sdy <- sd(...)
-se  <- .../...
-c05   <- abs(qt(0.025))
 # 95% Confidence interval:
-avgy + c * c(-se,+se)
+
 ```
 
 ```{r intervalEst-solution}
-# Ingredients to CI formula
 avgy<- mean(audit$y)
 n   <- length(audit$y)
 sdy <- sd(audit$y)
 se  <- sdy/sqrt(n)
 c05   <- abs(qt(.025))
-# 95% Confidence interval:
 avgy + c05 * c(-se,+se)
 ```
 
@@ -144,33 +109,23 @@ grade_code()
 
 ## Hypothesis Testing
 
-1.  State the Null & Alternative Hypotheses
+1. State the Null & Alternative Hypotheses
+2. Determine the Significance Level ($\alpha$)
+3. Calculate the parameters and the test statistic
+4. Calculate the critical value or p-value
+5. Make a Rejection Decision
 
-2.  Determine the Significance Level ($\alpha$)
-
-3.  Calculate the parameters and the test statistic
-
-4.  Calculate the critical value or p-value
-
-5.  Make a Rejection Decision
-
-## Example
+### Example
 
 Calculate the test statistic, absolute critical value for $\alpha = 0.01$, and p-value to test the null hypothesis of $H_0: \mu_y = 0$ against the two-sided alternative of $H_1: \mu_y \ne 0$. Call these t, c01, and p, and print them as a vector.
 
 ```{r tTest, exercise = TRUE}
-
-
-```
-
-```{r tTest-hint}
 # t statistic for H0: mu=0
-t <- .../...
+
 # critical value for alpha = 0.05
-c01 <- abs(pt(..., ...))
+
 # p value
-p <- pt(...,...)
-c(..., ..., ...)
+
 ```
 
 ```{r tTest-solution}
@@ -184,27 +139,20 @@ c(t, c01, p)
 grade_code()
 ```
 
-## Shortcut using $t.test()$
+### Shortcut using $t.test()$
 
-Replicate the confidence interval and t-test from the previous examples using the $t.test()$ command. Don't forget that the second example used a different $\alpha$ than the first one. 
+Replicate the confidence interval and t-test from the previous examples using the `t.test()` command. Don't forget that the second example used a different $\alpha$ than the first one. 
 
-```{r t.test, exercise = TRUE}
+```{r t-test, exercise = TRUE}
 
 
 ```
 
-```{r t.test-hint}
-t.test(...)
-t.test(..., conf.level = ...)
-```
-
-```{r t.test-solution}
+```{r t-test-solution}
 t.test(audit$y)
 t.test(audit$y, conf.level = 0.99)
 ```
 
-```{r t.test-check}
+```{r t-test-check}
 grade_code()
 ```
-
-

@@ -1,6 +1,8 @@
 ---
 title: "Chapter 1-1 Practice"
-output: learnr::tutorial
+output: 
+  learnr::tutorial:
+    progressive: true
 runtime: shiny_prerendered
 ---
 
@@ -42,31 +44,61 @@ grade_result(
   pass_if(~identical(.result, 42))) 
 ```
 
-## Using Objects
+### Using Objects
 
-Do the following: 
+R is an object-oriented language. The "assignment" operator, "<-" (keyboard shortcut: "Alt" + "-") computes the operation to the right and gives it name in your *environment* (see top-right pane in RStudio). Name the calculations from the previous exercise as indicated below.
 
-- Assign a value of five to a numerical object x
-- Display x and it's squared value
-- Assign a value of 3 to the object y and a value of $y^x$ to the object z using these objects.
+- $21 + 21$: answer
+- $5(4-1)^2-3$: life
+- $\sqrt{1764}$: universe
+- $ln(e^{42})$: everything
 
-```{r objects, exercise=TRUE, exercise.eval=TRUE}
+Display the objects in your environment using the `ls()` function. 
+
+```{r objects, exercise=TRUE}
 
 ```
 
 ```{r objects-solution}
-x <- 5
-x
-x^2
-y <- 3
-z <- y^x
+answer <- 21+21
+life <- 5*(4-1)^2-3
+universe <- sqrt(1764)
+everything <- log(exp(42))
+ls()
 ```
 
-```{r objects-code-check}
+```{r objects-check}
 grade_code() 
 ```
 
-## Vectors and Matrices
+Note that in some cases you can use the "equal to" operator, "=", but only if the thing you're operating and the name of the object you're assigning are unambiguous. The direction of the "<-" operator points *from* the operation you mean for R to calculate and *to* the name you want to give to it. In fact, you may reverse the direction to assign from left to right, as in `21 + 21 -> answer`. 
+
+### Defining and Evaluating Functions
+
+If you can define an object you can write (and evaluate) your own function! A function can be a simple mathematical function, or it can be a long script that outputs several different values. Define the function, `quadratic`, as a function of *variable* `x` and *parameters* `a`, `b`, and `c` as 
+$$f(x) = ax^2 + bx + c.$$ 
+Then, evaluate $f(x) = 8x^2 - 6x - 12$ at $x = 3$
+
+```{r functions, exercise=TRUE}
+
+```
+
+```{r functions-solution}
+quadratic <- function(x, a, b, c) {
+  a*x^2 + b*x + c
+}
+quadratic(3, 8, -6, -12)
+```
+
+```{r functions-check}
+grade_code() 
+```
+
+For the purposes of getting computational solutions, there is not really a difference between a parameter and a variable. Economically, we consider parameters (a, b, c, and d) to be *exogenous* - determined by nature (like preference parameters) or markets (like prices or income) - whereas we consider variables (x) to be *endogenous* - chosen by households (like quantities consumed) or firms (like amounts of a resource hired). 
+
+## Vectors, Matrices, and Data Frames
+
+### Vectors
 
 Do the following: 
 
@@ -86,13 +118,15 @@ b <- a+1
 c <- a+b
 d <- b+c
 sqrt(d)
-A <- matrix(a, ncol = 2)
-
 ```
 
 ```{r Vectors-code-check}
 grade_code() 
 ```
+
+### Matrices
+
+Do the following: 
 
 - Create a matrix, A that splits the values of a across two columns;
 - Create a matrix, B that duplicates the columns of A twice. 
@@ -112,9 +146,10 @@ b <- B[, 3]
 grade_code() 
 ```
 
-## Loading and importing data frames
+### Data Frames
 
-Load the RData file, "BeerData" into your workspace, then import the CSV file by the same name as an object named "BeerDataCSV"
+1. *Load* "BeerData.RData" from "https://github.com/bangecon/metricsToTheFace/tree/master/inst/tutorials/Chapter01-1-Practice/BeerData.RData" into your workspace. 
+2. *Read* "BeerData.csv" from "https://github.com/bangecon/metricsToTheFace/tree/master/inst/tutorials/Chapter01-1-Practice/BeerData.csv" as an object named "BeerDataCSV".
 
 ```{r Import, exercise=TRUE, exercise.eval=TRUE}
 
@@ -129,24 +164,7 @@ BeerDataCSV <- read.csv("https://github.com/bangecon/metricsToTheFace/tree/maste
 grade_code() 
 ```
 
-## Saving your work
-
-When you are finished it is *crucial* that you save your work. Save the object, BeerDataCSV as its own RData file named "BeerDataCSV.RData," then save your entire workspace as "BeerData.RData."
-
-```{r Save, exercise=TRUE, exercise.eval=TRUE}
-
-```
-
-```{r Save-solution}
-save(BeerDataCSV, file = "BeerDataCSV.RData")
-save.image("BeerData.RData")
-```
-
-```{r Save-code-check}
-grade_code() 
-```
-
-## Examining a Dataset
+### Examining a Dataset
  
 Display the first *five* rows of the mtcars dataset. Then, View the complete data frame in a new window.
 
@@ -160,32 +178,6 @@ View(mtcars)
 ```
 
 ```{r View-code-check}
-grade_code() 
-```
-
-## Writing your own function 
-
-Now write a function that adds any two numbers, x and y:
-
-```{r add_function, exercise=TRUE, exercise.lines = 5}
-add <- function() {
-  
-}
-```
-
-```{r add_function-hint}
-# A function needs arguments (variables) as inputs.
-function(...)
-```
-
-
-```{r add_function-solution}
-add <- function(x, y) {
-  x + y
-}
-```
-
-```{r add_function-code-check}
 grade_code() 
 ```
 

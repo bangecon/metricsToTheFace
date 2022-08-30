@@ -1,0 +1,100 @@
+---
+title: "Appendix C \n\n Fundamentals of Mathematical Statistics"
+author: "Jim Bang"
+description: >
+  This tutorial introduces general concepts of estimation and testing.
+output: pdf_document
+classoption: landscape
+---
+
+```{r setup, include=FALSE}
+audit <- wooldridge::audit
+avgy<- mean(audit$y)
+n   <- length(audit$y)
+sdy <- sd(audit$y)
+se  <- sdy/sqrt(n)
+c05   <- abs(qt(.025, n-1))
+c01   <- abs(qt(.005, n-1))
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Approaches to Parameter Estimation
+
+### Ordinary Least Squares (OLS)
+
+$$\min_{\hat{\beta}}{\sum_{i=1}^{n}(Y_i – \beta_0 – \beta_1X_i)^2}$$
+
+### Least/Minimum Absolute Deviations (LAD/MAD)
+
+$$\min_{\hat{\beta}}{\sum_{i=1}^{n}|Y_i – \beta_0 – \beta_1X_i|}$$
+
+### Maximum likelihood (MLE)
+
+$$\max_{\hat{\beta}}{\prod_{i=1}^{n}f(Y_i – \beta_0 – \beta_1X_i)}$$
+
+where $f(\cdot)$ is the probability distribution of the errors (e.g. Normal, logistic, Poisson)
+
+### Method of Moments 
+
+$$E(Xu) = 0$$
+$$ \sum_{i=1}^n{X_i(Y_i-\beta_0-\beta_1X_i)} = 0 $$ 
+
+If the assumptions of the Classical Regression Model hold, all four of these methods are equivalent.
+
+\newpage 
+## Interval Estimation
+
+The 95% confidence interval for the sample mean, $\bar{x}$ solves
+$$ P(\bar{x}-t_{0.025}^c \cdot s_{\bar{x}} \le \mu \le \bar{x}+t_{0.025}^c \cdot s_{\bar{x}}) = 0.95 $$
+Since the sampling distribution of $\bar{x}$ is normal and the sampling
+distribution of $s_{\bar{x}}^2$ is $\chi^2$, this involves inverting the
+t-distribution (normal divided by the square root of $\chi^2$).
+
+### Example
+
+Using the $audit$ data from the $wooldridge$, calculate the 95% confidence interval *by hand* by calculating the following (and naming them): 
+
+1. the mean of `y` (call it `avgy`);
+2. the number of observations in (`length()` of) `y` (`n`);
+3. the standard deviation of `y` (`sdy`)
+4. the standard error of $\bar{y}$ (`sdy`)
+5. the two-sided critical value for $\alpha = 0.05$ (`c05`) 
+6. the 95% confidence-interval bounds as a vector (lower bound, upper bound)
+
+```{r intervalEst-solution}
+avgy<- mean(audit$y)
+n   <- length(audit$y)
+sdy <- sd(audit$y)
+se  <- sdy/sqrt(n)
+c05   <- abs(qt(.025, n-1))
+avgy + c05 * c(-se,+se)
+```
+
+\newpage 
+## Hypothesis Testing
+
+1. State the Null & Alternative Hypotheses
+2. Determine the Significance Level ($\alpha$)
+3. Calculate the parameters and the test statistic
+4. Calculate the critical value or p-value
+5. Make a Rejection Decision
+
+### Example
+
+Calculate the test statistic, absolute critical value for $\alpha = 0.01$, and p-value to test the null hypothesis of $H_0: \mu_y = 0$ against the two-sided alternative of $H_1: \mu_y \ne 0$. Call these t, c01, and p, and print them as a vector.
+
+```{r tTest-solution}
+t <- avgy/se
+c01 <- abs(qt(0.005, n-1))
+p <- pt(t, n-1)
+c(t, c01, p)
+```
+
+### Shortcut using $t.test()$
+
+Replicate the confidence interval and t-test from the previous examples using the `t.test()` command. Don't forget that the second example used a different $\alpha$ than the first one. 
+
+```{r t-test-solution}
+t.test(audit$y)
+t.test(audit$y, conf.level = 0.99)
+```

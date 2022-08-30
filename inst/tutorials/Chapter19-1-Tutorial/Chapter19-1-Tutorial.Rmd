@@ -1,26 +1,50 @@
 ---
-output: slidy_presentation
+output: 
+  learnr::tutorial:
+    progressive: true
 runtime: shiny_prerendered
 title: "Chapter 19 \n\n Conducting Research \n\n Presenting Tables and Graphs"
 description: >
   This tutorial introduces tools for creating attractive tables and graphs.
 ---
 
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+<script language="JavaScript">
+$(function() {
+   var editor;
+   $('.ace_editor').each(function( index ) {
+     editor = ace.edit(this);
+     editor.setFontSize("16px");
+   });
+})
+</script>
+
 ```{r setup, include=FALSE}
 library(learnr)
 library(gradethis)
 library(gtsummary)
 library(corrgram)
+library(ggplot2)
 library(wooldridge)
 ceosal1 <- wooldridge::ceosal1
 affairs <- wooldridge::affairs
 affairs$haskids <- factor(affairs$kids, labels = c("no","yes"))
 affairs$marriage <- factor(affairs$ratemarr, labels = c("very unhappy","unhappy","average","happy", "very happy"))
+ceosal1$industry <- factor(ceosal1$indus + 2*ceosal1$finance + 3*ceosal1$consprod + 4*ceosal1$utility, labels = c('indus', 'finance', 'consprod', 'utility'))
 gradethis::gradethis_setup()
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## Posing a question
+## Doing Economics: A Primer
+
+### Posing a question
 
 - Topic – the beginning of your search, not the end
   - Narrow it down
@@ -32,7 +56,7 @@ knitr::opts_chunk$set(echo = FALSE)
   - Are my tools and other resources sufficient? 
 - Focus on a testable hypothesis
 
-## Literature Review
+### Literature Review
 
 - Review the *literature*, not individual contributions
   - Organize papers into different “threads” of the literature
@@ -44,13 +68,13 @@ knitr::opts_chunk$set(echo = FALSE)
   - ~~Meta-Analysis~~
 - Databases
 
-## Research Databases
+### Research Databases
 
 - [Library](http://www.sau.edu/Library/Resources/Find_Articles.html): EBSCO Host, JSTOR, Science Direct
 - [Google Scholar](http://scholar.google.com)
   - Pro tip: Select "Endnote" as your bibliography manager in "Search results" and search and add "SAU" to the "Library links" in [settings](https://scholar.google.com/scholar_settings). 
 
-## Structure of the Paper 
+### Structure of the Paper 
 
 - Introduction
 - Conceptual Framework
@@ -58,7 +82,7 @@ knitr::opts_chunk$set(echo = FALSE)
 - Results and Discussion
 - Conclusion
 
-## Data Collection
+### Data Collection
 
 - Online Sources
   - Formatted Electronic Data (.xls, .csv, .dta, .dat, etc….)
@@ -70,7 +94,9 @@ knitr::opts_chunk$set(echo = FALSE)
   - Dealing with (and reformatting) NA’s
   - Naming, labelling, and storing data (.Rdata files, .Rproj files, and project directories) 
 
-## Summarizing Single Variables
+## Summarizing Data
+
+### Single Variables
 
 Do the following: 
 - Explore the objects in your environment using *ls()*
@@ -100,7 +126,7 @@ summary(ceosal1$salary)
 grade_code()
 ```
 
-## Summarizing an Entire Data Frame
+### Summarizing an Entire Data Frame
 
 - Calculate the summary statistics for all of the variables in *ceosal1*. 
 
@@ -122,6 +148,8 @@ grade_code()
 
 ## Creating Pretty Tables
 
+### Standard Output
+
 Create summary tables of *ceosal1* using the *tbl_summary* function in the *gtsummary* package.
 
 ```{r gtmedian, exercise=TRUE, exercise.eval=TRUE}
@@ -140,6 +168,8 @@ tbl_summary(ceosal1)
 ```{r gtmedian-check}
 grade_code(correct = "Well, we implemented the function correctly, but it gave us the median and the inter-quartile range (statistic = {median} ({p25}, {p75})). We are economists. We want the mean and standard deviation (sd). Adjust the 'statistic' option to give us what we want. Give me a couple of digits after the decimal place using digits = list() while you're at it!")
 ```
+
+### Means and Standard Deviations
 
 Input the request from the feedback below.
 
@@ -160,7 +190,9 @@ tbl_summary(ceosal1, statistic = list(all_continuous() ~ "{mean} ({sd})"), digit
 grade_code()
 ```
 
-## Summarizing Raw Relationships between Variables
+## Relationships between Variables
+
+### Correlation Matrix
 
 Calculate the following:
 
@@ -187,7 +219,7 @@ cor(ceosal1)
 grade_code()
 ```
 
-## Pretty Correlation Matrix
+### Pretty Correlation Matrix
 
 Use the *corrgram* function (part of the *corrgram* package) to create a correlogram.
 
@@ -207,6 +239,8 @@ corrgram(ceosal1)
 ```{r corrheatmap-check}
 grade_code(correct = "Hmm... you entered this correctly, but it's not quite what we want. Try setting the options for 'panel' differently so we get something useful.")
 ```
+
+### Pretty *Numerical* Correlation Matrix
 
 Input the suggestion from the feedback below. 
 
@@ -228,7 +262,9 @@ corrgram(ceosal1, panel = panel.cor)
 grade_code()
 ```
 
-## Factor Variable Tables
+## Factor Variables
+
+### Crosstabulation Tables
 
 Using the *affairs* data, do the following: 
 
@@ -260,7 +296,7 @@ prop.table(table(affairs$marriage,affairs$haskids))
 grade_code()
 ```
 
-## Attractive Crosstab Tables
+### Pretty Crosstab Tables
 
 - Replicate the previous tables using "tbl_cross" (using percent to generate percentages instead of proportions) to generate a more attractive layout that you can save as html. 
 - Combine counts and percentages in one table with each cell displaying percentages in parentheses next to its count.
@@ -289,7 +325,7 @@ tbl_cross(affairs, row = marriage, col = haskids, percent = 'cell')
 grade_code()
 ```
 
-## Base Graphics 
+## Graphs 
 
 Plot the following: 
 
@@ -341,7 +377,7 @@ ggplot() +
 
 ```{r ggplot-solution}
 ggplot() +
-  geom_freqpoly(data = ceosal1, mapping = aes(salary))
+  geom_histogram(data = ceosal1, mapping = aes(salary))
 ggplot() + 
   geom_point(data = ceosal1, mapping = aes(salary, roe))
 ```
@@ -349,6 +385,8 @@ ggplot() +
 ```{r ggplot-check}
 grade_code("That's great, but it might be useful to plot the relative frequency instead of the counts. Try adjusting the aesthetics using stat(count) and sum(count).")
 ```
+
+### Options in `ggplot`
 
 Implement the suggestion in the feedback. 
 

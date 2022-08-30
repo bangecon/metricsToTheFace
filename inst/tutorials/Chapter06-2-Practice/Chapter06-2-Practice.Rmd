@@ -1,5 +1,5 @@
 ---
-title: "Chapter 6-1 Practice"
+title: "Chapter 6-2 Practice"
 output: learnr::tutorial
 runtime: shiny_prerendered
 ---
@@ -17,35 +17,25 @@ tutorial_options(exercise.timelimit = 60)
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## Exercise 
+## Square Footage, Bedrooms, and Home Prices 
 
-Estimate the following model using the housing price dataset (hprice2 - note that this is not the same dataset as the tutorial!) from the Wooldridge package: 
+Estimate the following models using the housing price dataset (`hprice1` - note that this is *not* the same dataset as the tutorial!).
 
-$$Price = \beta_0 + \beta_1Lot\text{ }Size + \beta_2Square\text{ }Feet + \beta_3Bedrooms + u \text{ : (hprice.lm1)}$$ 
-Next, estimate the model with an interaction between $Square\text{ }Feet$ and $Bedrooms$ (hprice.lm2). Present both sets of estimates in the same **text** table using $stargazer$.
+1. $Price = \beta_0 + \beta_1Lot\text{ }Size + \beta_2Square\text{ }Feet + \beta_3Bedrooms + u \text{ : (hprice.lm1)}$
+2. $Price = \beta_0 + \beta_1Lot\text{ }Size + \beta_2Square\text{ }Feet + \beta_3Bedrooms + \beta4Square\text{ }Feet \cdot Bedrooms + u \text{ : (hprice.lm2)}$
+3. $Price = \beta_0 + \beta_1Lot\text{ }Size + \beta_2Square\text{ }Feet + \beta_3Bedrooms + \beta4(Square\text{ }Feet - \mu_{Sq.\text{ }Ft.}) \cdot (Bedrooms - \mu_{Bedrooms}) + u \text{ : (hprice.lm3)}$
 
-$$Price = \beta_0 + \beta_1Lot\text{ }Size + \beta_2Square\text{ }Feet + \beta_3Bedrooms + \beta4Square\text{ }Feet \cdot Bedrooms + u \text{ : (hprice.lm2)}$$ 
-Finally, estimate the model with the interaction term centered like Example 6.3. 
+Present all three sets of estimates in the same **text** table using `stargazer.`
 
-$$Price = \beta_0 + \beta_1Lot\text{ }Size + \beta_2Square\text{ }Feet + \beta_3Bedrooms + \beta4(Square\text{ }Feet - \mu_{Sq.\text{ }Ft.}) \cdot (Bedrooms - \mu_{Bedrooms}) + u \text{ : (hprice.lm3)}$$ 
-
-Present all three sets of estimates in the same **text** table using $stargazer$.
-
-```{r housePricePractice, exercise=TRUE, exercise.reveal_solution = TRUE}
+```{r housePricePractice, exercise=TRUE, exercise.reveal_solution = FALSE}
 
 ```
 
 ```{r housePricePractice-solution}
 hprice.lm1 <- lm(price ~ lotsize + sqrft + bdrms, data = hprice1)
-hprice.lm2 <- lm(price ~ lotsize + sqrft + bdrms + I(sqrft*bdrms), data = hprice1)
+hprice.lm2 <- lm(price ~ lotsize + sqrft + bdrms + sqrft*bdrms, data = hprice1)
 hprice.lm3 <- lm(price ~ lotsize + sqrft + bdrms + I(scale(sqrft, scale = FALSE)*scale(sqrft, scale = FALSE)), data = hprice1)
 stargazer(hprice.lm1, hprice.lm2, hprice.lm3, type = 'text')
-```
-
-```{r housePricePractice-hint}
-hprice.lm1 <- lm(..., ...)
-hprice.lm2 <- lm(..., ...)
-hprice.lm3 <- lm(..., ...)
 ```
 
 ```{r housePricePractice-check}

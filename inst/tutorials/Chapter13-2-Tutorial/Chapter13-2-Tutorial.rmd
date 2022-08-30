@@ -1,0 +1,161 @@
+---
+output: slidy_presentation
+runtime: shiny_prerendered
+title: "Chapter 13 \n\n Pooled Cross Sections and \n\n Difference-in-Differences Estimation"
+author: "James Bang"
+description: >
+  This tutorial introduces simple panel methods.
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(wooldridge)
+library(plm)
+library(gtsummary)
+library(stargazer)
+crime2 <- wooldridge::crime2
+crime2$id <- factor(rank(crime2$area, ties.method = 'max')/2)
+crime2.pdata <- pdata.frame(crime2, index = c('id', 'd87'))
+crime2.pdata$dcrmrte <- diff(crime2.pdata$crmrte)
+crime2.pdata$dunem   <- diff(crime2.pdata$unem)
+crime2.lm1 <- lm(crmrte ~ d87 + unem + id, data = crime2)
+crime2.lm2 <- lm(dcrmrte ~ dunem, data = crime2.pdata)
+crime2.plm1 <- plm(crmrte~unem, data = crime2.pdata, model = 'fd')
+crime4 <- wooldridge::crime4
+crime4.p <- pdata.frame(crime4, index=c("county","year") )
+crime4.p$cr.l <- lag(crime4.p$crmrte)
+crime4.p$cr.d <- diff(crime4.p$crmrte)
+crime4.p$cr.B <- Between(crime4.p$crmrte)
+crime4.p$cr.W <- Within(crime4.p$crmrte)
+crime4.p[1:16,c("county","year","crmrte","cr.l","cr.d","cr.B","cr.W")]
+summary(plm(log(crmrte)~factor(year)+lprbarr+lprbconv+lprbpris+lavgsen+lpolpc,data=crime4.p, model="fd") )
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Organizing Panel Data
+
+Panel data requires you to assign an "i" variable that uniquely identifies each of the individuals and a "t" variable that uniquely identifies each time period (preferably in increments of one "unit"). 
+
+Use the $crime2$ dataset, which is a two-period panel dataset for crime rates and community characteristics for 46 cities and counties for 1982 and 1987. Define the following: 
+  
+  1. A new variable in $crime2$ named $id$ that takes values from 1 through 46 to identify the communities. <br>
+  (Hint: the $area$ of each community doesn't change over time; $rank(x, ties.method='max')$ will define even-valued integers from $2$ through $2n$ for each community.)
+  2. Use $pdata.frame(data.frame, index)$ from the $plm$ package to organize the data into a panel data frame named $crime2.pdata$ so that R recognizes the individuals ($'id'$) and time periods ($'year'$) within the panels. <br>
+  (Hint: use the dummy, $'d87'$ to identify the time period instead of 'year' so that there are increments of 1 time period.)
+  3. New variables in $crime2.pdata$ named $'dcrmrte'$ and $'dunem'$ for the first-differences ($diff(x)$) of crime rate and unemployment. 
+
+Then, make a "pretty" summary (we are economists - means and standard deviations, please!) of crime and unemployment rates only using $\textit{tbl_summary}$ from the $gtsummary$ package.
+
+```{r pdata, exercise = TRUE}
+
+```
+
+```{r pdata-hint}
+crime2$id <- factor(rank(..., ties.method = '...')/...)
+crime2.pdata <- pdata.frame(..., index = ...)
+crime2.pdata$dcrmrte <- diff(...)
+crime2.pdata$dunem   <- diff(...)
+```
+
+```{r pdata-solution}
+crime2$id <- factor(rank(crime2$area, ties.method = 'max')/2)
+crime2.pdata <- pdata.frame(crime2, index = c('id', 'd87'))
+crime2.pdata$dcrmrte <- diff(crime2.pdata$crmrte)
+crime2.pdata$dunem   <- diff(crime2.pdata$unem)
+tbl_summary(crime2.pdata, statistic = list(all_continuous() ~ "{mean} ({sd})"), include = c(crmrte, unem))
+```
+
+```{r pdata-check}
+grade_code()
+```
+
+## Two-Period Panal Data Analysis Using First Differences
+
+Estimate the following: 
+
+  1. $CrimeRate_{it} = \beta_0 + \beta_1Unemployment_{it} + \delta_t + a_i + u_{it}$ using the $lm$ function.
+  2. $\Delta CrimeRate_{it} = \beta_0 + \beta_1\Delta Unemployment_{it} + \Delta u_{it}$ using the $lm$ function.
+  3. $CrimeRate_{it} = \beta_0 + \beta_1Unemployment_{it} + u_{it}$ using the first-differences ($'fd'$) model option of the $plm(formula, pdata, model)$ function.
+  
+Summarize all three models in text format using the $stargazer$ function. Omit the year and id dummy variables from the first specification. 
+
+```{r fd2t, exercise = TRUE}
+
+```
+
+```{r fd2t-hint}
+crime2.lm1 <- lm(formula, data)
+crime2.lm2 <- lm(formula, data)
+crime2.plm1 <- plm(formula, data, model)
+stargazer(lm-model, ..., type, omit)
+```
+
+```{r fd2t-solution}
+crime2.lm1 <- lm(crmrte ~ d87 + unem + id, data = crime2)
+crime2.lm2 <- lm(dcrmrte ~ dunem, data = crime2.pdata)
+crime2.plm1 <- plm(crmrte~unem, data = crime2.pdata, model = 'fd')
+stargazer(crime2.lm1, crime2.lm2, crime2.plm1, type = 'text', omit = c('d87', 'id'))
+```
+
+```{r fd2t-check}
+grade_code(correct = 'Samesies!')
+```
+
+## Interpreting the Two-Period First-Differences Estimator
+
+
+
+## Organizing Panel Data with More than Two Time Periods
+
+Using the $crime4$ dataset do the following:
+
+  - Generate pdata.frame (id = "county", time = "year")
+  - Perform the following calculations within the pdata.frame:
+      1. the first time lag of crime rate ($cr.l$)
+      2. the first difference of crime rate ($cr.d$)
+      3. the between (panel average) transformation of crime rate ($cr.B$)
+      4. the within (time-demeaned) transformation of crime rate ($cr.W$)
+  - Display selected variables for observations 1-16:
+
+```{r plm-transforms, exercise = TRUE}
+
+```
+
+```{r plm-transforms-hint}
+```
+
+```{r plm-transforms-solution}
+crime4.p <- pdata.frame(crime4, index=c("county","year") )
+crime4.p$cr.l <- lag(crime4.p$crmrte)
+crime4.p$cr.d <- diff(crime4.p$crmrte)
+crime4.p$cr.B <- Between(crime4.p$crmrte)
+crime4.p$cr.W <- Within(crime4.p$crmrte)
+crime4.p[1:16,c("county","year","crmrte","cr.l","cr.d","cr.B","cr.W")]
+```
+
+```{r plm-transforms-check}
+grade_code()
+```
+
+## Differencing More than Two Time Periods
+
+Estimate the following model in first-differences using the pdata frame created in the previous exercise from the $crime4$ data: 
+
+$$ln(Crime Rate) = \beta_0 + \beta_1ln(P_i[Arrest]) + \beta_2ln(P_i[Conviction]) + \beta_3ln(P_i[Prison]) + \beta_4ln(AveSentence_i) + \beta_5ln(PolicePC_i) + a_{i} + u_{it}$$
+
+```{r fd, exercise = TRUE}
+
+```
+
+```{r fd-hint}
+```
+
+```{r fd-solution}
+summary( plm(log(crmrte)~d83+d84+d85+d86+d87+lprbarr+lprbconv+ 
+                  lprbpris+lavgsen+lpolpc,data=crime4.p, model="fd") )
+```
+
+```{r fd-check}
+grade_code()
+```
+

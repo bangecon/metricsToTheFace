@@ -1,19 +1,41 @@
 ---
-output: slidy_presentation
+output: 
+  learnr::tutorial:
+    progressive: true
 runtime: shiny_prerendered
-title: "Chapter 7 \n\n Regression with Qualitative Information"
-author: "James Bang"
-description: >
-  This tutorial introduces binary regressors (dummy variables).
+title: "Chapter 7 Regression with Qualitative Information"
+author: "Jim Bang"
+description: "This tutorial introduces binary regressors (dummy variables)."
 ---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+<script language="JavaScript">
+$(function() {
+   var editor;
+   $('.ace_editor').each(function( index ) {
+     editor = ace.edit(this);
+     editor.setFontSize("16px");
+   });
+})
+</script>
 
 ```{r setup, include=FALSE}
 library(learnr)
 library(gradethis)
+library(stargazer)
 library(wooldridge)
 wage1 <- wooldridge::wage1
 wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)
 wage.lm9 <- lm(wage ~ educ + exper + tenure + female, data = wage1)
+wage1$occ <- factor(1 + wage1$profocc + 2*wage1$clerocc + 3*wage1$servocc, labels = c("Manufacturing", "Professional", "Clerical", "Services"))
+wage.lm10 <- lm(wage ~ educ + exper + I(exper^2) + tenure + occ, data = wage1)
 wage.lm11 <- lm(wage ~ educ + exper + tenure + female*married, data = wage1)
 wage.lm12 <- lm(log(wage) ~ educ + exper + tenure + female*married, data = wage1)
 wage.lm13 <- lm(wage ~ educ + exper + tenure + female*educ, data = wage1)
@@ -34,21 +56,20 @@ Qualitative Information (Categorical/Factor Variables)
   
 ![](https://media.giphy.com/media/lk0TFUdop2JTW/giphy.gif)
 
-## Single Dummy Independent Variable
+### Single Dummy Independent Variable
 
-Estimate the wage differential for women, controlling for education, experience, and job tenure. Call this $wage.lm9$ and run a $summary$ of the results. 
+Estimate the wage differential for women, controlling for education, experience, and experience squared. Call this `wage.lm9` and run a `summary()` of the results. 
 
 ```{r gender, exercise = TRUE}
 
 ```
 
 ```{r gender-hint}
-wage.lm9 <- lm(..., data = ...)
-summary(...)
+
 ```
 
 ```{r gender-solution}
-wage.lm9 <- lm(wage ~ educ + exper + tenure + female, data = wage1)
+wage.lm9 <- lm(wage ~ educ + exper + I(exper^2) + female, data = wage1)
 summary(wage.lm9)
 ```
 
@@ -56,30 +77,28 @@ summary(wage.lm9)
 grade_code()
 ```
 
-## Dummy Variables for Multiple Categories
+### Dummy Variables for Multiple Categories
 
-- Use the $factor()$ function to create a factor, $occ$, as a variable in $wage1$ from the occupational dummy variables in $wage1$ ($profocc$, $clerocc$, and $servocc$) that takes integer values from one to four. Use the $labels$ option to assign the labels $Manufacturing$, $Professional$, $Clerical$, and $Services$ to the values. 
-- Replicate the regression, wage.lm7 using the new factor variable you created. Call this $wage.lm10$.  
-- Summarize both regressions using a text stargazer() output.
+1. Use the `factor()` function to create a factor, `occ`, as a variable in `wage1` from the occupational dummy variables in `wage1` (`profocc`, `clerocc`, and `servocc`) that takes integer values from one to four. Use the `labels` option to assign the labels `Manufacturing`, `Professional`,` Clerical`, and `Services` to the values.
+2. Replicate `wage.lm7` using the new factor variable you created. Call this `wage.lm10` and summarize both regressions using a text stargazer() output.
 
 ```{r occupation, exercise = TRUE}
+# Giving you the original model (with individual occupational groups separately):
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)
+
 
 ```
 
 ```{r occupation-hint}
-# The variables profocc, clerocc, and servocc take values on {0,1}.
+# The variables profocc, clerocc, and servocc take values of 0 or 1.
 # To make them to each take sequential integer values, you can just multiply them by a constant.
-# Get them to take values {0,1} for profocc, {0,2} for clerocc, and {0,3 for servocc}. 
+# Get them to take values {0,1} for profocc, {0,2} for clerocc, and {0,3} for servocc. 
 # Add one to scale it from 1 through 4 (more natural for categories) instead of 0 through 3. 
-wage1$occ <- factor(..., labels = c("Manufacturing", "Professional", "Clerical", "Services"))
-wage.lm7  <- lm(..., data = ...)
-wage.lm10 <- lm(..., data = ...)
-stargazer(..., type = "text")
 ```
 
 ```{r occupation-solution}
-wage1$occ <- factor(1 + wage1$profocc + 2*wage1$clerocc + 3*wage1$servocc, levels = c("Manufacturing", "Professional", "Clerical", "Services"))
 wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)
+wage1$occ <- factor(1 + wage1$profocc + 2*wage1$clerocc + 3*wage1$servocc, labels = c("Manufacturing", "Professional", "Clerical", "Services"))
 wage.lm10 <- lm(wage ~ educ + exper + I(exper^2) + tenure + occ, data = wage1)
 stargazer(wage.lm7, wage.lm10, type = "text")
 ```
@@ -88,71 +107,65 @@ stargazer(wage.lm7, wage.lm10, type = "text")
 grade_code("They're the same!")
 ```
 
-## Interactions among Dummy Variables
+## Interactions 
 
-- Estimate the wage effect of marriage differ across gender by interacting $female$ with $married$, controlling for education, experience, and job tenure. Call this $wage.lm11$ 
-- Estimate the effect of marriage on *log wages* across gender with the same controls. Call this $wage.lm12$ 
-- Print a text $stargazer()$ of your results. 
+### Interactions among Dummy Variables
+
+Estimate the wage effect of marriage differ across gender by interacting `female` with `married`, controlling for education, experience, and job tenure. Call this `wage.lm11` and use a pipe to print a `summary()` of the results.
 
 ```{r marriage, exercise = TRUE}
 
 ```
 
 ```{r marriage-hint}
-wage.lm11 <- lm(..., data = ...)
-wage.lm12 <- lm(..., data = ...)
-stargazer(..., type = 'text')
+# You can do this one!
 ```
 
 ```{r marriage-solution}
-wage.lm11 <- lm(wage ~ educ + exper + tenure + female*married, data = wage1)
-wage.lm12 <- lm(log(wage) ~ educ + exper + tenure + female*married, data = wage1)
-stargazer(wage.lm11, wage.lm12, type = 'text')
+wage.lm11 <- lm(wage ~ educ + exper + tenure + female*married, data = wage1) |> 
+  summary()
 ```
 
 ```{r marriage-check}
 grade_code()
 ```
 
-## Different Slopes
+### Different Slopes
 
-What if we think the *effect of education* (a continuous variable in our model) differs for women? 
-
-- Estimate the effect of gender on wages *and the returns to education*, controlling for experience and job tenure. Call this $wage.lm13$ and run a $summary()$ of your result. 
+Estimate the effect of gender on wages *and the returns to education*, controlling for experience and job tenure. Call this `wage.lm12` and print a `summary()` of your result. 
 
 ```{r genderEducation, exercise = TRUE}
 
 ```
 
 ```{r genderEducation-hint}
-wage.lm13 <- lm(..., data = ...)
-summary(...)
+# Do I have to start hiding the solution? 
+
 ```
 
 ```{r genderEducation-solution}
-wage.lm13 <- lm(wage ~ educ + exper + tenure + female*educ, data = wage1)
-summary(wage.lm13)
+wage.lm12 <- lm(wage ~ educ + exper + tenure + female*educ, data = wage1) 
+summary()
 ```
 
 ```{r genderEducation-check}
 grade_code()
 ```
 
-## Binary Dependent Variables: The Linear Probability Model
+## Binary Dependent Variables
 
-- Estimate the effect of prior convictions ($pcnv$) on whether a person was arrested in 1986, controlling for the average sentence of prior convictions ($avesen$), total time spent in prison prior to 1986 ($tottime$), total number of months spent in prison in 1986 ($ptime86$), and total number of quarters officially employed in 1986 ($qemp86$). 
-- Call this $crime.lm1$ and run a $summary()$ of your result.
+### Probability of Arrest
+
+Estimate the effect of prior convictions (`pcnv`) on *whether* a person was arrested in 1986, controlling for the average sentence of prior convictions (`avesen`), total time spent in prison prior to 1986 (`tottime`), total number of months spent in prison in 1986 (`ptime86`), and total number of quarters officially employed in 1986 (`qemp86`). Call this `crime.lm1` and print a `summary()` of your result.
 
 ```{r arrests, exercise = TRUE}
 
 ```
 
 ```{r arrests-hint}
-# We don't have the variable we need in the data, but we don't need to create it!
+# We don't have the variable we need in the data, but we don't need to create it separately.
 # The formula argument understands logical functions. 
 # Since we have the number of times a person was arrested, narr86, we can operate a logical condition within our lm formula argument for narr86 > 0 and specify this directly as the dependent variable. 
-crime.lm1 <- lm(..., data = ...)
-summary(...)
 ```
 
 ```{r arrests-solution}
@@ -165,3 +178,29 @@ grade_code()
 ```
 
 What does the coefficient on prior convictions represent? 
+
+### Linear Probability Model
+
+$$\begin{align}Arrest_i^{86} ={} &\beta_0 + \beta_1Priors_i + \beta_2\bar{Sentence}_i + \beta_3PriorTime_i + \\ &\beta_4PrisonTime_i^{86} + \beta_5QuaartersEmployed_i^{86} + u_i \end{align}$$
+$$Arrest_i^{86} = \begin{cases} 1 \text{ if number of arrests} > 0; \\ 0 \text{ otherwise} \end{cases}$$
+$$\hat{y}_i = \hat{P}(Arrest_i^{86}=1|x) = X\beta$$
+$$\beta_j = \frac{\Delta\hat{P}(Arrest_i^{86}=1|x)}{\Delta x_j}$$
+
+### Problems with the Linear Probability Model
+
+Estimate the model including the respondent's income in 1986 (`inc86`) and name it `crime.lm2`. Summarize the `fitted.values` stored in the estimation results.
+
+```{r arrestsIncome, exercise = TRUE}
+
+```
+
+```{r arrestsIncome-solution}
+crime.lm2 <- lm((narr86 > 0) ~ pcnv + avgsen + tottime + ptime86 + qemp86, data = crime1)  
+summary(crime.lm2$fitted.values)
+```
+
+```{r arrestsIncome-check}
+grade_code()
+```
+
+Notice a problem?

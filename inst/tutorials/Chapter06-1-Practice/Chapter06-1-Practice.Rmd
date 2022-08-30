@@ -18,42 +18,61 @@ tutorial_options(exercise.timelimit = 60)
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## Exercise
+## Crime and House Prices
 
-Estimate the following model using the housing price dataset (hprice2) from the Wooldridge package: 
+### Standardized Coefficients
 
+1. Estimate the following model using the `hprice2` dataset as `hprice.lm1`: 
 $$Price = \beta_0 + \beta_1NO2 + \beta_2Crime + \beta_3Rooms + \beta4Employer\text{ }Distance + \beta_5Student\text{-}Teacher\text{ }Ratio + u \text{ : (hprice.lm1)}$$ 
+2. Reestimate the same model *with and without a constant* using the `scale` function in your formula argument to estimate the standardized coefficients (`hprice.lm2` and `hprice.lm3`). 
 
-Next, estimate the same model *with and without a constant* using the $scale$ function in your formula argument to estimate the standardized coefficients (hprice.lm2 and hprice.lm3). Present all three sets of estimates in the same **text** table using $stargazer$.
-
-```{r housePrice, exercise=TRUE, exercise.reveal_solution = TRUE}
+```{r housePriceBetas, exercise=TRUE, exercise.reveal_solution = TRUE}
 
 ```
 
-```{r housePrice-solution}
+```{r housePriceBetas-solution}
 hprice.lm1 <- lm(price ~ nox + crime + rooms + dist + stratio, data = hprice2)
 hprice.lm2 <- lm(scale(price) ~ scale(nox) + scale(crime) + scale(rooms) + scale(dist) + scale(stratio), data = hprice2)
 hprice.lm3 <- lm(scale(price) ~ 0 + scale(nox) + scale(crime) + scale(rooms) + scale(dist) + scale(stratio), data = hprice2)
 stargazer(hprice.lm1, hprice.lm2, hprice.lm3, type = 'text')
 ```
 
-```{r housePrice-hint}
-hprice.lm1 <- lm(..., ...)
-hprice.lm2 <- lm(scale(price) ~ scale(...) + ..., ...)
-hprice.lm3 <- lm(..., ...)
-```
-
-```{r housePrice-check}
+```{r housePriceBetas-check}
 grade_code()
 ```
 
-## Exercise
+### Elasticities
 
-Estimate the following model using the housing price (hprice2) dataset from the Wooldridge package: 
+3. Calculate the elasticities for the model estimated in (1) as `hprice.eyex1`.
+4. Present the estimates in the same text table using `stargazer.`
 
+```{r housePriceEYEX, exercise=TRUE, exercise.reveal_solution = TRUE}
+
+# I'm giving you the code to make the stargazer table for free. 
+stargazer(hprice.lm1,                                 # Tell it the structure of the original model
+          coef = list(c(summary(hprice.eyex1)[[4]])), # Tell it where to find the elasticities
+          se = list(c(summary(hprice.eyex1)[[5]])),   # Tell it where to find the se's
+          type = 'text')                              # Remember to specify type
+```
+
+```{r housePriceEYEX-solution}
+hprice.eyex1 <- marginaleffects(hprice.lm1, slope = 'eyex')
+stargazer(hprice.lm1,                                 # Tell it the structure of the original model
+          coef = list(c(summary(hprice.eyex1)[[4]])), # Tell it where to find the elasticities
+          se = list(c(summary(hprice.eyex1)[[5]])),   # Tell it where to find the se's
+          type = 'text')                              # Remember to specify type
+```
+
+```{r housePriceEYEX-check}
+grade_code()
+```
+
+### Log Transofrmation
+
+1. Estimate the following model using `hprice2`.
 $$ln(Price) = \beta_0 + \beta_1ln(NO2) + \beta_2ln(Crime) + \beta_3Rooms + \beta_4Rooms^2 + \beta5Employer\text{ }Distance + \beta_5Student\text{-}Teacher\text{ }Ratio + u \text{ : (lnhprice.lm1)}$$ 
+2. Summarize this estimation using the $summary()$ function. 
 
-Summarize this estimation using the $summary()$ function. 
 ```{r lnHousePrice, exercise=TRUE, exercise.reveal_solution = TRUE}
 
 ```
@@ -72,4 +91,3 @@ summary(lnhprice.lm1)
 ```{r lnHousePrice-check}
 grade_code()
 ```
-

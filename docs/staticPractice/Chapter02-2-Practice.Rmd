@@ -1,0 +1,17 @@
+---
+title: "Chapter 2-2 Practice"
+author: "Jim Bang"
+output: pdf_document
+classoption: landscape
+---
+
+```{r setup, include=FALSE}
+
+```
+
+## CEO Salaries and Sales
+
+Use the `ceosal1` data to regress the *log* of CEO salaries on the *log* of sales. Name the results `ceosal.lm`
+
+Summarize the results and plot the data with the regression line. 
+

@@ -1,0 +1,238 @@
+---
+output: pdf_document
+classoption: landscape
+title: "Chapter 4 \n\n Multiple Regression Analysis -- Inference"
+author: "Jim Bang"
+---
+
+```{r setup, include=FALSE}
+library(wooldridge)
+wage1 <- wooldridge::wage1
+wage.lm6 <- lm(wage ~ exper + educ + tenure, data = wage1)
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure  + clerocc + servocc, data = wage1)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Sampling Distribution of $\hat\beta$
+
+### BLUE to BUE
+
+$$ y = \beta_0 + \beta_1x_1 + \beta_2x_2 + ... + \beta_kx_k + u $$
+
+::: {.left style="float:left;width:48%"}
+Assumptions of Gauss-Markov
+
+1. Linear in the parameters
+2. Random Sampling
+3. Zero conditional mean of errors
+4. Homoskedasticity
+5. No Perfect Multicollinearity
+6. Large Outliers are Unlikely
+
+<br> 
+Under these assumptions, OLS is <span style="color: blue;">BLUE</span> - minimum variance among all *linear* unbiased estimators
+:::
+
+::: {.right style="float:right;width:48%"}
+Assumptions of the Classical Linear Model
+
+1. Linear in the parameters
+2. Random Sampling
+3. Zero conditional mean of errors
+4. Homoskedasticity
+5. No Perfect Multicollinearity
+6. Large Outliers are Unlikely
+7. $E(y|X) \sim N(X\beta, \sigma^2)$
+
+Under these assumptions, OLS is not only <span style="color: blue;">BLUE</span> but MVUE - minimum variance among *all* unbiased estimators, not just linear ones.
+:::
+
+### Distribution of $\hat\beta$
+
+Under the assumptions of the CLM,
+
+$$ \hat\beta_j \sim N(\beta_j, Var(\hat\beta_j)) $$ 
+
+When $\sigma^2$ is known,
+
+$$ \hat\beta_j/\sigma_{\hat\beta_j} \sim N(0,1)$$ 
+
+When $\sigma^2$ is unknown,
+
+$$ \hat\beta_j/s_{\hat\beta_j} \sim t_{n-k-1} = t_{df} $$
+
+\newpage
+## Hypothesis Testing
+
+### Steps
+
+1.  State the Null & Alternative Hypotheses
+2.  Determine the Significance Level ($\alpha$)
+3.  Estimate the parameter(s) and the test statistic(s)
+4.  Calculate the critical value or p-value
+5.  Make a Rejection Decision
+
+### Types of Null/Alternative Hypotheses
+
+1. One-Sided Alternatives
+  a. Left-Tailed Alternative
+$$ H_0: \beta \ge 0 $$ 
+$$ H_1: \beta < 0 $$
+  b. Right-Tailed Alternative
+$$ H_0: \beta \le 0 $$ 
+$$ H_1: \beta > 0 $$
+2. Two-Sided 
+$$ H_0: \beta = 0 $$ 
+$$ H_1: \beta \ne 0 $$
+
+### Determining $\alpha$
+
+Type I and Type II Errors
+
+|                      |              | Null Hypothesis: |               |
+|----------------------|--------------|------------------|---------------|
+|                      |              | True             | False         |
+| **Data Conclusion:** | Accept $H_0$ | No Error         | Type II Error |
+|                      | Reject $H_0$ | Type I Error     | No Error      |
+
+Significance ($\alpha$) measures the probability of observing data different from $H_0$ when $H_0$ is true. 
+
+$$\alpha = P[\hat{T}> T_c| H_0] = P[\text{Type I Error}]$$ 
+
+### Significance and Power 
+
+Power ($B$) measures the probability of observing data different from $H_0$ when $H_1$ is true. 
+
+$$B = P[\hat{T} > T_c | H_1] = 1 - P[\text{Type II Error}] = 1 - F(T_c - \frac{\beta_{H_1}}{s_{\hat\beta}}) $$
+
+For a given magnitude of difference between $\beta_{H_0}$ and $\beta_{H_1}$ and a given sample size, there is a trade-off between achieving a lower significance level and achieving a higher power.
+
+Survey designs typically determine their minimum sample size by calculating the number of observations required to detect a predetermined minimum effect size to be considered "important" at a predetermined highest-acceptable significance level (usually 0.05) at a predetermined lowest-acceptable power (often 0.8)
+
+\newpage
+## Does Experience *Increase* Wages?
+
+Using `wage1`, regress `wage` on `exper`, controlling for `educ` and `tenure`. Call the output `wage.lm6` and print a `summary()` of the results.
+
+```{r experTest-solution}
+wage.lm6 <- lm(wage ~ exper + educ + tenure, data = wage1)
+summary(wage.lm6)
+```
+
+### Critical Values and p-Values
+
+$$ H_0: \beta = 0 $$ $$ H_1: \beta > 0 $$
+
+  - What is the t-critical value for a test for whether the effect of experience is *greater than* zero and a significance of 0.05?
+    a. 1.645
+    b. -1.645
+    c. 1.965
+    d. -1.965
+    
+  - What is the p-value?
+    a. 0.0645
+    b. 0.9355
+    c. 0.9678
+    d. 0.0322
+    
+### Critical Values and p-Values in `R`
+
+The following code would calculate and graph the critical value with its corresponding rejection region, along with a horizontal line for the test value. 
+
+```{r, echo = TRUE}
+# Define values for x and y axes, and the critical and test values.
+x <- seq(-3.5, 3.5, length = 1000)
+y <- dt(x, wage.lm6$df.residual)
+t.critval <- qt(0.95, wage.lm6$df.residual)
+t.testval <- summary(wage.lm6)$coefficients['exper', 't value']
+# Plot the t distribution with n-k-1 degrees of freedom and sensibly-labeled axes.
+plot(x,
+     y,
+     type = "l",
+     ylab = "f(t)",
+     xlab = "t")
+# Add the polygon for the right-tailed, alpha = 0.05 t-critical value.
+polygon(c(x[x >= t.critval], max(x), t.critval),
+        c(y[x >= t.critval], 0, 0),
+        col = "red",
+        density = 10)
+# Add the polygon for the p-value.
+polygon(
+  c(x[x >= t.testval], max(x), t.testval),
+  c(y[x >= t.testval], 0, 0),
+  col = "blue",
+  density = 10,
+  angle = -45
+)
+```
+
+\newpage
+## Do Sales Revenues *Affect* CEO Salaries?
+
+1. Using `ceosal1`, regress the log of `salary` on log of `sales`, controlling for `roe` and firm industry group (industry, finance, consumer product, or utility)
+2. Look out for perfect multicollinearity and leave on group - industry - out!).
+3. Call the output `salary.lm1` and print a `summary()` of the results.
+
+```{r financeTest-solution}
+salary.lm1 <- lm(salary ~  log(sales) + roe + finance + consprod + utility, data = ceosal1)
+summary(salary.lm1)
+```
+
+### Critical Values and p-Values
+
+  - What is the t-critical value of a test for whether the salaries of CEOs in finance firms differ from those of the baseline group (indistrial firms) at the 0.05 level?
+    a. $-1.652$
+    b. $\\pm 1.652$
+    c. $\\pm 1.972$
+    d. $-1.972$
+
+  - What is the p-value?
+    a. 0.914
+    b. 0.362
+    c. 0.05
+    d. 0.025
+
+### Critical Values and P-Values in `R`
+
+```{r, echo = TRUE}
+# Define values for x and y axes, and the critical and test values. 
+x <- seq(-3.5,3.5,length=1000)
+y <- dt(x,wage.lm6$df.residual)
+t.critval <- qt(0.025, wage.lm6$df.residual)
+t.testval <- summary(wage.lm6)$coefficients['exper', 't value']
+# Plot the t distribution with n-k-1 degrees of freedom and sensibly-labeled axes.
+plot(x, y, type="l", ylab = "f(t)", xlab = "t")
+# Add the polygons for the p-value. 
+polygon(c(x[x>=abs(t.testval)], max(x), abs(t.testval)), c(y[x>=abs(t.testval)], 0, 0), col="blue", density = 10, angle = -45)
+polygon(c(min(x), x[x<=-abs(t.testval)], -abs(t.testval)), c(y[x<=-abs(t.testval)], 0, 0), col="blue", density = 10, angle = -45)
+# Add the polygons for BOTH alpha = 0.05 t-critical values. 
+polygon(c(x[x>=-t.critval], max(x), -t.critval), c(y[x>=-t.critval], 0, 0), col="red", density = 10)
+polygon(c(min(x), x[x<=t.critval], t.critval), c(y[x<=t.critval], 0, 0), col="red", density = 10)
+```
+
+\newpage
+## Confidence Intervals
+
+The 95% confidence interval for $\hat\beta_j$ solves
+
+$$ P(\hat{\beta_j}-t_{0.025}^c \cdot s_{\hat{\beta_j}} \le \mu \le \hat{\beta_j}+t_{0.025}^c \cdot s_{\hat{\beta_j}}) = 0.95 $$
+
+  - The bounds of the confidence interval for $\\hat\\beta_j$ are:
+    a. Random.
+    b. Centered around the true value of $\beta$
+    c. Centered around zero.
+    d. Centered around the null-hypothesized value of $\\beta_j$, $\\beta_0.
+    
+### Confidence Intervals
+
+1. Using the `wage1` data, regress wage on education, experience, experience squared, tenure, and occupation (profesional services, professional occupations, clerical occupations, and service occupations).
+2. Name the result `wage.lm7` and summarize the results using `summary()`.
+3. Calculate 95-percent confidence intervals for the coefficients using the `confint()` function.
+4. Calculate 99-percent confidence intervals for the coefficients.
+
+```{r confint-solution}
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure  + clerocc + servocc, data = wage1)
+summary(wage.lm7)
+confint(wage.lm7)
+confint(wage.lm7, level = 0.99)
+```

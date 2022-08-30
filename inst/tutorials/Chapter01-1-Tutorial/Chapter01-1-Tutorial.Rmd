@@ -1,61 +1,138 @@
 ---
-output: slidy_presentation
+output: 
+  learnr::tutorial:
+    progressive: true
 runtime: shiny_prerendered
-title: "Chapter 1 \n\n Installing R and RStudio \n\n The Nature of Econometrics and Econometric Data"
+title:  "Chapter 1-1" 
+subtitle:  |
+  | Installing R and RStudio
+  | The Nature of Econometrics and Econometric Data
+author: Jim Bang
 description: >
   This tutorial introduces students to the course and demonstrates the basic setup for R and RStudio.
 always_allow_html: yes
 ---
 
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+<script language="JavaScript">
+$(function() {
+   var editor;
+   $('.ace_editor').each(function( index ) {
+     editor = ace.edit(this);
+     editor.setFontSize("16px");
+   });
+})
+</script>
+
 ```{r setup, include=FALSE}
 library(learnr)
 library(gradethis)
 gradethis_setup()
-tutorial_options(exercise.timelimit = 60)
+tutorial_options(exercise.eval = FALSE, exercise.checker = gradethis_exercise_checker)
 knitr::opts_chunk$set(echo = FALSE, tidy.opts=list(width.cutoff=80), tidy=TRUE)
-tutorial_options(exercise.eval = FALSE)
-webshot::install_phantomjs(force = TRUE)
-new_recorder <- function(tutorial_id, tutorial_version, user_id, event, data) {
-    cat(tutorial_id, " (", tutorial_version, "): ", user_id, ", ", event, ", ", data$label, ", ", data$answers, ", ", data$correct, "\n", sep = "")
-}
-options(tutorial.event_recorder = new_recorder)
 ```
 
 ## Syllabus Information
 
--   Office Hours: Liberally by appointment.
+### General Information
+
+-   Office Hours: MWF 11am-12:30pm; TR 8:30-10am; liberally by appointment: [book me here](https://calendar.google.com/calendar/selfsched?sstoken=UUFLaDRHQXJVeXZHfGRlZmF1bHR8YjU1MzlmMzk2YjBlMWEzMzUzNTUzZDI0MjVhYzBiMTMA)!
 -   Research Paper Deadlines:
 -   Class Preparation, Participation, and Discussion
     -   The class participant's engagement actively contributes to general student learning -- particularly important with a very small class.
     
-## Resources
+### What is Econometrics?
 
--   Blackboard 
--   Software
-    -   R (Free Download): <https://cran.r-project.org/>
-    -   RStudio (Free Download -- Recommended): <https://www.rstudio.com/>
+- "How much?"
+  - The quantitative analysis of economic data
+  - Helps to quantify relationships
 
-<html>
-<blockquote class="twitter-tweet"><p lang="en" dir="ltr">In the topsy-turvy world of <a href="https://twitter.com/hashtag/metricstotheface?src=hash&amp;ref_src=twsrc%5Etfw">#metricstotheface</a>, having a good solid piece of wood in your hand is quite often useful.</p>&mdash; Jeffrey Wooldridge (@jmwooldridge) <a href="https://twitter.com/jmwooldridge/status/1375201672901890051?ref_src=twsrc%5Etfw">March 25, 2021</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-</html>
+### Learning Objectives
 
-## Install R
+To equip students with the tools for analyzing the costs and benefits of trade. 
 
-![](https://vimeo.com/203516510)
+- Part one of the course will teach the gains from trade; 
+- Part two will describe its distributional impact;
+- Part three will deal with policy and social issues.
 
-## Installing R
+The successful student will be able to: 
+
+1. demonstrate the gains from trade based on comparative advantage; 
+2. describe the consequences of trade for income distribution; 
+3. analyze the welfare effects of trade intervention; 
+4. connect trade theory to other topics 
+
+### Class Resources
+
+1. Blackboard, Inc. 2021. Blackboard. https://blackboard.sau.edu. 
+2. R Core Team. 2021. R: A Language and Environment for Statistical Computing. R Foundation for Statistical Computing. 
+3. RStudio Team. 2020. RStudio: Integrated Development for R, RStudio, PBC, Boston, MA. 
+4. Suranovic, S 2015/2011. International Trade, 2nd Edition (Recommended) or 1st Edition (Minimum Required), FlatWorld, Boston.  
+
+### Class Policies
+
+```{r policies, echo=FALSE}
+  question("Which of the following is a class policy?",
+    answer("Electronic devices must be turned off at all times"),
+    answer("Anyone who attends class and completes all of their own work will earn a C or better", correct = TRUE, message = random_praise()),
+    answer("No food or drink allowed in class")
+  )
+```
+
+### Coursework and Grading
+
+| Assignment Type                                 | Point Total         |
+|-------------------------------------------------|---------------------|
+| Paper Sections/Drafts (4 @ 50 points each)      | 200 points          |
+| Peer Referee Report                             |  50 points          |
+| Pilot Analysis Presentation                     |  50 points          |
+| Final Draft of Research Paper                   | 250 points          |
+| Assessments                                     |  50 points          |
+| Participation                                   | 200 points          |
+| Final Exam                                      | 200 points          |
+
+
+<br> <br> 
+
+| Letter Grade     | Point Range               |
+|------------------|---------------------------|
+| A+/A/A-          | 900-1,000 points          |
+| B+/B/B-          | 800-899.9 points          |
+| C+/C/C-          | 700-799.9 points          |
+| D+/D/D-          | 600-699.9 points          |
+| F                | < 600 points              |
+
+## Getting Started with R 
+
+### Why R? 
+
+R helps you talk to a computer and help solve big problems. Employers use R (or other similar languages like Python or Julia) for statistics and data analysis. R is not usually associated with calculus or mathematics, but can do anything that expensive mathematical-analysis programs like Matlab or Mathematica can do - and possibly more! Also, R is free! 
+
+We will use R in this class for two reasons: 
+
+1. As a practical alternative to pencil-and-paper calculus; 
+2. To develop basic proficiency with a computing language.
+
+### Installing R
 
 ```{r installR, echo=FALSE}
 question("Where do you download R?",
-    answer("www.rstudio.com/download"),
+    answer("[www.rstudio.com/download](www.rstudio.com/download)"),
     answer("[cloud.r-project.org](http://cloud.r-project.org)", correct = TRUE, message = "You can also download R from [cran.r-project.org](http://cran.r-project.org)"),
-    answer("www.r-project.org", message = "Good try, but not exactly. www.r-project.org doesn't provide a download link, but it does provide a link to one the websites above."),
-    answer("www.r.com"),
+    answer("[www.r-project.org](www.r-project.org)", message = "Good try, but not exactly. www.r-project.org doesn't provide a download link, but it does provide a link to one the websites above."),
+    answer("[www.r.com](www.r.com)"),
     allow_retry = TRUE
   )
 ```
 
-## Updating R
+### Updating R
 
 ```{r updaterR, echo=FALSE}
 question("How often should you update R?",
@@ -66,15 +143,9 @@ question("How often should you update R?",
   )
 ```
 
-## Install RStudio
+## RStudio
 
-### How to install RStudio
-
-RStudio is an Integrated Development Environment (IDE) for R. What does that mean? Well, if you think of R as a language, which it is, you can think of RStudio as a program that helps you write and work in the language. RStudio makes programming in R much easier and I suggest that you use it!
-
-![](https://vimeo.com/203516968)
-
-## What is RStudio?
+### What is RStudio?
 
 ```{r rStudio, echo=FALSE}
   question("What is the RStudio IDE?",
@@ -86,19 +157,23 @@ RStudio is an Integrated Development Environment (IDE) for R. What does that mea
   )
 ```
 
-## Where do I get RStudio? 
+### Why RStudio?
+
+RStudio is an Integrated Development Environment (IDE) for R. What does that mean? Well, if you think of R as a language, which it is, you can think of RStudio as a program that helps you write and work in the language. RStudio makes programming in R much easier and I suggest that you use it!
+
+### Where do I get RStudio? 
 
 ```{r installRStudio, echo=FALSE}
 question("Where do you download RStudio?",
-    answer("www.rstudio.com/download", correct = TRUE, message = "For these tutorials, download and install the RStudio Desktop Open Source License."),
+    answer("[www.rstudio.com/download](www.rstudio.com/download)", correct = TRUE, message = "For these tutorials, download and install the RStudio Desktop Open Source License."),
     answer("[cloud.r-project.org](http://cloud.r-project.org)", message = "This is where you download R, not RStudio."),
-    answer("www.r-project.org"),
+    answer("[www.r-project.org](www.r-project.org)"),
     answer("[cran.rstudio.org](http://cran.rstudio.org)"),
     allow_retry = TRUE
   )
 ```
 
-## Do I still need R?
+### Do I still need R?
 
 ```{r installR_RStudio, echo=FALSE}
   question("Do you need to install R if you already have RStudio?",
@@ -107,13 +182,9 @@ question("Where do you download RStudio?",
   )
 ```
 
-## Install Packages
+## R Packages
 
-### How to install R packages
-
-![](https://vimeo.com/203516241)
-
-## How do I install packages?
+### How do I install packages?
 
 ```{r install_packages, echo = FALSE}
   question("What command do you use to install packages?",
@@ -125,7 +196,7 @@ question("Where do you download RStudio?",
   )
 ```
 
-## How often do I install a package?
+### How often do I install a package?
 
 ```{r reinstall_packages, echo = FALSE}
   question("How often do you need to install a package on your computer?",
@@ -137,50 +208,48 @@ question("Where do you download RStudio?",
   )
 ```
 
-## What is Econometrics?
-
-- "How much?"
-  - The quantitative analysis of economic data
-  - Helps to quantify relationships
-
 ## Economics and the Scientific Method
 
 1.  Ask a Question
-
 2.  Form a Hypothesis
-
 3.  Review Existing Research
-
 4.  Collect Data
-
 5.  Analyze the Data
-
   - Test *Causal* Hypotheses 
   - Forecast/Predict
-
 6.  Form a Conclusion
 
-## Example: Effects of Training on Productivity
+### Example 1: Effects of Training on Productivity
 
-<p align="center">
-$wage=f(educ,exper,training)$, </p>
+$$wage=f(educ,exper,training; u) \text{, where}$$
+- $wage$ is the worker's hourly wage,
+- $educ$ is a measure of schooling, 
+- $exper$ is a measure of workforce experience,  
+- $training$ is a measure of time spent training, and
+- $u$ is random noise.
 
-where $educ$ is a measure of schooling, $exper$ is a measure of workforce experience, and $training$ is a measure of time spent training.
+Assuming we can approximate $f(\cdot)$ with a linear function, we would 
 
-<p align="center">
-$wage=\beta_{0}+\beta_{1}educ+\beta_{2}exper+\beta_{3}training+u$ </p>
+$$wage=\beta_0 + \beta_1educ + \beta_2exper + \beta_3training + u$$
 
 An econometric model consists of a systematic part – $f(*)$ – and a random error – $u$
 
-## Example: Effects of Training on Productivity
+### Example 2: Effects of Sentencing on Crime
 
-<p align="center">
-$crime=f(crime wage, market wage, other income, p_{caught}, p_{convicted|caught}, \hat{sentence}, age)$, 
+$$crime=f(crimewage, marketwage, otherincome, p_{caught}, p_{convicted|caught}, \hat{sentence}, age; u) \text{, where}$$ 
 
-where $educ$ is a measure of schooling, $exper$ is a measure of workforce experience, and $training$ is a measure of time spent training.
+- $crime$ is the number of hours spent in illegal activities,
+- $crimewage$ is the "wage" per hour for illegal work,
+- $marketwage$ is the wage for legal employment, 
+- $otherincome$ is income from other sources, 
+- $p_{caught}$ is the probability of getting caught, 
+- $p_{convicted|caught}$ is the probability of conviction if caught, 
+- $sentence$ is the expected sentence if convicted, and 
+- $age$ is the person's age.
 
-<p align="center">
-$wage=\beta_{0}+\beta_{1}wage_m+\beta_{2}otherinc+\beta_{3}freqarr+\beta_{4}freqconv+\beta_{5}avesen+\beta_{6}age+u$  </p>
+Some variables might not be observed (crime wage); others might only be observe by proxy or as an average ($p_{caught}$, $p_{convicted|caught}$, $sentence$)
+
+$$crime=\beta_0 + \beta_1marketwage + \beta_2otherinc + \beta_3freqarr + \beta_4freqconv + \beta_5avesen + \beta_6age + u$$
 
 ## Data: Sources and Types
 -   Experimental versus Observational Data
@@ -195,18 +264,19 @@ How could we determine whether spending on education *causes* better performance
 
 Hold all else equal: *ceteris paribus*
 
-Problems: 
+### Problems: 
 
-- Confounding (omitted) variables
+#### Confounding (omitted) variables
 
   Solution: Add those variables to the model.
 
-- Non-random sample selection
+#### Non-random sample selection
 
   Solution: Tobit (Chapter 17; Tobin, 1958)
             Heckit (Chapter 17; Heckman, 1976)
 
-- Non-random treatment assignment
+#### Non-random treatment assignment
+
   Solution: Instrumental Variables (Chapter 15)
             Matching treatment and controls (Rosenbaum & Rubin, 1983); 
             Covariate balancing (Horvitz & Thompson, 1952; Robins et al., 2000)

@@ -1,0 +1,21 @@
+---
+title: "Chapter 3-3 Practice"
+author: "Jim Bang"
+output: pdf_document
+classoption: landscape
+---
+
+```{r setup, include=FALSE}
+library(wooldridge)
+gpa1 <- wooldridge::gpa1
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## College GPA 
+
+Simulate the bias term from the omitted variable bias formula, $E(\tilde\beta_1) = \beta_1 + \beta_2\delta$ for the model $CollegeGPA = \beta_0 + \beta_1HighSchoolGPA + \beta_2ACTScore + u$ using the $gpa1$ data. 
+
+1. Define `beta.hat` as the coefficient vector (`coef()`) from the OLS estimates (`lm()`) of college GPA on ACT score and high school GPA and `delta.tilde` as the coefficient vector from the OLS estimates of high school GPA on ACT score. 
+3. Calculate the formula for $\tilde\beta_1 = \hat\beta_1 + \hat\beta_2\hat\delta$. 
+4. Produce a table summarizing the results for `beta.hat` and `beta.tilde` for the simple regression of college GPA on ACT Score. 
+

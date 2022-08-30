@@ -8,7 +8,7 @@ runtime: shiny_prerendered
 library(learnr)
 library(gradethis)
 gradethis_setup()
-tutorial_options(exercise.timelimit = 60)
+tutorial_options(exercise.reveal_solution = FALSE)
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
@@ -23,10 +23,9 @@ Let $Y$ be a random variable that depends on $X$ according to the known linear s
 
 Create a loop that does the following: 
 
-  - Simulate samples of sizes 1-1000 for $X$, $u$, and $Y$.
-  - Estimates the equation for Y to obtain $\hat\beta_0$ and $\hat\beta_1$ for each sample size.
-  
-Show the convergence of the sample estimate of $\beta_1$ towards the known population value of -1 for sample sizes 1 through 1000. 
+1. Simulate samples of sizes 1-1000 for $X$, $u$, and $Y$.
+2. Estimates the equation for Y to obtain $\hat\beta_0$ and $\hat\beta_1$ for each sample size.
+3. Show the convergence of the sample estimate of $\beta_1$ towards the known population value of -1 for sample sizes 1 through 1000 by plotting the squared deviations from the true value. 
 
 ```{r llnPractice, exercise=TRUE, exercise.eval=TRUE}
 set.seed(8675309)
@@ -44,15 +43,14 @@ X <- NULL
 u <- NULL
 Y <- NULL
 b1 <- NULL
-size <- c(1:1000)
 for(i in 1:1000) {
-  X = rexp(n = size[i], rate = 1)
-  u = rnorm(n = size[i], mean = 0, sd = 1)
+  X = rexp(n = i, rate = 1)
+  u = rnorm(n = i, mean = 0, sd = 1)
   Y = 2 - 0.5*X + u
   b1[i] <- lm(Y ~ X)$coefficients[2]
 }
-plot(size, b1, type = 'l')
-abline(h = -0.5, col = 'red')
+plot((b1-(-0.5))^2, type = 'l')
+abline(h = 0, col = 'red')
 ```
 
 ```{r llnPractice-check}
@@ -63,10 +61,9 @@ grade_code()
 
 Using the same population parameters and variables as the previous exercise, create a loop that does the following: 
 
-  - Simulate 1000 *distributions* of $\hat\beta_1$ with 1000 values estimates each from samples $X$, $u$, and $Y$ ranging from 1-1000. 
-  - Estimates the equation for Y to obtain $\hat\beta_0$ and $\hat\beta_1$ for each sample size.
-  
-Plot the convergence of the distribution of $\hat\beta_1$ towards a normal distribution. 
+1. Simulate 1000 *distributions* of $\hat\beta_1$ with 1000 values estimates each from samples $X$, $u$, and $Y$ ranging from 1-1000. 
+2. Estimates the equation for Y to obtain $\hat\beta_0$ and $\hat\beta_1$ for each sample size.
+3. Plot the convergence of the distribution of $\hat\beta_1$ towards a normal distribution. 
 
 ```{r cltPractice, exercise=TRUE, exercise.eval=TRUE}
 set.seed(8675309)
@@ -83,12 +80,11 @@ set.seed(8675309)
 X <- NULL 
 u <- NULL
 Y <- NULL
-b1 <- matrix(NA, nrow = 1000, ncol = 1000)
-size <- c(1:1000)
-for(i in 1:1000) {
+b1 <- matrix(NA, nrow = 1000, ncol = 100)
+for(i in 1:100) {
   for(j in 1:1000) {
-    X <- rexp(n = size[i], rate = 1) 
-    u <- rnorm(n = size[i], mean = 0, sd = 1)
+    X <- rexp(n = i, rate = 1) 
+    u <- rnorm(n = i, mean = 0, sd = 1)
     Y = 2 - 0.5*X + u
     b1[j, i] = lm(Y ~ X)$coefficients[2]
   }

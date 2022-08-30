@@ -1,0 +1,33 @@
+---
+title: "Appendix C-1 Practice"
+author: "Jim Bang"
+output: pdf_document
+classoption: landscape
+---
+
+```{r setup, include=FALSE}
+
+```
+
+## Simple Regression Simulation
+
+Let $X$ be a random variable that follows a exponential distribution with rate parameter $\lambda = 1$. 
+Let $Y$ be a random variable that depends on $X$ according to the known linear structural population model $Y = \beta_0 + \beta_1X + u$, where: 
+  
+  + $\beta_0 = 2$
+  + $\beta_1 = -0.5$
+  + $u \sim N(0,1)$
+
+Create a loop that does the following: 
+
+1. Simulate samples of sizes 1-1000 for $X$, $u$, and $Y$.
+2. Estimates the equation for Y to obtain $\hat\beta_0$ and $\hat\beta_1$ for each sample size.
+3. Show the convergence of the sample estimate of $\beta_1$ towards the known population value of -1 for sample sizes 1 through 1000 by plotting the squared deviations from the true value. 
+
+## Regression CLT Practice
+
+Using the same population parameters and variables as the previous exercise, create a loop that does the following: 
+
+1. Simulate 1000 *distributions* of $\hat\beta_1$ with 1000 values estimates each from samples $X$, $u$, and $Y$ ranging from 1-1000. 
+2. Estimates the equation for Y to obtain $\hat\beta_0$ and $\hat\beta_1$ for each sample size.
+3. Plot the convergence of the distribution of $\hat\beta_1$ towards a normal distribution. 

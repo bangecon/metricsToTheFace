@@ -1,0 +1,185 @@
+---
+output: slidy_presentation
+runtime: shiny_prerendered
+title: "Chapter 11 \n\n Advanced Time Series \n\n Problems with OLS in Time Series"
+description: >
+  This tutorial introduces some problems specific to time series (and panel data) in regression analysis.
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+library(dynlm)
+library(stargazer)
+library(wooldridge)
+nyse <- wooldridge::nyse
+nyse.ts <- ts(nyse)
+fertil3 <- wooldridge::fertil3
+fertil3.ts <- ts(fertil3)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Classical Assumptions
+
+Assumptions needed for $\hat\beta_OLS$ to be "BLUE"
+
+1.  Linear in the parameters
+
+2.  $X_i$'s and $Y_i$'s are independently and identically distributed
+    (random sampling)
+
+3.  No perfect multicollinearity
+
+4.  $E(u|X)=0$ (strict exogeneity)
+
+    a.  No omitted variables
+    b.  No endogenous regressors
+    c.  No measurement error
+    d.  No included "colliders" (e.g. post-treatment effects)
+
+5.  $Var(u) = \sigma^2$ (homoskedasticity)
+
+6.  $E(X^4) < 0$, $E(Y^4) < 0$ (no extreme "outliers")
+
+Additional assumption for $\hat\beta_{OLS}$ to be "MVUE"
+
+7.  $u \sim N(0, \sigma^2)$ (normal distribution of errors)
+
+## Strong Assumptions for Time Series (Chapter 10)
+
+Strict independence (2), exogeneity (4), and homoskedasticity (5) may be
+unrealistic. Replace with
+
+1.  Linear in the parameters
+2.  Independence (random sampling)
+3.  No perfect multicollinearity
+4.  $E(u_t|X)=0$ (strict exogeneity)
+5.  $Var(u) = \sigma^2$ (homoskedasticity)
+6.  $Corr(u_s, u_t |X) = 0, t \neq 0$ (no serial correlation)
+
+## Weakened Assumptions for Time Series (Chapter 11)
+
+Independence (2) *strict* exogeneity (4), homoskedasticity (5), and *no* serial correlation (6)
+may be unrealistic. Replace with:
+
+2.  Weak dependence <br>
+    $\lim_{h \to \infty} \text{corr}(X_t, X_{t+h}) = 0$ <br>
+    $\lim_{h \to \infty} \text{corr}(Y_t, Y_{t+h}) = 0$ <br> Dependence
+    between two values of X and Y decays the farther apart they are.
+
+Stationarity (three types)
+
+4.  Mean stationary: $E(x_t) = \mu$ <br> $E(u_t|X_t)=0$
+    (*contemporaneous* exogeneity)\
+5.  Variance stationary: mean stationarity *and* $V(x_t) = \sigma^2$
+    (*contemporaneous* homoskedasticity)
+6.  Covariance stationary: variance stationarity *and*
+    $Cov(x_t, x_{t+h}) = f(h)$ <br> $E(u_tu_s|X_t,X_s)=0$ (no [contemporaneous?] serial
+    correlation)
+
+Linearity, weak dependence, no perfect multicollinearity, and
+stationarity imply OLS will be *consistent* (but not necessarily
+completely unbiased)
+
+Consistency: $\text{plim}_{t \to \infty}\hat\beta = \beta$
+
+
+## Examples
+
+Weak Dependence
+
+1.  MA(1) processes <br> $x_t = e_t + \alpha x_{t-1}$
+2.  AR(1) processes <br> $y_t = \rho y_{t-1} + e_t$
+
+Non-Stationarity
+
+1.  Time trend <br> $y_t = \beta t + e_t$
+2.  Seasonality <br> $y_t = \sum_{k=1}^K \delta_k s_kt + e_t$
+3.  Random Walk <br> $y_t = y_{t-1} + e_t$
+
+## Examples, Continued
+
+Sometimes we can "see" nonstationarity in the time series plot:
+
+```{r}
+par(mfrow=c(1,2))
+plot(fertil3$year[-1], fertil3$gfr[-1], type = 'l', xlab = "Year", ylab = "Fertility")
+plot(fertil3$year[-1], diff(fertil3$gfr), type = 'l', xlab = "Year", ylab = "Change in Fertility")
+```
+
+## Exercise
+
+Using the $dynlm$ package, do the following:
+
+1.  Define time series (numbered 1,...,n and named $nyse.ts$)
+2.  Line plot the price against the time period
+3.  Plot the *return* (change in price) against time period
+
+```{r stationary, exercise = TRUE}
+
+
+```
+
+```{r stationary-hint}
+nyse.ts <- ts(data)
+plot(x, y)
+```
+
+```{r stationary-solution}
+nyse.ts <- ts(nyse)
+plot(nyse$t[-1], nyse$price[-1], type = 'l')
+plot(nyse$t, nyse$return, type = 'l')
+```
+
+```{r stationary-check}
+grade_code()
+```
+
+## Exercise, Continued
+
+Next, do the following:
+
+1.  Estimate the following autoregressive models:
+    a.  $Return_t = \beta_0 + \beta_1 Return_{t-1} + e_t$
+    b.  $Return_t = \beta_0 + \beta_1 Return_{t-1} + \beta_2 Return_{t-2} + e_t$
+    c.  $Return_t = \beta_0 + \beta_1 Return_{t-1} + \beta_2 Return_{t-2} + \beta_3 Return_{t-3} + e_t$
+
+2.  Present the regression results using a formatted text-formatted
+    table with the number of observations, $R^2$, $\bar{R}^2$, and $F$
+    statistics reported at the bottom.
+
+```{r arp, exercise = TRUE}
+
+
+```
+
+```{r arp-hint}
+nyse.ts <- ts(...)
+ar1 <- dynlm(formula, data) 
+ar2 <- dynlm(formula, data) 
+ar3 <- dynlm(formula, data) 
+stargazer(list, type, keep.stat)
+
+```
+
+```{r arp-solution}
+nyse.ts <- ts(nyse)
+ar1 <- dynlm(return~L(return)                        , data=nyse.ts) 
+ar2 <- dynlm(return~L(return)+L(return,2)            , data=nyse.ts) 
+ar3 <- dynlm(return~L(return)+L(return,2)+L(return,3), data=nyse.ts) 
+stargazer(reg1, reg2, reg3, type="text", keep.stat=c("n","rsq","adj.rsq","f"))
+```
+
+```{r arp-check}
+grade_code()
+```
+
+## Rules of Thumb
+
+1.  Include lags of the dependent variable
+2.  Take first differences (sometimes higher differences)
+3.  Check for serial correlation?

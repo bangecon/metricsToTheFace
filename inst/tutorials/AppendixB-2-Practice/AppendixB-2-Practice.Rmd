@@ -7,6 +7,7 @@ runtime: shiny_prerendered
 ```{r setup, include=FALSE}
 library(learnr)
 library(gradethis)
+library(corrgram)
 gradethis_setup()
 tutorial_options(exercise.timelimit = 60)
 knitr::opts_chunk$set(echo = FALSE)
@@ -14,7 +15,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## Appendix B #10
 
-Suppose that at a large university, college GPA and SAT scoreare related by the conditional expectation $E(GPA|SAT) = 0.70 + 0.002 SAT$
+Suppose that at a large university, college GPA and SAT score are related by the conditional expectation $E(GPA|SAT) = 0.70 + 0.002 SAT$
   - Find expected $GPA$ when $SAT = 800$. Find $E(GPA|SAT = 1400)$. 
   - If average $SAT$ at the university is 1,100, what is the average GPA? 
 
@@ -27,7 +28,8 @@ Suppose that at a large university, college GPA and SAT scoreare related by the 
 ```
 
 ```{r gpaSAT-solution}
-
+0.7 + 0.002*800
+0.7 + 0.002*1100
 ```
 
 ```{r gpaSAT-check}
@@ -35,7 +37,7 @@ grade_result()
 ```
 
 ```{r singleObservation, echo=FALSE}
-question("If a student's $SAT$ is 1,100, does this mean they will have the same GPA as the previous question?",
+question("If an individual student's $SAT$ is 1,100, does this mean they will have the same GPA as the previous question?",
     answer("Yes"),
     answer("No", correct = TRUE),
     allow_retry = TRUE

@@ -1,11 +1,31 @@
 ---
-output: slidy_presentation
+output: 
+  learnr::tutorial:
+    progressive: true
 runtime: shiny_prerendered
 title: "Chapter 4 \n\n Multiple Regression Analysis - Inference"
 author: "James Bang"
 description: >
   This tutorial discusses tests involving multiple slope coefficients.
 ---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+<script language="JavaScript">
+$(function() {
+   var editor;
+   $('.ace_editor').each(function( index ) {
+     editor = ace.edit(this);
+     editor.setFontSize("16px");
+   });
+})
+</script>
 
 ```{r setup, include=FALSE}
 library(learnr)
@@ -21,13 +41,11 @@ gradethis::gradethis_setup()
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## Warmup
+## Occupation and Wages
 
-Re-estimate $wage.lm7$, which from the previous tutorial regressed wage on education, experience, experience squared, job tenure, and occupation type. 
-
-$$ wage = \beta_0 + \beta_1educ + \beta_2exper + \beta_3exper^2 + \beta_4tenure + \beta_5profocc + \beta_6clerocc + \beta_7servocc $$
-
-Summarize the result. 
+1. Re-estimate `wage.lm7`, which from the previous tutorial regressed wage on education, experience, experience squared, job tenure, and occupation type. 
+$$\begin{align}wage ={} &\beta_0 + \beta_1educ + \beta_2exper + \beta_3exper^2 + \beta_4tenure + \\ & \beta_5profocc + \beta_6clerocc + \beta_7servocc \end{align}$$
+2. Summarize the result. 
 
 ```{r tTestReview, exercise = TRUE}
 
@@ -39,12 +57,15 @@ Summarize the result.
 ```
 
 ```{r tTestReview-solution}
-
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)
+summary(wage.lm7)
 ```
 
 ```{r tTestReview-check}
 grade_code()
 ```
+
+### Question
 
 ```{r pValReview, echo=FALSE}
   question("The p-Value to test whether the wages of clerical occupations differ from the baseline group (manufacturing occupations) is:",
@@ -60,38 +81,35 @@ grade_code()
 
 Suppose we want to test whether clerical and service occupations differ *from each other*. One way to write this is: 
 
-- $H_0: \beta_6 = \beta_7$
-- $H_1: \beta_6 \ne \beta_7$
+$$H_0: \beta_6 = \beta_7$$
+$$H_1: \beta_6 \ne \beta_7$$
 
 Another way to write this is: 
 
-- $H_0: \beta_6 - \beta_7 = 0$
-- $H_1: \beta_6 - \beta_7 \ne 0$
+$$H_0: \beta_6 - \beta_7 = 0$$
+$$H_1: \beta_6 - \beta_7 \ne 0$$
 
-It might seem like these are identical but rearranging them the second way has an important purpose: it arranges all of the unknown parameters (the estimates of which are random variables!) on the left and known constants on the right. 
+Rearranging them this way has a purpose: it places all unknown parameters on the left and numerical constants on the right. 
 
-We can now think about what the distribution of the (random) estimated difference ($\hat\beta_6 - \hat\beta_7$) is under the null hypothesis. 
+### Sampling distribution of $\beta_j - \beta_l$
 
-## Sampling distribution of $\beta_j - \beta_l$
+Under $H_0$, $\beta_6 - \beta_7 = 0$
 
-If the null hypothesis is true, then $\beta_6 - \beta_7 = 0$
+If the OLS assumptions hold, then under $H_0$,
 
-If the OLS assumptions hold, $E(\hat\beta_6) = \beta_6$ and $E(\hat\beta_7) = \beta_7$, so under the null $E(\hat\beta_6 - \hat\beta_7) = 0$
-
-Using the rules on variance in Appendix B, the variance of the difference is 
-$$ Var(\hat\beta_6 - \hat\beta_7) = Var(\hat\beta_6) + Var(\hat\beta_7) - 2Cov(\hat\beta_6,\hat\beta_7) $$
-So the standard error is
-$$ se_{\hat\beta_6 - \hat\beta_7} = \sqrt{Var(\hat\beta_6) + Var(\hat\beta_7) - 2Cov(\hat\beta_6,\hat\beta_7)} $$
+1. $E(\hat\beta_6 - \hat\beta_7) = 0$ 
+2. $Var(\hat\beta_6 - \hat\beta_7) = Var(\hat\beta_6) + Var(\hat\beta_7) - 2Cov(\hat\beta_6,\hat\beta_7)$<br>
+$se_{\hat\beta_6 - \hat\beta_7} = \sqrt{Var(\hat\beta_6) + Var(\hat\beta_7) - 2Cov(\hat\beta_6,\hat\beta_7)}$
 
 Since the parameter estimates are normally distributed, and the variances are $\chi^2$, the test statistic, 
 
-$$ t_{\hat\beta_6-\hat\beta_7} = \frac{\hat\beta_6 - \hat\beta_7}{se_{\hat\beta_6 - \hat\beta_7}} \sim t(n-k-1) $$
+$$ t_{\hat\beta_6-\hat\beta_7} = \frac{(\hat\beta_6 - \hat\beta_7)-0}{s_{\hat\beta_6 - \hat\beta_7}} \sim t(n-k-1) $$
 
-## Example
+### Comparing Two Occupational Groups' Wages
 
-Use the $glht$ function from the $multcomp$ package (preloaded with this tutorial) to test the hypothesis that clerical occupations have the same wages as service occupations against the alternative that they differ. Nest the test inside a $summary$ to give the full table of test statistics. 
+Use the `glht` function from the `multcomp` package (preloaded with this tutorial) to test the hypothesis that clerical occupations have the same wages as service occupations against the alternative that they differ. Pipe the test to a `summary` to give the full table of test statistics. 
 
-Use the $lht$ function from the $car$ package (also preloaded). You do not need to $summary()$ the results to get the output you want to see. 
+Use the `lht` function from the `car` package (also preloaded). You do not need to `summary()` the results to get the output you want to see. 
 
 ```{r lincom, exercise = TRUE}
 
@@ -101,56 +119,51 @@ Use the $lht$ function from the $car$ package (also preloaded). You do not need 
 
 ```{r lincom-hint}
 # glht requires a model and a "linfct" option where "linfct" is a linear function of the variables in quotation marks.
-summary(glht(..., linfct = ...))
+
 # lht requires a model, a linear function of the parameters for the left-hand side of the hypothesis, and the numerical value(s) for the right hand side. 
-lht(..., ..., ...)
+
 ```
 
 ```{r lincom-solution}
-summary(glht(wage.lm7, linfct = "clerocc - servocc = 0"))
+glht(wage.lm7, linfct = "clerocc - servocc = 0") |>
+  summary()
 lht(wage.lm7, "clerocc - servocc",  0)
 ```
 
 ```{r lincom-check}
-grade_code("Notice that the test statistic for $lht$ is exactly the value of that for $glht$. That's because lht uses an F-Test for everything, and the F-distribution (ratio of two $\chi^2$s) is exactly the same as the distribution of the square of a t-distributed random variable (ratio of a normal and the square root of a $\chi^2$). $glht$ is cleaner for single restrictions, $lht$ is more flexible.")
+grade_code("Notice that the test statistic for `lht` is exactly the value of that for `glht` *squared*. That's because `lht` uses an F-Test for everything, and the F-distribution (ratio of two Chi-Squareds) is exactly the same as the distribution of the square of a t-distributed random variable (ratio of a normal and the square root of a Chi-Squared). `glht` is cleaner for single restrictions; `lht` is more flexible.")
 ```
+
+Warning: "The Difference Between 'Significant' and 'Insignificant' is not Itself Statistically Significant" - Andrew Gelman
 
 ## Testing Joint Significance of Multiple Coefficients
 
-We have our wage model: 
-
-$$ wage = \beta_0 + \beta_1educ + \beta_2exper + \beta_3exper^2 + \beta_4tenure + \beta_5profocc + \beta_6clerocc + \beta_7servocc $$
-We want to test the following hypothesis: 
-
-$$ H_0: \begin{pmatrix} \beta_5 \\ \beta_6 \\ \beta_7 \end{pmatrix} = \begin{pmatrix} 0\\ 0 \\ 0 \end{pmatrix} $$
-All three occupation coefficents equal zero. 
-$$ H_1: \begin{pmatrix} \beta_5 \\ \beta_6 \\ \beta_7 \end{pmatrix} \ne \begin{pmatrix} 0\\ 0 \\ 0 \end{pmatrix} $$
-At least one occupation coefficient is not zero.
+We want to test the hypothesis that all of the occupational groups have the same wage against the alternative that *at least* one group has different wages. 
 
 This involves (a vector of) multiple restrictions and we cannot test this hypothesis using a simple t-Test. We must use an F-test (like you might have if you have studied ANoVA). 
 
-## Calculating the F-Statitic
+$$ H_0: \begin{pmatrix} \beta_{profocc} \\ \beta_{servocc} \\ \beta_{clerocc} \end{pmatrix} = \begin{pmatrix} 0\\ 0 \\ 0 \end{pmatrix} $$
+$$ H_1: \begin{pmatrix} \beta_{profocc} \\ \beta_{servocc} \\ \beta_{clerocc} \end{pmatrix} \ne \begin{pmatrix} 0\\ 0 \\ 0 \end{pmatrix} $$
+
+### Calculating the F-Statitic
 
 There are a couple of different (but equivalent) ways to calculate the F-Statistic for the joint significance of a group of variables. They involve the same basic steps. 
 
-- Estimate the unrestricted model (the full model) and store the $R^2$ *or* the residual sum of squares (SSR). 
-- Estimate the restricted model (which *excludes* the variables you wish to test) and store the $R^2$ or SSR. 
-- Calculate the F statistic: 
-  - Formula using SSR: 
-  $$ F = \frac{(SSR_r - SSR_u)/q}{SSR_u/(n-k-1)} $$
-  - Formula using $R^2$: 
-  $$ F = \frac{(R_u^2 - R_r^2)/q}{(1-R_u^2/(n-k-1)} $$
-  - You should be able to work out the equivalence of these formulas by noting that $R^2 = 1 - \frac{SSR}{SST}$
+1. Estimate the unrestricted model (the full model) and store the $R^2$ *or* the residual sum of squares (SSR). 
+2. Estimate the restricted model (which *excludes* the variables you wish to test) and store the $R^2$ or SSR. 
+3. Calculate the F statistic: 
+  a. Formula using SSR: $F = \frac{(SSR_r - SSR_u)/q}{SSR_u/(n-k-1)}$
+  b. Formula using $R^2$: $F = \frac{(R_u^2 - R_r^2)/q}{(1-R_u^2/(n-k-1)} $
+  c. These formulas are equivalent since $R^2 = 1 - \frac{SSR}{SST}$
 
-## Example
+### Differences in Wages among All Occupational Groups
 
-Test the joint significance of occupational choice on wages "by hand" using the $R^2$ formula
+Test the joint significance of occupational choice on wages "by hand" using the $R^2$ formula:  
 
-Note that the unrestricted model is $wage.lm7$ that we re-estimated in the warmup; you will need to run the restricted model yourself (call it wage.lm8). 
-
-Name the R-squareds $r2.u$ for the unrestricted model and $r2.r$ for the restricted model.
-
-Name the F statistic "wage.F.occ" and print its p-value without assigning it a name.
+1. Estimate the unrestricted model, `wage.lm7` and the restricted model (without occupations), `wage.lm8`. 
+2. Extract the R-squareds as `r2.u` and `r2.r`.
+3. Compute the F statistic using the equation from 3(b) above and name it `wage.F.occ`. 
+4. Calculate and print the p-value.
 
 ```{r fTest, exercise = TRUE}
 
@@ -159,44 +172,40 @@ Name the F statistic "wage.F.occ" and print its p-value without assigning it a n
 
 ```{r fTest-hint}
 # Estimate the restricted Model:
-wage.lm8 <- lm(..., ...)
+
 # The R-squareds are an object stored in the summary() of the regression output:
-r2.u <- summary(...)$... 
-r2.r  <- summary(...)$...
+
 # F statistic:
-wage.F.occ <- ...
+
 # p value = 1-cdf of the appropriate F distribution:
-1 - pf(..., ..., ...)
+
 ```
 
 ```{r fTest-solution}
-# Restricted Model:
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)
 wage.lm8 <- lm(wage ~ educ + exper + I(exper^2) + tenure, data = wage1)
-# Extract the R-squareds:
 r2.u <- summary(wage.lm7)$r.squared
 r2.r <- summary(wage.lm8)$r.squared
-# F statistic:
-wage.F.occ <- ((r2.u-r2.r)/3) / ((1-r2.u)/wage.lm7$df.residual)
-# p value = 1-cdf of the appropriate F distribution:
-1 - pf(wage.F.occ, 3,wage.lm7$df.residual)
+wage.F.occ <- ((r2.u-r2.r)/(wage.lm8$df.residual - wage.lm7$df.residual)) / ((1-r2.u)/wage.lm7$df.residual)
+1 - pf(wage.F.occ, wage.lm8$df.residual -wage.lm7$df.residual, wage.lm7$df.residual)
 ```
 
 ```{r fTest-check}
-grade_code("Note that here I have just used the number *3* as the numerator degrees of freedom. If we wanted to generalize this code for any model or any number of restrictions, we could use the difference in the *rank* of the X-matrix (number of non-collinear columns) for the two models, $wage.lm7$rank - wage.lm8$rank$.")
+grade_code("Note that the numerator degrees of freedom equal the residual degrees of freedom for the restricted model minus the residual degrees of freedom for the unrestricted model; the denominator degrees of freedom are the residual degrees of freedom for the unrestricted model.")
 ```
 
-## Warning about Independent t-Tests and a Note on the *Regression F-Statistic*
+### Warning about Independent t-Tests and a Note on the *Regression F-Statistic*
 
 ```{r independentTTest, echo=FALSE}
   question("Suppose we test these three parameters independently and reject just one of them at $\\alpha \\le 0.05$ (we do not know the actual p-value or exact t-statistic, only the result of the test for some reason). What is the probability of a type I error if we use this method to test joint significance?",
-    answer("0.05", message = "Careful! We cannot substitute individual t-tests for joint tests and get equivalent levels of significance! The true probability of type I error in this case is $1 - P(\text{none of the hypotheses rejected}) = 1 - 0.95^3$!"),
     answer("0.000125"),
+    answer("0.05", message = "Careful! We cannot substitute individual t-tests for joint tests and get equivalent levels of significance! The true probability of type I error in this case is $1 - P(\text{none of the hypotheses rejected}) = 1 - 0.95^3$!"),
+    answer("0.10"),
     answer("0.142625", correct = TRUE),
-    answer("0.15"),
     allow_retry = TRUE
   )
 ```
 
-The *regression F-Statistic* (the F-Statistic reported when you $summary()$ a model) is simply a joint significance test where the number of restrictions is all of the independent variables. The restricted model is the unconditional mean (regression on a constant). Its formula is: 
+The *regression F-Statistic* (the F-Statistic reported when you `summary()` a model) is simply a joint significance test where the number of restrictions is all of the independent variables. The restricted model is the unconditional mean (regression on a constant). Its formula is: 
 
 $$ F = \frac{SSR/k}{SST/(n-k-1)} $$

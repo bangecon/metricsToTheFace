@@ -10,12 +10,137 @@ description: >
 ```{r setup, include=FALSE}
 library(learnr)
 library(wooldridge)
+library(plm)
+library(lmtest)
+library(sandwich)
+library(gradethis)
+library(gtsummary)
 library(stargazer)
-wage1 <- wooldridge::wage1
-wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)
-wage.lm9 <- lm(wage ~ educ + exper + tenure + female, data = wage1)
-wage.lm11 <- lm(wage ~ educ + exper + tenure + female*married, data = wage1)
-wage.lm12 <- lm(log(wage) ~ educ + exper + tenure + female*married, data = wage1)
-wage.lm13 <- lm(wage ~ educ + exper + tenure + female*educ, data = wage1)
+library(lmtest)
+gradethis::gradethis_setup()
+crime4 <- wooldridge::crime4
+crime4.p <- pdata.frame(crime4, index=c("county", "year") )
+crime4.p$lcrmrte.b <- Between(crime4.p$lcrmrte)
+crime4.p$lcrmrte.w <- Within(crime4.p$lcrmrte)
+crime4.p$lprbarr.b <- Between(crime4.p$lprbarr)
+crime4.p$lprbarr.w <- Within(crime4.p$lprbarr)
+crime4.p$lprbconv.b <- Between(crime4.p$lprbconv)
+crime4.p$lprbconv.w <- Within(crime4.p$lprbconv)
+crime4.p$lprbpris.b <- Between(crime4.p$lprbpris)
+crime4.p$lprbpris.w <- Within(crime4.p$lprbpris)
+crime4.p$lavgsen.b <- Between(crime4.p$lavgsen)
+crime4.p$lavgsen.w <- Within(crime4.p$lavgsen)
+crime4.p$lpolpc.b <- Between(crime4.p$lpolpc)
+crime4.p$lpolpc.w <- Within(crime4.p$lpolpc)
+crmrte.fe1 <- lm(log(crmrte) ~ lprbarr + lprbconv + lprbpris + lavgsen + lpolpc + factor(county), 
+                  data = crime4.p)
+crmrte.fe2 <- lm(lcrmrte.w ~ lprbarr.w + lprbconv.w + lprbpris.w + lavgsen.w + lpolpc.w, 
+                  data = crime4.p)
+crmrte.fe3 <- plm(log(crmrte) ~ lprbarr + lprbconv + lprbpris + lavgsen + lpolpc, 
+                  data = crime4.p, model = "within")
+crmrte.fe4 <- plm(log(crmrte) ~ lprbarr + lprbconv + lprbpris + lavgsen + lpolpc, 
+                  data = crime4.p, effects = "individual")
+crmrte.be1 <- lm(lcrmrte.b ~ lprbarr.b + lprbconv.b + lprbpris.b + lavgsen.b + lpolpc.b, 
+                 data = crime4.p)
+crmrte.re1 <- plm(log(crmrte) ~ lprbarr + lprbconv + lprbpris + lavgsen + lpolpc, 
+                  data = crime4.p, model = "random", effects = "none")
+crmrte.re2 <- plm(log(crmrte) ~ lprbarr + lprbconv + lprbpris + lavgsen + lpolpc, 
+                  data = crime4.p, effects = "none")
+crmrte.cre1 <- plm(lcrmrte ~ lprbarr + lprbconv + lprbpris + lavgsen + lpolpc + 
+                    lprbarr.b + lprbconv.b + lprbpris.b + lavgsen.b + lpolpc.b, 
+                  data = crime4.p, model = "random", effects = "none")
+crmrte.cre2 <- plm(lcrmrte ~ lprbarr + lprbconv + lprbpris + lavgsen + lpolpc + west + central +
+                    urban + lprbarr.b + lprbconv.b + lprbpris.b + lavgsen.b + lpolpc.b, 
+                  data = crime4.p, model = "random", effects = "none")
+crmrte.fe5 <- plm(lcrmrte ~ lprbarr + lprbconv + lprbpris + lavgsen + lpolpc + west + central + 
+                   urban, data = crime4.p, effects = "individual")
 knitr::opts_chunk$set(echo = FALSE)
 ```
+
+# Correlated Random Effects
+
+$$ln(Crime Rate_{it}) = \beta_0 + \beta_1ln(P_{it}[Arrest]) + \beta_2ln(P_{it}[Conviction]) + \beta_3ln(P_{it}[Prison]) + $$
+$$\beta_4ln(AveSentence_{it}) + \beta_5ln(PolicePC_{it}) + \beta_6West_{i} + \beta_7Central_{i} + \beta_8Urban_{i} + a_{i} + u_{it}$$
+
+Estimate this model the following ways: 
+
+  1. Use a standard random-effects estimator ($crmrte.re3$)
+  2. Use a random-effects estimator, adding the *between transforms* ($variable.b$) of all of the time-varying variables as additional controls ($crmrte.cre1$). 
+  3. Use a random-effects estimator with between-effects controls, adding region ($west$ and $central$) and $urban$ as controls ($crmrte.cre2$).
+  4. Use a fixed-effects estimator, *without* between-effects controls, adding region ($west$ and $central$) and $urban$ as controls ($crmrte.fe5$).
+
+Create a $stargazer$ text table of these estimates and the fixed-effects estimator ($crmrte.fe4$). 
+
+```{r cre, exercise = TRUE}
+
+```
+
+```{r cre-hint}
+crmrte.cre1 <- plm(formula, data, model, effects)
+crmrte.cre2 <- plm(formula, data, model, effects)
+crmrte.fe5 <- plm(formula, data, effects)
+stargazer(list, type)
+```
+
+```{r cre-solution}
+crmrte.cre1 <- plm(lcrmrte ~ lprbarr + lprbconv + lprbpris + lavgsen + lpolpc + 
+                    lprbarr.b + lprbconv.b + lprbpris.b + lavgsen.b + lpolpc.b, 
+                  data = crime4.p, model = "random", effects = "none")
+crmrte.cre2 <- plm(lcrmrte ~ lprbarr + lprbconv + lprbpris + lavgsen + lpolpc + west + central +
+                    urban + lprbarr.b + lprbconv.b + lprbpris.b + lavgsen.b + lpolpc.b, 
+                  data = crime4.p, model = "random", effects = "none")
+crmrte.fe5 <- plm(lcrmrte ~ lprbarr + lprbconv + lprbpris + lavgsen + lpolpc + west + central + 
+                   urban, data = crime4.p, effects = "individual")
+stargazer(crmrte.cre1, crmrte.cre2, crmrte.fe5, crmrte.fe4, type = 'text')
+```
+
+```{r cre-check}
+grade_code()
+```
+
+# Other Adventures in Panel Data
+
+## Fixed or random effects? Which should I choose?
+
+## Fixing standard errors for heteroscedasticity/clustering
+
+  1. "Robust" standard errors
+  2. Individual-specific clustered SEs
+
+## Other data structures
+
+  1. Cluster sampling
+  2. Multilevel models
+
+# Clustering Standard Errors
+
+Clustering Standard Errors: Differences in standard errors within panels
+
+Replicate the correlated random effects model from (4) in the previous exercise using clustered standard errors (package = lmtest; function = coeftest(model, vcov.)). Perform the clustering two ways: 
+
+  1. Using the classical OLS standard errors; 
+  2. Using the heteroscedasticity-consistent standard errors (vcovHC); 
+  3. Using the small-sample corrected HC standard errors (type = 'sss'). 
+
+Summarize your results using stargazer.
+
+```{r cluster, exercise = TRUE}
+
+```
+
+```{r cluster-hint}
+crmrte.cre2HC0 <-coeftest(model, vcovHC)
+crmrte.cre2SSS <-coeftest(model, vcovHC(crmrte.cre2, type="sss"))
+stargazer(crmrte.cre2, crmrte.cre2HC0, crmrte.cre2SSS, type = 'text')
+```
+
+```{r cluster-solution}
+crmrte.cre2HC0 <-coeftest(crmrte.cre2, vcovHC)
+crmrte.cre2SSS <-coeftest(crmrte.cre2, vcovHC(crmrte.cre2, type="sss"))
+stargazer(crmrte.cre2, crmrte.cre2HC0, crmrte.cre2SSS, type = 'text')
+```
+
+```{r cluster-check}
+grade_code()
+```
+

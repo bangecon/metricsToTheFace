@@ -1,0 +1,111 @@
+---
+output: pdf_document
+classoption: landscape
+title: "Chapter 7 \n\n Regression with Qualitative Information"
+author: "Jim Bang"
+description: "This tutorial introduces binary regressors (dummy variables)."
+---
+
+```{r setup, include=FALSE}
+library(stargazer)
+library(wooldridge)
+wage1 <- wooldridge::wage1
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)
+wage.lm9 <- lm(wage ~ educ + exper + tenure + female, data = wage1)
+wage1$occ <- factor(1 + wage1$profocc + 2*wage1$clerocc + 3*wage1$servocc, labels = c("Manufacturing", "Professional", "Clerical", "Services"))
+wage.lm10 <- lm(wage ~ educ + exper + I(exper^2) + tenure + occ, data = wage1)
+wage.lm11 <- lm(wage ~ educ + exper + tenure + female*married, data = wage1)
+wage.lm12 <- lm(log(wage) ~ educ + exper + tenure + female*married, data = wage1)
+wage.lm13 <- lm(wage ~ educ + exper + tenure + female*educ, data = wage1)
+crime1 <- wooldridge::crime1
+crime.lm1 <- lm((narr86 > 0) ~ pcnv + avgsen + tottime + ptime86 + qemp86, data = crime1)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Dummy (Binary) Independent Variables
+
+Qualitative Information (Categorical/Factor Variables)
+
+  - Gender, Race, Industry, Occupation
+  - Create separate dummy variables for each category. 
+  - Avoid the *dummy variable trap*!
+  - R automatically does this for you. 
+  
+### Single Dummy Independent Variable
+
+Estimate the wage differential for women, controlling for education, experience, and experience squared. Call this `wage.lm9` and run a `summary()` of the results. 
+
+```{r gender-solution}
+wage.lm9 <- lm(wage ~ educ + exper + I(exper^2) + female, data = wage1)
+summary(wage.lm9)
+```
+
+### Dummy Variables for Multiple Categories
+
+1. Use the `factor()` function to create a factor, `occ`, as a variable in `wage1` from the occupational dummy variables in `wage1` (`profocc`, `clerocc`, and `servocc`) that takes integer values from one to four. Use the `labels` option to assign the labels `Manufacturing`, `Professional`,` Clerical`, and `Services` to the values.
+2. Replicate `wage.lm7` using the new factor variable you created. Call this `wage.lm10` and summarize both regressions using a text stargazer() output.
+
+```{r occupation-solution}
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)
+wage1$occ <- factor(1 + wage1$profocc + 2*wage1$clerocc + 3*wage1$servocc, 
+                    labels = c("Manufacturing", "Professional", "Clerical", "Services"))
+wage.lm10 <- lm(wage ~ educ + exper + I(exper^2) + tenure + occ, data = wage1)
+stargazer(wage.lm7, wage.lm10, type = "text")
+```
+
+\newpage
+## Interactions 
+
+### Interactions among Dummy Variables
+
+Estimate the wage effect of marriage differ across gender by interacting `female` with `married`, controlling for education, experience, and job tenure. Call this `wage.lm11` and use a pipe to print a `summary()` of the results.
+
+```{r marriage-solution}
+wage.lm11 <- lm(wage ~ educ + exper + tenure + female*married, data = wage1) |> 
+  summary()
+```
+
+### Different Slopes
+
+Estimate the effect of gender on wages *and the returns to education*, controlling for experience and job tenure. Call this `wage.lm12` and print a `summary()` of your result. 
+
+```{r genderEducation-solution}
+wage.lm12 <- lm(wage ~ educ + exper + tenure + female*educ, data = wage1) 
+summary(wage.lm12)
+```
+
+\newpage
+## Binary Dependent Variables
+
+### Probability of Arrest
+
+Estimate the effect of prior convictions (`pcnv`) on *whether* a person was arrested in 1986, controlling for the average sentence of prior convictions (`avesen`), total time spent in prison prior to 1986 (`tottime`), total number of months spent in prison in 1986 (`ptime86`), and total number of quarters officially employed in 1986 (`qemp86`). Call this `crime.lm1` and print a `summary()` of your result.
+
+```{r arrests-solution}
+crime.lm1 <- lm((narr86 > 0) ~ pcnv + avgsen + tottime + ptime86 + qemp86, data = crime1)
+summary(crime.lm1)
+```
+
+What does the coefficient on prior convictions represent? 
+
+### Linear Probability Model
+
+$$\begin{aligned}
+Arrest_i^{86} = {} &\ beta_0 + \beta_1Priors_i + \beta_2Sentence_i + \beta_3PriorTime_i + \\ 
+&\beta_4PrisonTime_i^{86} + \beta_5QuaartersEmployed_i^{86} + u_i
+\end{aligned}$$
+
+$$Arrest_i^{86} = \begin{cases} 1 \text{ if number of arrests} > 0; \\ 0 \text{ otherwise} \end{cases}$$
+$$\hat{y}_i = \hat{P}(Arrest_i^{86}=1|x) = X\beta$$
+$$\beta_j = \frac{\Delta\hat{P}(Arrest_i^{86}=1|x)}{\Delta x_j}$$
+
+### Problems with the Linear Probability Model
+
+Estimate the model including the respondent's income in 1986 (`inc86`) and name it `crime.lm2`. Summarize the `fitted.values` stored in the estimation results.
+
+```{r arrestsIncome-solution}
+crime.lm2 <- lm((narr86 > 0) ~ pcnv + avgsen + tottime + ptime86 + qemp86, data = crime1)  
+summary(crime.lm2$fitted.values)
+```
+
+Notice a problem?
