@@ -8,22 +8,19 @@ runtime: shiny_prerendered
 library(learnr)
 library(gradethis)
 library(corrgram)
+affairs <- wooldridge::affairs
 gradethis_setup()
-tutorial_options(exercise.timelimit = 60)
-knitr::opts_chunk$set(echo = FALSE)
+tutorial_options(exercise.reveal_solution = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 ```
 
 ## Appendix B #10
 
 Suppose that at a large university, college GPA and SAT score are related by the conditional expectation $E(GPA|SAT) = 0.70 + 0.002 SAT$
   - Find expected $GPA$ when $SAT = 800$. Find $E(GPA|SAT = 1400)$. 
-  - If average $SAT$ at the university is 1,100, what is the average GPA? 
+  - If average $SAT$ at the university is 1,100, what is the expected average GPA? 
 
-```{r gpaSAT, exercise=TRUE, exercise.reveal_solution = TRUE}
-
-```
-
-```{r gpaSAT-hint}
+```{r gpaSAT, exercise=TRUE}
 
 ```
 
@@ -33,7 +30,9 @@ Suppose that at a large university, college GPA and SAT score are related by the
 ```
 
 ```{r gpaSAT-check}
-grade_result() 
+grade_this({if (identical(.result, .solution)) {
+  pass(random_praise())}
+  fail(random_encouragement())})
 ```
 
 ```{r singleObservation, echo=FALSE}
@@ -43,7 +42,6 @@ question("If an individual student's $SAT$ is 1,100, does this mean they will ha
     allow_retry = TRUE
   )
 ```
-
 
 ## Correlogram Practice
 
@@ -61,12 +59,13 @@ Give your corrgram the following panel attributes:
   - Estimated empirical uni-variate densities in the diagonal panel; 
   - Black color palette. 
 
-```{r corrgramPractice, exercise=TRUE, exercise.reveal_solution = TRUE}
+```{r corrgramPractice, exercise=TRUE}
 
 ```
 
 ```{r corrgramPractice-hint}
-
+# `panel.cor`, `panel.pts`, and `panel.density` give the options you want for the upper, lower, and diagonal panels, respectively.
+# Use 
 ```
 
 ```{r corrgramPractice-solution}
@@ -78,5 +77,20 @@ corrgram(affairs[,which(names(affairs) %in% c('age', 'yrsmarr', 'educ', 'naffair
 ```
 
 ```{r corrgramPractice-check}
-grade_result() 
+grade_this({
+  if (!inherits(.result, c("matrix", "array"))) {
+    fail("Your class of your answer should be c('matrix', 'array').")
+  }
+
+  if (length(.result) != 16) {
+    fail("Your table should have a length of 16. Make sure you plot the variables specified.")
+  }
+
+  if (nrow(.result) != 4) {
+    fail("Your table should have 4 rows. Make sure you plot the variables specified.")
+  }
+
+  # all of the above checks have passed now.
+  pass()
+})
 ```

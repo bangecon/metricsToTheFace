@@ -7,6 +7,7 @@ runtime: shiny_prerendered
 ```{r setup, include=FALSE}
 library(learnr)
 library(gradethis)
+library(stargazer)
 gpa1 <- wooldridge::gpa1
 k401k <- wooldridge::k401k
 gradethis_setup()
@@ -17,8 +18,9 @@ knitr::opts_chunk$set(echo = FALSE)
 ## Exercise
 
 Using the $gpa1$ dataset do the following: 
-1. Regress college GPA ($colGPA$) on ACT score($ACT$) and name the result $GPA.lm1$; 
-2. Regress college GPA on high school GPA ($hsGPA$) and ACT score, and name the result $GPA.lm2$. 
+1. Regress college GPA ($colGPA$) on ACT score($ACT$); 
+2. Regress college GPA on high school GPA ($hsGPA$) and ACT score. 
+3. 
 
 ```{r colGPA, exercise=TRUE, exercise.reveal_solution = FALSE}
 
@@ -30,26 +32,27 @@ GPA.lm2 <- lm(colGPA ~ hsGPA + ACT, data=gpa1)
 stargazer(GPA.lm1, GPA.lm2, type = 'text')
 ```
 
-```{r colGPA-hint}
-GPA.lm1 <- lm(..., data = ...)
-GPA.lm2 <- lm(..., data = ...)
-stargazer(..., ..., ...)
-```
-
 ```{r colGPA-check}
-grade_code()
+grade_this({if (!inherits(.result, c("character"))) {
+    fail("Your class of your answer should be a list of character strings.")}
+  if (length(.result) != 24) { 
+    fail("The length of the result should equal the number of rows in your table (including separators and text)" ) }
+  if (.result[11]!="ACT                        0.027**                 0.009         "){ 
+    fail("The ACT coefficients don't look quite right.") }
+  pass()
+})
 ```
 
 ## Partition Regression
 
 Use partitioned regression to partial out the effect of a company's matching rate to their employees' 401k plan on the plan's participation rates, controlling for the plan's age. Recall that to do this you need to: 
 
-1. Regress the outcome ($prate$) on the control ($age$) and extract the residuals ($prate.u$);
-2. Regress the treatment ($mrate$) on the control ($age$) and extract the residuals ($mrate.u$); 
-3. Regress the residuals of participation on the residuals of matching (name this $prate.lm1$ and note that the coefficient matches the $mrate$ coefficient in example 3.3 in the book); 
+1. Regress the outcome ($prate$) on the control ($age$) and extract the residuals;
+2. Regress the treatment ($mrate$) on the control ($age$) and extract the residuals; 
+3. Regress the residuals of participation on the residuals of matching (note that the coefficient matches the $mrate$ coefficient in example 3.3 in the book); 
 4. Summarize the final residual regression. 
-5. Plot the outcome residuals ($prate.u$) on the treatment residuals ($mrate.u$)
-6. Add the regression line. 
+
+Hint: The `residuals()` function extracts the residuals from a regression object. 
 
 ```{r k401k, exercise=TRUE, exercise.reveal_solution = FALSE}
 
@@ -60,10 +63,37 @@ prate.u <- lm(prate ~ age, data = k401k)$residuals
 mrate.u <- lm(mrate ~ age, data = k401k)$residuals
 prate.lm1 <- lm(prate.u ~ mrate.u)
 summary(prate.lm1)
-plot(mrate.u, prate.u)
-abline(prate.lm1)
 ```
 
 ```{r k401k-check}
-grade_code()
+grade_this({if (!inherits(.result, c("summary.lm"))) {
+    fail("Your class of your answer should be a summary of an lm object.")}
+  if (.result$coefficients[2] != 5.521289) { 
+    fail("The coefficient on log(Sales) should be about 5.52.") }
+  pass()
+})
+```
+
+5. Plot the outcome residuals on the treatment residuals.
+6. Add the regression line. 
+
+```{r k401kPlot, exercise=TRUE, exercise.reveal_solution = FALSE}
+
+```
+
+```{r k401kPlot-solution}
+df <- data.frame(prate.u = residuals(lm(prate ~ age, data = k401k)), 
+                 mrate.u = residuals(lm(mrate ~ age, data = k401k)))
+ggplot(df) + 
+  geom_point(aes(mrate.u, prate.u)) +
+  geom_smooth(aes(mrate.u, prate.u), method = 'lm', formula = y ~ x)
+```
+
+```{r k401kPlot-check}
+grade_this({if (!inherits(.result, c("gg", "ggplot"))) {
+    fail("Your class of your answer should be c('gg', 'ggplot').")}
+  if (length(.result) != 9) { 
+    fail("You should use 'proto' plot functions to add layers to the same plot" ) }
+  pass()
+})
 ```

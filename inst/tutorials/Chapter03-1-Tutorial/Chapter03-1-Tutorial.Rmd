@@ -71,7 +71,12 @@ summary(wage.lm2)
 ```
 
 ```{r multipleLM-check}
-grade_code()
+grade_this({if (!inherits(.result, c("summary.lm"))) {
+    fail("Your class of your answer should be a summary of an lm object.")}
+  if (.result$coefficients[2] != 0.6442721) { 
+    fail("The coefficient on education should be about 0.644.") }
+  pass()
+})
 ```
 
 ### Table Output for Regressions
@@ -93,7 +98,14 @@ stargazer(wage.lm1, wage.lm2, type = 'text')
 ```
 
 ```{r gtLM-check}
-grade_code()
+grade_this({if (!inherits(.result, c("character"))) {
+    fail("Your class of your answer should be a list of character strings.")}
+  if (length(.result) != 24) { 
+    fail("The length of the result should equal the number of rows in your table (including separators and text)" ) }
+  if (.result[8] != "educ                        0.541***                0.644***        "){ 
+    fail("The edycation coefficients don't look quite right.") }
+  pass()
+})
 ```
 
 ### Raw Stargazer HTML Output 
@@ -242,7 +254,7 @@ educ.p <- lm(educ~exper, data = wage1)
 ```
 
 ```{r partials-check}
-grade_code()
+grade_this_code()
 ```
 
 ### Regressing the Residuals
@@ -260,11 +272,16 @@ Summarize the regression of the residuals of these regressions on each other and
 
 ```{r residReg-solution, exercise.reveal_solution = FALSE}
 summary(lm(wage.p$resid~educ.p$residuals))
-summary(wage2.lm2)
+summary(wage.lm2)
 ```
 
 ```{r residReg-check}
-grade_code("Notice that the coefficients are identical! The standard error of regression (and hence the standard errors of the coeffients, t-statistics, and p-values) differ slightly. This is because R only takes into account the education variable when determining the degrees of freedom. The true standard error of the residual regression should take that into account and the SER should be scaled up by $(n-2)/(n-k)$, where $k = 3$ in this example.")
+grade_this({if (!inherits(.result, c("summary.lm"))) {
+    fail("Your class of your answer should be a summary of an lm object.")}
+  if (.result$coefficients[2] != 0.6442721) { 
+    fail("The coefficient on education should be about 0.644.") }
+  pass("Notice that the coefficients are identical! The standard error of regression (and hence the standard errors of the coeffients, t-statistics, and p-values) differ slightly. This is because R only takes into account the education variable when determining the degrees of freedom. The true standard error of the residual regression should take that into account and the SER should be scaled up by $(n-2)/(n-k)$, where $k = 3$ in this example.")
+})
 ```
 
 ## Properties of OLS Redux

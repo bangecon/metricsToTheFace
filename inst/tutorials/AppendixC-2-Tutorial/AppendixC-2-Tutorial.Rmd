@@ -104,7 +104,12 @@ avgy + c05 * c(-se,+se)
 ```
 
 ```{r intervalEst-check}
-grade_code()
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
 ```
 
 ## Hypothesis Testing
@@ -136,7 +141,12 @@ c(t, c01, p)
 ```
 
 ```{r tTest-check}
-grade_code()
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
 ```
 
 ### Shortcut using $t.test()$
@@ -154,5 +164,10 @@ t.test(audit$y, conf.level = 0.99)
 ```
 
 ```{r t-test-check}
-grade_code()
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
 ```

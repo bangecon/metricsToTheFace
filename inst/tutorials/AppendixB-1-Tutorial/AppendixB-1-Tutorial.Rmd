@@ -2,6 +2,7 @@
 output: 
   learnr::tutorial:
     progressive: true
+runtime: shiny_prerendered
 title: "Appendix B Fundamentals of Probability" 
 author: Jim Bang
 description: "This tutorial reviews some basic concepts about probability and probability distributions."
@@ -28,13 +29,9 @@ $(function() {
 ```{r setup, include=FALSE}
 library(learnr)
 library(gradethis)
-ceosal1 <- wooldridge::ceosal1
-affairs <- wooldridge::affairs
-attach(ceosal1) 
-E_sal.roe <- mean(salary*roe)
-E_sal.E_roe <- mean(salary)*mean(roe)
-affairs$haskids <- factor(affairs$kids, labels = c("no","yes"))
-affairs$marriage <- factor(affairs$ratemarr, labels = c("very unhappy","unhappy","average","happy", "very happy"))
+y <- c(0:10)
+py <- rep(1/length(y), length(y))
+mu <- integrate(function(x) x/10, 0, 10)$value
 gradethis::gradethis_setup()
 knitr::opts_chunk$set(echo = FALSE)
 ```
@@ -46,7 +43,7 @@ knitr::opts_chunk$set(echo = FALSE)
 Probability mass function, $Pr(x)$, maps all possible values of $X$ into the probabilities that $X = x$.
 
 +----------------+--------------------------+--------------------------+--------------------------+--------------------------+
-| Name           | PMF [$Pr(x=x)$]          | CDF [$P(x<=x)$]          | Quantile [$P^{-1}(p)$]   | Random \#s               |
+| Name           | PMF: $Pr(x=x)$           | CDF: $P(x<=x)$           | Quantile: $P^{-1}(p)$    | Random \#s               |
 +================+:========================:+:========================:+:========================:+:========================:+
 | Bernoulli      | dbinom(x, 1, $\pi_s$)    | pbinom(x, 1, $\pi_s$)    | qbinom(x, 1, $\pi_s$)    | rbinom(R, 1, $\pi_s$)    |
 +----------------+--------------------------+--------------------------+--------------------------+--------------------------+
@@ -67,7 +64,7 @@ Probability mass function, $Pr(x)$, maps all possible values of $X$ into the pro
 Probability density function, $f(x)$, measures how tightly packed the probability is around $x$, *not* the probability at that point ($Pr[X=x]=0$).
 
 +---------------+----------------------------+----------------------------+----------------------------+----------------------------+
-| Name          | PMF [$f(x)$]               | CDF [$P(x<=x)$]            | Quantile [$P^{-1}(p)$]     | Random \#s                 |
+| Name          | PDF: $f(x)$                | CDF: $F(x)=P(x<=x)$        | Quantile: $F^{-1}(p)$      | Random \#s                 |
 +===============+:==========================:+:==========================:+:==========================:+:==========================:+
 | Uniform       | dunif(x, min, max)         | punif(x, min, max)         | qunif(p, min, max)         | runif(R, min, max)         |
 +---------------+----------------------------+----------------------------+----------------------------+----------------------------+
@@ -118,6 +115,12 @@ For a random variable, y, defined on a uniform *discrete* distribution, py, from
 
 ```
 
+```{r discreteEz-hint}
+# Define the sample space (range of possible values) for y
+# Define the probability mass function (vector of probabilities for each value) for y
+# Calculate the vector cross-product of y with p(y)
+```
+
 ```{r discreteEz-solution}
 y <- c(0:10)
 py <- rep(1/length(y), length(y))
@@ -125,7 +128,13 @@ y%*%py
 ```
 
 ```{r discreteEz-check}
-grade_code()
+grade_this({
+  # custom checking code appears here
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
 ```
 
 ### Continuous Random Variable
@@ -138,12 +147,24 @@ For a random variable, x, defined on a uniform *continuous* distribution between
 
 ```
 
+```{r continuousEx-hint}
+# You may want to start by separately defining the probability mass function, f(x), 
+# and the function over which you will integrate. 
+# Integrate the function (you can actually even do all of this in one line).
+```
+
 ```{r continuousEx-solution}
 integrate(function(x) x/10, 0, 10)
 ```
 
 ```{r continuousEx-check}
-grade_code()
+grade_this({
+  # custom checking code appears here
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
 ```
 
 Notice that $E(X^2) > E(X)^2$. This because x^2 is a convex function, and this property is known as Jensen’s Inequality.
@@ -164,14 +185,26 @@ For a random variable, x, defined on a uniform *continuous* distribution between
 
 ```
 
+```{r JensensInequality-hint}
+# You may or may not want to define the functions, x*f(x) and x^2*f(x), ahead of 
+# integrating.  
+# Print only the "value" variable from the list output of `integrate()`. 
+# You need to do this in any case for the first one because you need to square it. 
+```
+
 ```{r JensensInequality-solution}
-# Calculate E(x), E(X)^2, and E(X^2)
 integrate(function(x) x/10, 0, 10)$value^2
 integrate(function(x) (x^2)/10, 0, 10)$value
 ```
 
 ```{r JensensInequality-check}
-grade_code()
+grade_this({
+  # custom checking code appears here
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
 ```
 
 ### Mean, Median, and Mode
@@ -211,19 +244,58 @@ The standard deviation is the square root of the variance, or $\sigma_x$.
 
 For a discrete uniform random variable from zero to ten, $Z$, calculate $Var(Z)$.
 
+```{r discreteVz, exercise = TRUE}
+
+```
+
+```{r discreteVz-hint}
+# Use the vector cross-product to get the mean. 
+# Use normal operations to get the squared deviations from the mean. 
+# Use the vector product with the probabilities to get the variance (mean squared 
+# deviations from the mean)
+# See if you can do it all in one line!
+```
+
 ```{r discreteVz-solution}
-y <- c(0:10)
-py <- rep(1/length(y), length(y))
 (y - c(y%*%py))^2%*%py
+```
+
+```{r discreteVz-check}
+grade_this({
+  # custom checking code appears here
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
 ```
 
 ### Continuous Random Variable
 
 For a *continuous* uniform random variable from zero to ten, $X$, calculate $Var(Z)$.
 
+```{r continuousVx, exercise = TRUE}
+
+```
+
+```{r continuousVx-hint}
+# Since we didn't assign E(x) to a named obect, you'll need to define it (and name it). 
+# Integrate (x - mu)^2 * f(x) over the sample space.
+```
+
 ```{r continuousVx-solution}
 mu <- integrate(function(x) x/10, 0, 10)$value
 integrate(function(x) (x - mu)^2/10, 0, 10)
+```
+
+```{r continuousVx-check}
+grade_this({
+  # custom checking code appears here
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
 ```
 
 ### Variance and Standard Deviation of a Linear Function of a Random Variable

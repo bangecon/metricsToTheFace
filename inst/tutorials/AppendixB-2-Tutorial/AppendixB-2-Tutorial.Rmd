@@ -2,6 +2,7 @@
 output: 
   learnr::tutorial:
     progressive: true
+runtime: shiny_prerendered
 title: "Appendix B Fundamentals of Probability"
 description: "This tutorial reviews some basic concepts about relationships between two variables."
 ---
@@ -81,7 +82,13 @@ prop.table(table(affairs$marriage,affairs$haskids))
 ```
 
 ```{r joint-check}
-grade_code("The values within each cell represent the estimated joint probability.")
+grade_this({
+  # custom checking code appears here
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
 ```
 
 ### *Estimated* Conditional Probabilities of Discrete Variables: Row Margins
@@ -106,7 +113,13 @@ prop.table(table(affairs$marriage,affairs$haskids), margin = 2)
 ```
 
 ```{r conditional-check}
-grade_code("Within each column, the values in each cell represent the estimated conditional probability.")
+grade_this({
+  # custom checking code appears here
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
 ```
 
 ## Covariance and Correlation
@@ -160,7 +173,13 @@ E_sal.roe - E_sal.E_roe
 ```
 
 ```{r Exy-check}
-grade_code()
+grade_this({
+  # custom checking code appears here
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
 ```
 
 ### Correlation Coefficient
@@ -179,7 +198,13 @@ $$Corr(X,Y) = \rho_{XY} = \frac{Cov(X,Y)}{\sqrt{V(X) \cdot V(Y)}} = \frac{\sigma
 ```
 
 ```{r cor-check}
-grade_code()
+grade_this({
+  # custom checking code appears here
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
 ```
 
 ### Using `cov` and `cor` Functions
@@ -196,7 +221,13 @@ cor(ceosal1$salary, ceosal1$roe)
 ```
 
 ```{r covcor2-check}
-grade_code("Notice that they are slightly different. This is because to calculate the covariance for the sample, we should divide by (n - 1) instead of by n (just like we do with the sample variance). Why?")
+grade_this({
+  # custom checking code appears here
+  if (identical(.result, .solution)) {
+    pass(paste(random_praise(), " Notice that the covariances are slightly different. This is because to calculate the covariance for the sample, we should divide by (n - 1) instead of by n (just like we do with the sample variance). Why?"))
+  }
+  fail(random_encouragement())
+})
 ```
 
 ### Correlation and Independence

@@ -32,8 +32,7 @@ library(learnr)
 library(gradethis)
 library(wooldridge)
 wage1 <- wooldridge::wage1
-wage.lm0 <- lm(wage ~ educ - 1, data = wage1)
-wage.lm1 <- lm(wage ~ educ, data = wage1)
+lwage.lm1 <- lm(log(wage) ~ educ, data = wage1)
 gradethis::gradethis_setup()
 knitr::opts_chunk$set(echo = FALSE)
 ```
@@ -62,7 +61,6 @@ question("What do we mean by 'linear regression?'",
 
 ```{r logLinear-hint}
 # You may use mathematical operators on variables within your formula() argument, e.g. log(wage).
-lwage.lm1 <- lm(..., data = ...) 
 ```
 
 ```{r logLinear-solution}
@@ -71,7 +69,12 @@ summary(lwage.lm1)
 ```
 
 ```{r logLinear-check}
-grade_code()
+grade_this({if (!inherits(.result, c("summary.lm"))) {
+    fail("Your class of your answer should be a summary of an lm object.")}
+  if (.result$coefficients[2] != 0.08274437) { 
+    fail("The coefficient on education should be about 0.083.") }
+  pass()
+})
 ```
 
 ### Interpreting Regression Coefficients
@@ -131,34 +134,6 @@ abline(v = mean(b1[, 5]), col = 'red', lty = 'dotted')
 abline(v = mean(b1[, 10]), col = 'gold', lty = 'solid')
 abline(v = mean(b1[, 30]), col = 'green', lty = 'dashed')
 abline(v = mean(b1[, 100]), col = 'blue', lty = 'dotted')
-```
-
-```{r E_betaHat-solution}
-set.seed(8675309)
-X <- NULL 
-u <- NULL
-Y <- NULL
-b1 <- matrix(NA, nrow = 1000, ncol = 100)
-for(i in 1:100) {
-  for(j in 1:1000) {
-    X <- rexp(n = i, rate = 1) 
-    u <- rnorm(n = i, mean = 0, sd = 1)
-    Y = 2 - 0.5*X + u
-    b1[j, i] = lm(Y ~ X)$coefficients[2]
-  }
-}
-plot(density(b1[,5]), xlim = c(-2, 1), ylim = c(0, 4), col = 'red', main = "Sampling Distributions of the OLS Estimator", xlab = expression(hat(beta)[1]))
-lines(density(b1[,10]), col = 'gold')
-lines(density(b1[,30]), col = 'green')
-lines(density(b1[,100]), col = 'blue')
-abline(v = mean(b1[,5]), col = 'red', lty = 'dotted')
-abline(v = mean(b1[,10]), col = 'gold', lty = 'solid')
-abline(v = mean(b1[,30]), col = 'green', lty = 'dashed')
-abline(v = mean(b1[,100]), col = 'blue', lty = 'dotted')
-```
-
-```{r E_betaHat-check}
-grade_code()
 ```
 
 ### Unbiasedness of the OLS Estimator

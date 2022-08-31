@@ -10,7 +10,7 @@ description: >
 library(learnr)
 library(gradethis)
 gradethis_setup()
-tutorial_options(exercise.timelimit = 60)
+tutorial_options(exercise.reveal_solution = FALSE)
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
@@ -21,12 +21,13 @@ Prior to jury selection for O.J Simpson's murder trial in 1995, a poll found tha
 1. Calculate the probability that the jury had at least one member who believed in Simpson's innocence prior to jury selection. 
 2. Calculate the probability that the jury had at least two members who believed in Simpson's innocence.
 
-```{r OJ, exercise=TRUE, exercise.reveal_solution = TRUE}
+```{r OJ, exercise=TRUE}
 
 ```
 
 ```{r OJ-solution}
-
+1 - pbinom(0, 12, 0.2)
+1 - pbinom(1, 12, 0.2)
 ```
 
 ```{r OJ-hint}
@@ -35,8 +36,13 @@ Prior to jury selection for O.J Simpson's murder trial in 1995, a poll found tha
 ```
 
 ```{r OJ-check}
-1 - pbinom(0, 12, 0.2)
-1 - pbinom(1, 12, 0.2)
+grade_this({
+  # custom checking code appears here
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
 ```
 
 ## Exercise
@@ -45,11 +51,15 @@ Let X denote the prison sentence, in years (up to a hypothetical three-year maxi
 $$ f(x) = (1/9)x^2, \text{ } 0 < x < 3 $$
 Find the expected value and standard deviation of the prison sentence. 
 
-```{r prison, exercise=TRUE, exercise.reveal_solution = TRUE}
+```{r prison, exercise=TRUE}
 
 ```
 
 ```{r prison-solution}
+xf.x <- function(x) {(1/9)*x^3}
+x2f.x <- function(x) {(1/9)*x^4}
+integrate(xf.x, 0, 3)
+sqrt(integrate(x2f.x, 0, 3)$value - integrate(xf.x, 0, 3)$value^2)
 
 ```
 
@@ -62,9 +72,12 @@ Find the expected value and standard deviation of the prison sentence.
 ```
 
 ```{r prison-check}
-xf.x <- function(x) {(1/9)*x^3}
-x2f.x <- function(x) {(1/9)*x^4}
-integrate(xf.x, 0, 3)
-sqrt(integrate(x2f.x, 0, 3)$value - integrate(xf.x, 0, 3)$value^2)
+grade_this({
+  # custom checking code appears here
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
 ```
 

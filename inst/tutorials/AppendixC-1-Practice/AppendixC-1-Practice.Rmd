@@ -7,6 +7,7 @@ runtime: shiny_prerendered
 ```{r setup, include=FALSE}
 library(learnr)
 library(gradethis)
+library(ggplot2)
 gradethis_setup()
 tutorial_options(exercise.reveal_solution = FALSE)
 knitr::opts_chunk$set(echo = FALSE)
@@ -29,6 +30,10 @@ Create a loop that does the following:
 
 ```{r llnPractice, exercise=TRUE, exercise.eval=TRUE}
 set.seed(8675309)
+X <- NULL 
+u <- NULL
+Y <- NULL
+b1 <- NULL
 
 
 ```
@@ -49,12 +54,20 @@ for(i in 1:1000) {
   Y = 2 - 0.5*X + u
   b1[i] <- lm(Y ~ X)$coefficients[2]
 }
-plot((b1-(-0.5))^2, type = 'l')
-abline(h = 0, col = 'red')
+df <- data.frame(n = c(1:length(b1)), b1 = b1, v1 = (b1-(-0.5))^2)
+ggplot() + 
+  geom_line(data = df, aes(n, v1)) + 
+  xlab("Sample Size") + 
+  ylab("Squared Deviation")
 ```
 
 ```{r llnPractice-check}
-grade_code()
+grade_this({if (!inherits(.result, c("gg", "ggplot"))) {
+    fail("Your class of your answer should be c('gg', 'ggplot').")}
+  if (length(.result) != 9) { if (length(.result) != 11) {
+    fail("Your table should have a length of 9 or 11.") } }
+  pass()
+})
 ```
 
 ## Regression CLT Practice

@@ -364,7 +364,12 @@ summary(wage.lm1)
 ```
 
 ```{r simpleLM-check}
-grade_code()
+grade_this({if (!inherits(.result, c("summary.lm"))) {
+    fail("Your class of your answer should be a summary of an lm object.")}
+  if (.result$coefficients[2] != 0.5413593) { 
+    fail("The coefficient on education should be about 0.54.") }
+  pass()
+})
 ```
 
 ### Regression without an Intercept
@@ -387,16 +392,21 @@ summary(wage.lm0)
 ```
 
 ```{r nointerceptLM-check}
-grade_code()
+grade_this({if (!inherits(.result, c("summary.lm"))) {
+    fail("Your class of your answer should be a summary of an lm object.")}
+  if (.result$coefficients[1] != 0.4726637) { 
+    fail("The coefficient on education should be about 0.47. Make sure you leave out the intercept.") }
+  pass()
+})
 ```
 
 ### Plotting the Regression Line
 
-Plot the following with base R graphics. 
+Plot the following with `ggplot2` graphics. 
 
 1. A scatter of the data for wage against education 
-2. The linear fit for the simple regression of wages on education *with* an intercept (dashed)
-3. The linear fit for the simple regression of wages on education *without* an intercept (dotted)
+2. The linear fit for the simple regression of wages on education *with* an intercept
+3. The linear fit for the simple regression of wages on education *without* an intercept
 
 ```{r abline, exercise = TRUE}
 
@@ -404,17 +414,24 @@ Plot the following with base R graphics.
 ```
 
 ```{r abline-hint}
-# The abline() function lets you add a line with a given slope and intercept, or corresponding to a given regression result, or horizontal/vertical bars. 
+# The geom_smooth() function lets you add a fitted line or curve, corresponding to a given regression result. 
 ```
 
 ```{r abline-solution}
-plot(wage1$educ, wage1$wage)
-abline(wage.lm1)
-abline(wage.lm0)
+ggplot(wage1) + 
+  geom_point(aes(educ, wage)) + 
+  geom_smooth(aes(educ, wage), formula = y ~ x, method = 'lm') + 
+  geom_smooth(aes(educ, wage), formula = y ~ x - 1, method = 'lm', color = 'red') + 
+  xlab("Education") + ylab("Wage") 
 ```
 
 ```{r abline-check}
-grade_code()
+grade_this({if (!inherits(.result, c("gg", "ggplot"))) {
+    fail("Your class of your answer should be c('gg', 'ggplot').")}
+  if (length(.result) != 9) { 
+    fail("You should use 'proto' plot functions to add layers to the same plot" ) }
+  pass()
+})
 ```
 
 ## Properties of OLS
