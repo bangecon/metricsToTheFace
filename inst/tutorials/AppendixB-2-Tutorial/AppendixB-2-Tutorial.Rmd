@@ -65,6 +65,8 @@ For *independent* random variables, knowing information about $X$ does not chang
 
 Sample proportions, or relative frequencies, estimate the population proportions (probabilities) of an outcome. 
 
+In the setup, I have pre-defined factor variables for whether a couple has kids (`haskids`) and a labeled factor variable for the rating of their marriage (very unhappy to very happy instead of numerical one to five). 
+
 Re-create the crosstabulation of marital happiness and whether a couple has kids from the affairs dataset showing only the *proportion* (not percentage) of each joint outcome.
 
 ```{r joint, exercise=TRUE, exercise.eval=TRUE}
@@ -95,7 +97,7 @@ grade_this({
 
 Conditional probabilities only consider the probablities of $Y$ *given* a specific known outcome on $X$ (or vice-versa). The `margins` option in `prop.table` conditions the relative frequencies on knowing the outcome of the row (`margins = 1`) or column (`margins = 2`). 
 
-Re-create the crosstabulation of marital happiness and whether a couple has kids from the affairs dataset showing only the *proportion* (not percentage) of each *conditional* outcome.
+Re-create the crosstabulation of marital happiness and *whether* a couple has kids from the affairs dataset showing only the *proportion* (not percentage) of each *conditional* outcome.
 
 ```{r conditional, exercise=TRUE, exercise.eval=TRUE}
 

@@ -21,16 +21,13 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 ## Approaches to Parameter Estimation
 
 ### Ordinary Least Squares (OLS)
-
-$$\min_{\hat{\beta}}{\sum_{i=1}^{n}(Y_i – \beta_0 – \beta_1X_i)^2}$$
+$$\min_{\hat{\beta}}{\sum_{i=1}^{n}(Y_i–\beta_0–\beta_1X_i)^2}$$
 
 ### Least/Minimum Absolute Deviations (LAD/MAD)
-
-$$\min_{\hat{\beta}}{\sum_{i=1}^{n}|Y_i – \beta_0 – \beta_1X_i|}$$
+$$\min_{\hat{\beta}}{\sum_{i=1}^{n}|Y_i–\beta_0–\beta_1X_i|}$$
 
 ### Maximum likelihood (MLE)
-
-$$\max_{\hat{\beta}}{\prod_{i=1}^{n}f(Y_i – \beta_0 – \beta_1X_i)}$$
+$$\max_{\hat{\beta}}{\prod_{i=1}^{n}f(Y_i–\beta_0–\beta_1X_i)}$$
 
 where $f(\cdot)$ is the probability distribution of the errors (e.g. Normal, logistic, Poisson)
 

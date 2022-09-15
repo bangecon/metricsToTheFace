@@ -219,7 +219,7 @@ $$\hat\mu = \underset{\theta}{\operatorname{argmin}} \bigg\{\sum_{i = 1}^n|x_i -
 
 We learn the *median* as the value of $x$ that "splits" the distribution (or population or sample) in half. An interesting property of the median is that it minimizes the *absolute* differences (to the first power) of the observed data from itself. 
 
-$$\tilde\mu = \underset{\theta}{\operatorname{argmin}} \bigg\{\sum_{i = 1}^n|x_i - \theta|\bigg\}$$
+$$\tilde\mu = \underset{\theta}{\operatorname{argmin}} \bigg\{\sum_{i = 1}^n|x_i - \theta|^1\bigg\}$$
 
 The *mode* measures the most frequent or most likely value of $x$. An interesting property of the mode is that it minimizes the *absolute* differences of the observed data from itself *raised to the zero power*.
 
