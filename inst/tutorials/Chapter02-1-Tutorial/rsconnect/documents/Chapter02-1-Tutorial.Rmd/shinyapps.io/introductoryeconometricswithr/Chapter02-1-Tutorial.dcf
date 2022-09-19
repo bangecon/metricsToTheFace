@@ -5,9 +5,9 @@ account: introductoryeconometricswithr
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 6692110
-bundleId: 6132491
+bundleId: 6314280
 url: https://introductoryeconometricswithr.shinyapps.io/Chapter02-1-Tutorial/
-when: 1658795636.43767
-lastSyncTime: 1658795636.43767
+when: 1663528980.10561
+lastSyncTime: 1663528980.10564
 asMultiple: FALSE
 asStatic: FALSE

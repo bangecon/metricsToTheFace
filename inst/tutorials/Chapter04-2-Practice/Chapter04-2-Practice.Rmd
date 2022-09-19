@@ -34,6 +34,8 @@ F <- (r2.ur-r2.r) / (1-r2.ur) * crime.lm1$df.residual/crime.lm1$rank
 ```
 
 ```{r crime-check}
-grade_code()
+grade_this({if(round(.result,4) != 0.4120) { 
+    fail("The p-value should be about 0.412") }
+  pass()
+})
 ```
-

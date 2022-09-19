@@ -7,6 +7,7 @@ runtime: shiny_prerendered
 ```{r setup, include=FALSE}
 library(learnr)
 library(gradethis)
+library(ggplot2)
 library(stargazer)
 gpa1 <- wooldridge::gpa1
 k401k <- wooldridge::k401k
@@ -20,7 +21,7 @@ knitr::opts_chunk$set(echo = FALSE)
 Using the $gpa1$ dataset do the following: 
 1. Regress college GPA ($colGPA$) on ACT score($ACT$); 
 2. Regress college GPA on high school GPA ($hsGPA$) and ACT score. 
-3. 
+3. Summarize the results as a `stargazer` table.
 
 ```{r colGPA, exercise=TRUE, exercise.reveal_solution = FALSE}
 
@@ -68,7 +69,7 @@ summary(prate.lm1)
 ```{r k401k-check}
 grade_this({if (!inherits(.result, c("summary.lm"))) {
     fail("Your class of your answer should be a summary of an lm object.")}
-  if (.result$coefficients[2] != 5.521289) { 
+  if (round(.result$coefficients[2],4) != 5.5213) { 
     fail("The coefficient on log(Sales) should be about 5.52.") }
   pass()
 })

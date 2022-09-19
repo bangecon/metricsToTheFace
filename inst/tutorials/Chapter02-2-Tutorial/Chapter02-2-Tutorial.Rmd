@@ -3,10 +3,9 @@ output:
   learnr::tutorial:
     progressive: true
 runtime: shiny_prerendered
-title: "Chapter 2 \n\n The Simple Regression Model"
+title: "Chapter 2-2 The Simple Regression Model"
 author: "James Bang"
-description: >
-  This tutorial discusses interpretation of the linear coefficients and the properties of the OLS estimator.
+description: "This tutorial discusses interpretation of the linear coefficients and the properties of the OLS estimator."
 ---
 
 <style type="text/css">
@@ -71,7 +70,7 @@ summary(lwage.lm1)
 ```{r logLinear-check}
 grade_this({if (!inherits(.result, c("summary.lm"))) {
     fail("Your class of your answer should be a summary of an lm object.")}
-  if (.result$coefficients[2] != 0.08274437) { 
+  if (round(.result$coefficients[2],4) != 0.0827) { 
     fail("The coefficient on education should be about 0.083.") }
   pass()
 })

@@ -53,6 +53,8 @@ Using the `wage1` dataset calculate the regression coefficients and their standa
 
 Note you will need to define `n` (the number of rows in the data), `y`, `X`, `k`, and (after calculating $\hat\beta$) `uhat`. 
 
+Return a matrix with the first row equal to the estimated coefficients and the second row equal to their standard errors. 
+
 ```{r olsMatrix, exercise=TRUE, exercise.reveal_solution = TRUE}
 
 ```
@@ -68,6 +70,7 @@ sigsqhat <- as.numeric( t(uhat) %*% uhat / (n-k-1) )
 SER <- sqrt(sigsqhat)
 Vbetahat <- sigsqhat * solve( t(X)%*%X )
 se <- sqrt( diag(Vbetahat) )
+cbind(bhat, se)
 ```
 
 ```{r olsMatrix-hint}
@@ -77,7 +80,12 @@ se <- sqrt( diag(Vbetahat) )
 ```
 
 ```{r olsMatrix-check}
-grade_code()
+grade_this({if (!inherits(.result, c("matrix"))) {
+    fail("Your class of your answer should be a matrix.")}
+  if (round(.result[2,1], 4) != 0.6443) { 
+    fail("The coefficient on education should be about 0.64") }
+  pass()
+})
 ```
 
 ## Gauss-Markov Theorem

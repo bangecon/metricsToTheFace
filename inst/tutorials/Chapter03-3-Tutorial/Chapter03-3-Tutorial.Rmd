@@ -3,7 +3,7 @@ output:
   learnr::tutorial:
     progressive: true
 runtime: shiny_prerendered
-title: "Chapter 3: Multiple Regression Analysis -- Gauss-Markov Theorem"
+title: "Chapter 3 Multiple Regression Analysis - Gauss-Markov Theorem"
 author: "James Bang"
 description: "This tutorial simulates omitted variables bias and multicollinearity." 
 ---
@@ -144,13 +144,13 @@ animate(p,nframes=200, renderer = gifski_renderer())
 
 </details>
 
-### Mathematical Proof
+### Mathematical Derivation
 
 $$E(\tilde\beta_1) = E[(X_1'X_1)^{-1}X_1'(X_1\beta_1 + X_2\beta_2 + u)]$$  
 
 $$ E(\tilde\beta_1) = \beta_1 + \beta_2E[(X_1'X_1)^{-1}X_1'X_2] $$  
 
-We can even rewrite this as: 
+We can rewrite this as: 
 
 $$ E(\hat\beta_1) = \beta_1 + \beta_2\delta$$  
 
@@ -158,12 +158,12 @@ where $\delta$ is the coefficient from regressing $X_2$ on $X_1$, $X_2 = X_1\del
 
 ### Irrelevant Variables
 
-1. Generate a completely random variable, sunspots, which takes values from a Poisson distribution with parameter $\lambda = 10$ , as a new column in *wage1*. 
+1. Generate a completely random variable, `sunspots`, which takes values from a Poisson distribution with parameter $\lambda = 10$ , as a new column in *wage1*. 
 2. Regress *wage* on *educ*, *exper*, and *sunspots* (with a constant) and call this regression *wage.lm3*.
 3. Compare this to our previous regression, *wage.lm2* (which is identical but excludes *sunspots*) using stargazer(..., type = 'text').
 
 ```{r irrelevant, exercise = TRUE}
-
+set.seed(8675309)
 
 ```
 
@@ -180,7 +180,12 @@ stargazer(wage.lm2, wage.lm3, type = 'text')
 ```
 
 ```{r irrelevant-check}
-grade_code("There's almost no difference in the estimates, but we do lose some efficiency.")
+grade_this({if (!inherits(.result, c("character"))) {
+    fail("Your class of your answer should be character strings.")}
+  if (.result[8] != "educ                       0.644***                0.642***        ") { 
+    fail("The coefficients on education should be about 0.644 and 0.642, respectively") }
+  pass()
+})
 ```
 
 ### A Caveat about Omitted Variables
@@ -229,7 +234,13 @@ summary(wage.lm4)
 ```
 
 ```{r multicollinear-check}
-grade_code("Notice how the lm() function drops *nonwhite* since it is a perfect linear function of *white* and the constant (reverse the order they appear and it will drop whichever is last).")
+
+grade_this({if (!inherits(.result, c("summary.lm"))) {
+    fail("Your class of your answer should be a `summary.lm` object")}
+  if (round(.result$coefficients[4,1],4) != 0.0162) { 
+    fail("The coefficient on the white variable should be about 0.016.") }
+  pass()
+})
 ```
 
 ### Perfect Multicollinearity without a Constant
@@ -256,7 +267,12 @@ summary(wage.lm5)
 ```
 
 ```{r multicollinearNoConstant-check}
-grade_code("Notice that the coefficient for *nonwhite* is the same as the previous example's intercept; the value for *white* is the intercept of the previous regression plus its marginal effect for the *white* group.")
+grade_this({if (!inherits(.result, c("summary.lm"))) {
+    fail("Your class of your answer should be a `summary.lm` object")}
+  if (.result$coefficients[4,1] != 3.40304) { 
+    fail("The coefficient on the nonwhite variable should be about 0.016.") }
+  pass()
+})
 ```
 
 ### Imperfect Multicollinearity

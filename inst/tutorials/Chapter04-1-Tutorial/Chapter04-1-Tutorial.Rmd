@@ -155,7 +155,12 @@ summary(wage.lm6)
 ```
 
 ```{r experTest-check}
-grade_code()
+grade_this({if (!inherits(.result, c("summary.lm"))) {
+    fail("Your class of your answer should be summary of an `lm` object.")}
+  if (round(.result$coef[2],4) != 0.5990) { 
+    fail("The coefficients on education should be about 0.599") }
+  pass()
+})
 ```
 
 ### Critical Values and p-Values
@@ -262,7 +267,12 @@ summary(salary.lm1)
 ```
 
 ```{r financeTest-check}
-grade_code()
+grade_this({if (!inherits(.result, c("summary.lm"))) {
+    fail("Your class of your answer should be summary of an `lm` object.")}
+  if (round(.result$coef[2],4) != 262.1805) { 
+    fail("The coefficients on education should be about 262.18") }
+  pass()
+})
 ```
 
 ### Critical Values and p-Values
@@ -324,9 +334,7 @@ $$ P(\hat{\beta_j}-t_{0.025}^c \cdot s_{\hat{\beta_j}} \le \mu \le \hat{\beta_j}
 ### Confidence Intervals
 
 1. Using the `wage1` data, regress wage on education, experience, experience squared, tenure, and occupation (profesional services, professional occupations, clerical occupations, and service occupations).
-2. Name the result `wage.lm7` and summarize the results using `summary()`.
-3. Calculate 95-percent confidence intervals for the coefficients using the `confint()` function.
-4. Calculate 99-percent confidence intervals for the coefficients.
+2. Calculate 99-percent confidence intervals for the coefficients.
 
 ```{r confint, exercise = TRUE}
 
@@ -341,11 +349,14 @@ $$ P(\hat{\beta_j}-t_{0.025}^c \cdot s_{\hat{\beta_j}} \le \mu \le \hat{\beta_j}
 
 ```{r confint-solution}
 wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure  + clerocc + servocc, data = wage1)
-summary(wage.lm7)
-confint(wage.lm7)
 confint(wage.lm7, level = 0.99)
 ```
 
 ```{r confint-check}
-grade_code()
+grade_this({if (!inherits(.result, c("matrix"))) {
+    fail("Your class of your answer should be a `matrix` object.")}
+  if (round(.result$coef[2,1],4) != 0.3891) { 
+    fail("The coefficients on education should be about 0.389") }
+  pass()
+})
 ```

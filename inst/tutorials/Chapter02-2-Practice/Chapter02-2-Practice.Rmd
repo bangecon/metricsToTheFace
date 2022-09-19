@@ -7,6 +7,7 @@ runtime: shiny_prerendered
 ```{r setup, include=FALSE}
 library(learnr)
 library(gradethis)
+library(ggplot2)
 ceosal1 <- wooldridge::ceosal1
 gradethis_setup()
 tutorial_options(exercise.timelimit = 60)
@@ -31,7 +32,7 @@ summary(ceosal.lm)
 ```{r lmPractice-check}
 grade_this({if (!inherits(.result, c("summary.lm"))) {
     fail("Your class of your answer should be a summary of an lm object.")}
-  if (.result$coefficients[2] != 0.2566717) { 
+  if (round(.result$coefficients[2],4) != 0.2567) { 
     fail("The coefficient on log(Sales) should be about 0.26.") }
   pass()
 })

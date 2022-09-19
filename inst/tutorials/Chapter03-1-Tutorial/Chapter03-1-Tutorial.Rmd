@@ -73,7 +73,7 @@ summary(wage.lm2)
 ```{r multipleLM-check}
 grade_this({if (!inherits(.result, c("summary.lm"))) {
     fail("Your class of your answer should be a summary of an lm object.")}
-  if (.result$coefficients[2] != 0.6442721) { 
+  if (round(.result$coefficients[2],4) != 0.6443) { 
     fail("The coefficient on education should be about 0.644.") }
   pass()
 })
@@ -237,7 +237,7 @@ Note: the value of the function at the minimum is the SSR, so $\hat\sigma^2 = b.
 
 Regress wages on experience and then education on experience. 
 
-Name the results $wage.p$ and $educ.p$
+Summarize the auxiliary regression of education. 
 
 ```{r partials, exercise = TRUE, exercise.reveal_solution = FALSE}
 
@@ -251,10 +251,16 @@ Name the results $wage.p$ and $educ.p$
 ```{r partials-solution, exercise.reveal_solution = FALSE}
 wage.p <- lm(wage~exper, data = wage1)
 educ.p <- lm(educ~exper, data = wage1)
+summary(educ.p)
 ```
 
 ```{r partials-check}
-grade_this_code()
+grade_this({if (!inherits(.result, c("summary.lm"))) {
+    fail("Your class of your answer should be a summary of an lm object.")}
+  if (round(.result$coefficients[2],4) != -0.0611) { 
+    fail("The coefficient on experience should be about -0.06.") }
+  pass()
+})
 ```
 
 ### Regressing the Residuals
@@ -278,7 +284,7 @@ summary(wage.lm2)
 ```{r residReg-check}
 grade_this({if (!inherits(.result, c("summary.lm"))) {
     fail("Your class of your answer should be a summary of an lm object.")}
-  if (.result$coefficients[2] != 0.6442721) { 
+  if (round(.result$coefficients[2],4) != 0.6443) { 
     fail("The coefficient on education should be about 0.644.") }
   pass("Notice that the coefficients are identical! The standard error of regression (and hence the standard errors of the coeffients, t-statistics, and p-values) differ slightly. This is because R only takes into account the education variable when determining the degrees of freedom. The true standard error of the residual regression should take that into account and the SER should be scaled up by $(n-2)/(n-k)$, where $k = 3$ in this example.")
 })

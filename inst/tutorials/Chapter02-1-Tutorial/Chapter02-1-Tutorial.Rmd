@@ -366,8 +366,8 @@ summary(wage.lm1)
 ```{r simpleLM-check}
 grade_this({if (!inherits(.result, c("summary.lm"))) {
     fail("Your class of your answer should be a summary of an lm object.")}
-  if (.result$coefficients[2] != 0.5413593) { 
-    fail("The coefficient on education should be about 0.54.") }
+  if (round(.result$coefficients[2],4) != 0.5414) { 
+    fail("The coefficient on education should be about 0.541.") }
   pass()
 })
 ```
@@ -394,7 +394,7 @@ summary(wage.lm0)
 ```{r nointerceptLM-check}
 grade_this({if (!inherits(.result, c("summary.lm"))) {
     fail("Your class of your answer should be a summary of an lm object.")}
-  if (.result$coefficients[1] != 0.4726637) { 
+  if (round(.result$coefficients[1],4) != 0.4727) { 
     fail("The coefficient on education should be about 0.47. Make sure you leave out the intercept.") }
   pass()
 })

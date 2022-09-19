@@ -16,10 +16,9 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## Population Density and Crime 
 
-1. Estimate the following model using the `crime2` dataset. Name your model `crime.lm1`.
+1. Estimate the following model using the `crime2` dataset.
 $$ln(CrimeRate) = \beta_0 + \beta_1ln(LawExpendPC) + \beta_2ln(IncomePC) + \beta_3ln(PopulationDensity) + \beta_4West + \beta5Northeast + \beta_6South + u$$
-2. Test whether population density significantly impacts crime at the 0.05 level. Report the critical value for the test. 
-3. Construct a 99% confidence interval for the expenditure elasticity of crime rate using .
+2. Construct a 99% confidence interval for the expenditure elasticity of crime rate using `confint`.
 
 ```{r crime, exercise=TRUE}
 
@@ -27,18 +26,14 @@ $$ln(CrimeRate) = \beta_0 + \beta_1ln(LawExpendPC) + \beta_2ln(IncomePC) + \beta
 
 ```{r crime-solution, exercise.reveal_solution = FALSE}
 crime.lm1 <- lm(log(crmrte) ~ log(lawexpc) + log(pcinc) + log(popden) + west + nrtheast + south, data = crime2)
-qt(1-0.05/2, crime.lm1$df.residual)
 confint(crime.lm1, "log(lawexpc)", level = 0.99)
 ```
 
-```{r crime-hint}
-# Specify the probability in the left tail, and the residual degrees of freedom (n-k-1) from the regression object. 
-
-# Specify the model, parameter for which you want the interval estimate in "", and the confidence level. 
-
-```
-
 ```{r crime-check}
-grade_code()
+grade_this({if (!inherits(.result, c("matrix"))) {
+    fail("Your class of your answer should be a `matrix` object.")}
+  if (round(.result$coef[1],4) != 0.1535) { 
+    fail("The coefficients on education should be about 0.15") }
+  pass()
+})
 ```
-

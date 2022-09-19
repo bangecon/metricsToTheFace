@@ -62,7 +62,12 @@ summary(wage.lm7)
 ```
 
 ```{r tTestReview-check}
-grade_code()
+grade_this({if (!inherits(.result, c("matrix"))) {
+    fail("Your class of your answer should be a `matrix` object.")}
+  if (round(.result$coef[2],4) != 0.3936) { 
+    fail("The coefficients on education should be about 0.39") }
+  pass()
+})
 ```
 
 ### Question
@@ -119,9 +124,7 @@ Use the `lht` function from the `car` package (also preloaded). You do not need 
 
 ```{r lincom-hint}
 # glht requires a model and a "linfct" option where "linfct" is a linear function of the variables in quotation marks.
-
 # lht requires a model, a linear function of the parameters for the left-hand side of the hypothesis, and the numerical value(s) for the right hand side. 
-
 ```
 
 ```{r lincom-solution}
@@ -131,7 +134,12 @@ lht(wage.lm7, "clerocc - servocc",  0)
 ```
 
 ```{r lincom-check}
-grade_code("Notice that the test statistic for `lht` is exactly the value of that for `glht` *squared*. That's because `lht` uses an F-Test for everything, and the F-distribution (ratio of two Chi-Squareds) is exactly the same as the distribution of the square of a t-distributed random variable (ratio of a normal and the square root of a Chi-Squared). `glht` is cleaner for single restrictions; `lht` is more flexible.")
+grade_this({if (!inherits(.result, c("anova"))) {
+    fail("Your class of your answer should be a `anova` object.")}
+  if (round(.result$`Pr(>F)`[2],4) != 0.5574) { 
+    fail("The p-value should be about 0.56") }
+  pass()
+})
 ```
 
 Warning: "The Difference Between 'Significant' and 'Insignificant' is not Itself Statistically Significant" - Andrew Gelman
@@ -160,9 +168,9 @@ There are a couple of different (but equivalent) ways to calculate the F-Statist
 
 Test the joint significance of occupational choice on wages "by hand" using the $R^2$ formula:  
 
-1. Estimate the unrestricted model, `wage.lm7` and the restricted model (without occupations), `wage.lm8`. 
-2. Extract the R-squareds as `r2.u` and `r2.r`.
-3. Compute the F statistic using the equation from 3(b) above and name it `wage.F.occ`. 
+1. Estimate the unrestricted model and the restricted model (without occupations). 
+2. Extract the R-squareds.
+3. Compute the F statistic using the equation from 3(b) above. 
 4. Calculate and print the p-value.
 
 ```{r fTest, exercise = TRUE}
@@ -172,13 +180,9 @@ Test the joint significance of occupational choice on wages "by hand" using the 
 
 ```{r fTest-hint}
 # Estimate the restricted Model:
-
 # The R-squareds are an object stored in the summary() of the regression output:
-
 # F statistic:
-
 # p value = 1-cdf of the appropriate F distribution:
-
 ```
 
 ```{r fTest-solution}
@@ -191,7 +195,10 @@ wage.F.occ <- ((r2.u-r2.r)/(wage.lm8$df.residual - wage.lm7$df.residual)) / ((1-
 ```
 
 ```{r fTest-check}
-grade_code("Note that the numerator degrees of freedom equal the residual degrees of freedom for the restricted model minus the residual degrees of freedom for the unrestricted model; the denominator degrees of freedom are the residual degrees of freedom for the unrestricted model.")
+grade_this({if(round(.result,4) != 1.152e-09) { 
+    fail("The p-value should be about 1.2e-09") }
+  pass()
+})
 ```
 
 ### Warning about Independent t-Tests and a Note on the *Regression F-Statistic*

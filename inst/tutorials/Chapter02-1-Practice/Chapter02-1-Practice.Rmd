@@ -7,6 +7,7 @@ runtime: shiny_prerendered
 ```{r setup, include=FALSE}
 library(learnr)
 library(gradethis)
+library(ggplot2)
 library(wooldridge)
 ceosal1 <- wooldridge::ceosal1
 salary.lm1 <- lm(salary ~ roe, data = ceosal1)
@@ -41,8 +42,8 @@ summary(salary.lm3)
 ```{r lmPractice-check}
 grade_this({if (!inherits(.result, c("summary.lm"))) {
     fail("Your class of your answer should be a summary of an lm object.")}
-  if (.result$coefficients[1] != 1281.12) { 
-    fail("The coefficient on education should be about 0.54.") }
+  if (round(.result$coefficients[1],2) != 1281.12) { 
+    fail("The coefficient on education should be about 1281.") }
   pass()
 })
 ```

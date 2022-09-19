@@ -34,6 +34,7 @@ sigsqhat <- as.numeric( t(uhat) %*% uhat / (n-k-1) )
 SER <- sqrt(sigsqhat)
 Vbetahat <- sigsqhat * solve( t(X)%*%X )
 se <- sqrt( diag(Vbetahat) )
+cbind(bhat, se)
 ```
 
 ```{r colGPA-hint}
@@ -43,6 +44,11 @@ se <- sqrt( diag(Vbetahat) )
 ```
 
 ```{r colGPA-check}
-grade_code()
+grade_this({if (!inherits(.result, c("matrix"))) {
+    fail("Your class of your answer should be a matrix.")}
+  if (round(.result[2,1],4) != 0.4535) { 
+    fail("The coefficient on high-school GPA should be about 0.45") }
+  pass()
+})
 ```
 
