@@ -103,7 +103,7 @@ grade_this({if (!inherits(.result, c("character"))) {
   if (length(.result) != 24) { 
     fail("The length of the result should equal the number of rows in your table (including separators and text)" ) }
   if (.result[8] != "educ                        0.541***                0.644***        "){ 
-    fail("The edycation coefficients don't look quite right.") }
+    fail("The education coefficients don't look quite right.") }
   pass()
 })
 ```

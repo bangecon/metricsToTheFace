@@ -3,7 +3,7 @@ output:
   learnr::tutorial:
     progressive: true
 runtime: shiny_prerendered
-title: "Chapter 4 \n\n Multiple Regression Analysis - Inference"
+title: "Chapter 4 Multiple Regression Analysis - Inference"
 author: "James Bang"
 description: >
   This tutorial discusses tests involving multiple slope coefficients.

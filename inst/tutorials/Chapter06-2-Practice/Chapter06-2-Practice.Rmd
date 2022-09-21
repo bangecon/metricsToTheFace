@@ -39,6 +39,12 @@ stargazer(hprice.lm1, hprice.lm2, hprice.lm3, type = 'text')
 ```
 
 ```{r housePricePractice-check}
-grade_code()
+grade_this({if (!inherits(.result, c("character"))) {
+    fail("Your class of your answer should be a list of character strings.")}
+  if (.result[8] != "lotsize                                                             0.002***               0.002***               0.002***       "){
+    fail("The 'nox' coefficients don't look quite right.") }
+  pass()
+})
+
 ```
 

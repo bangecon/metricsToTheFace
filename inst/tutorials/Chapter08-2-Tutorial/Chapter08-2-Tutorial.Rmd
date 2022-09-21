@@ -1,7 +1,7 @@
 ---
 title: "Chapter 8-2: Estimation with Heteroskedasticity"
 author: Jim Bang
-description: "Consequences of heterodkedasticity and testing for heteroskedasticity"
+description: "Estimating robust standard errors"
 output: 
   learnr::tutorial: 
     progressive: true
@@ -71,7 +71,12 @@ stargazer(wage.lm14, wage.lm14r, type = 'text', digits = 4)
 ```
 
 ```{r robustHC1-check}
-grade_code()
+grade_this({if (!inherits(.result, c("character"))) {
+    fail("Your class of your answer should be a character list")}
+  if (.result[8] != "I(married * (1 - female))        0.2127***          0.2127*** ") { 
+    fail("The coefficient on married women don't look quite right.") }
+  pass("Note that the coefficients are the same; only the standard errors differ.")
+})
 ```
 
 ### The `sandwich::vcovHC` Default: $HC3$

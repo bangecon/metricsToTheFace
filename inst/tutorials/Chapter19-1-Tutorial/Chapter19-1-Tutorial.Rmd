@@ -3,7 +3,7 @@ output:
   learnr::tutorial:
     progressive: true
 runtime: shiny_prerendered
-title: "Chapter 19 \n\n Conducting Research \n\n Presenting Tables and Graphs"
+title: "Chapter 19: Conducting Research & Presenting Tables and Graphs"
 description: >
   This tutorial introduces tools for creating attractive tables and graphs.
 ---

@@ -92,7 +92,12 @@ stargazer(wage.lm14, wage.lm14r, type = 'text', digits = 4)
 ```
 
 ```{r robustHC1-check}
-grade_code()
+grade_this({if (!inherits(.result, c("character"))) {
+    fail("Your class of your answer should be a character list")}
+  if (.result[10] != "I(married * (1 - female))        0.2127***          0.2127*** ") { 
+    fail("The coefficient on married women don't look quite right.") }
+  pass("Note that the coefficients are the same; only the standard errors differ.")
+})
 ```
 
 ### Heteroskedasticity-Robust F-Test for College GPAs
@@ -146,7 +151,12 @@ stargazer(
 ```
 
 ```{r robustF-check}
-grade_code()
+grade_this({if (!inherits(.result, c("character"))) {
+    fail("Your class of your answer should be a character list")}
+  if (.result[32] != "F-Test (Race)                0.6796            0.7478   ") { 
+    fail("The line that should contain the partial F test doesn't look quite right.") }
+  pass()
+})
 ```
 
 ## Testing for Heteroskedasticity  
@@ -227,7 +237,12 @@ stargazer(hprice.lm1, hprice.lm2, type = 'text', digits = 4,
 ```
 
 ```{r bpTest-check}
-grade_code(correct = "Wait, what happened to the heteroskedasticity in the log-linear model?!?")
+grade_this({if (!inherits(.result, c("character"))) {
+    fail("Your class of your answer should be a character list")}
+  if (.result[21] != "Breusch-Pagan F                   5.3389        1.1745    ") { 
+    fail("The line that should contain the Breusch-Pagan F test doesn't look quite right.") }
+  pass("Wait, what happened to the heteroskedasticity in the log-linear model?!?")
+})
 ```
 
 ### White Test
@@ -281,6 +296,10 @@ stargazer(hprice.lm1, hprice.lm2, type = 'text', digits = 4,
 ```
 
 ```{r white-check}
-grade_code()
+grade_this({if (!inherits(.result, c("character"))) {
+    fail("Your class of your answer should be a character list")}
+  if (.result[21] != "Breusch-Pagan F                   5.3389        1.1745    ") { 
+    fail("The line that should contain the White F test doesn't look quite right.") }
+  pass("Wait, what happened to the heteroskedasticity in the log-linear model?!?")
+})
 ```
-

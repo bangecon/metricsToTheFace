@@ -43,6 +43,7 @@ bwght.lm7 <- lm(bwght ~ cigs + log(faminc), data = bwght)
 bwght.lm7 <- lm(log(bwght) ~ cigs + faminc, data = bwght)
 bwght.lm8 <- lm(bwght ~ cigs + log(faminc), data = bwght)
 bwght.lm9 <- lm(log(bwght) ~ cigs + log(faminc), data = bwght)
+bwght.lmX <- lm(bwghtlbs ~ cigs + faminc + I(faminc^2), data = bwght)
 gradethis::gradethis_setup()
 knitr::opts_chunk$set(echo = FALSE)
 ```
@@ -81,7 +82,12 @@ stargazer(bwght.lm1, bwght.lm2, bwght.lm3, type = 'text')
 ```
 
 ```{r bwght-check}
-grade_code()
+grade_this({if (!inherits(.result, c("character"))) {
+    fail("Your class of your answer should be a list of character strings.")}
+  if (.result[8] != "cigs                            -0.463***  -0.029***           "){ 
+    fail("The 'cigs' coefficients don't look quite right.") }
+  pass()
+})
 ```
 
 ## Standardized Coefficients and Elasticities
@@ -115,7 +121,12 @@ stargazer(bwght.lm4, bwght.lm5, bwght.lm6, type = 'text')
 ```
 
 ```{r scale-check}
-grade_code()
+grade_this({if (!inherits(.result, c("character"))) {
+    fail("Your class of your answer should be a list of character strings.")}
+  if (.result[8] != "scale(cigs)                      -0.136***      -0.136***                "){ 
+    fail("The 'cigs' coefficients don't look quite right.") }
+  pass()
+})
 ```
 
 ### Standardizing Coefficients
@@ -142,7 +153,12 @@ bwght.lm3$coefficients[-1]*sapply(bwght.lm3$model, sd)[-1]/sd(bwght.lm3$model$bw
 ```
 
 ```{r beta-check}
-grade_code()
+grade_this({if (!inherits(.result, c("numeric"))) {
+    fail("Your class of your answer should be a numeric vector.")}
+  if (round(.result,4) != c(-0.1360, 0.0854)){ 
+    fail("The coefficients don't look quite right.") }
+  pass()
+})
 ```
 
 ### Elasticities *at the Mean*
@@ -172,7 +188,12 @@ bwght.lm1$coefficients[-1]*sapply(bwght.lm1$model, mean)[-1]
 ```
 
 ```{r eMeans-check}
-grade_code()
+grade_this({if (!inherits(.result, c("numeric"))) {
+    fail("Your class of your answer should be a numeric vector.")}
+  if (round(.result,4) != c(-0.9672, 2.6927)){ 
+    fail("The coefficients don't look quite right.") }
+  pass()
+})
 ```
 
 ### *Average* Elasticities 
@@ -188,7 +209,7 @@ $$E_{AME} = \sum_{i=1}^n{\frac{d\hat{y}_i}{dx_i}\cdot \frac{x_i}{\hat{y}_i}}.$$
 The (right-hand side) partial elasticities would be: 
 $$E_{AME} = \sum_{i=1}^n{\frac{d\hat{y}_i}{dx_i}\cdot x_i.$$
 
-Estimate the full and partial elasticities for the `bwght.lm1` estimates using `marginaleffects::marginaleffects()`. 
+Estimate the full and partial elasticities for the `bwght.lm1` estimates by summarizing the results of `marginaleffects(model)` using the `marginaleffects` package. 
 
 ```{r eAME, exercise = TRUE}
 
@@ -205,7 +226,12 @@ marginaleffects(bwght.lm1, slope = 'dyex')
 ```
 
 ```{r eAME-check}
-grade_code()
+grade_this({if (!inherits(.result, c("marginaleffects.summary"))) {
+    fail("Your class of your answer should be a summary of a marginaleffects object.")}
+  if (round(.result[,4],4) != c(-0.9672, 2.6927)){ 
+    fail("The coefficients don't look quite right.") }
+  pass()
+})
 ```
 
 Note: Calculating standard errors for nonlinear functions of multiple parameters ($\hat{\beta}, \bar{x}, \bar{y}) is a little tricky, and I won't address it. If you're interested a couple of methods include the delta method (which is more theoretically-grounded and used by `marginaleffects`) and the bootstrap. 
@@ -253,7 +279,12 @@ stargazer(bwght.lm7, bwght.lm8, bwght.lm9, type = 'text')
 ```
 
 ```{r log-check}
-grade_code()
+grade_this({if (!inherits(.result, c("character"))) {
+    fail("Your class of your answer should be a list of character strings.")}
+  if (.result[8] != "cigs                            -0.004***  -0.467***  -0.004*** "){
+    fail("The 'cigs' coefficients don't look quite right.") }
+  pass()
+})
 ```
   
 ### Quadratics
@@ -283,9 +314,13 @@ Calculate the effect of a \$1,000/year increase in family income for a family wi
 ```{r log-quadratic-solution}
 bwght.lmX <- lm(bwghtlbs ~ cigs + faminc + I(faminc^2), data = bwght)
 summary(bwght.lmX)
-
 ```
 
 ```{r log-quadratic-check}
-grade_code()
+grade_this({if (!inherits(.result, c("summary.lm"))) {
+    fail("Your class of your answer should be a summary of an lm object.")}
+  if (round(.result[2,1]$coefficients,4) != -0.0285){
+    fail("The 'cigs' coefficient doesn't look quite right.") }
+  pass()
+})
 ```

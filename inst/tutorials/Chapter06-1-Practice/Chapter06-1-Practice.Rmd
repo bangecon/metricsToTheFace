@@ -7,6 +7,7 @@ runtime: shiny_prerendered
 ```{r setup, include=FALSE}
 library(learnr)
 library(gradethis)
+library(marginaleffects)
 library(stargazer)
 hprice2 <- wooldridge::hprice2
 hprice.lm1 <- lm(price ~ nox + crime + rooms + dist + stratio, data = hprice2)
@@ -38,7 +39,12 @@ stargazer(hprice.lm1, hprice.lm2, hprice.lm3, type = 'text')
 ```
 
 ```{r housePriceBetas-check}
-grade_code()
+grade_this({if (!inherits(.result, c("character"))) {
+    fail("Your class of your answer should be a list of character strings.")}
+  if (.result[8] != "nox                      -2,706.433***                                                        "){
+    fail("The 'nox' coefficients don't look quite right.") }
+  pass()
+})
 ```
 
 ### Elasticities
@@ -64,7 +70,12 @@ stargazer(hprice.lm1,                                 # Tell it the structure of
 ```
 
 ```{r housePriceEYEX-check}
-grade_code()
+grade_this({if (!inherits(.result, c("character"))) {
+    fail("Your class of your answer should be a list of character strings.")}
+  if (.result[8] != "nox                           -0.062           "){
+    fail("The 'nox' coefficients don't look quite right.") }
+  pass()
+})
 ```
 
 ### Log Transofrmation
@@ -89,5 +100,10 @@ summary(lnhprice.lm1)
 ```
 
 ```{r lnHousePrice-check}
-grade_code()
+grade_this({if (!inherits(.result, c("summary.lm"))) {
+    fail("Your class of your answer should be a summary of an lm object.")}
+  if (round(.result[2,1]$coefficients,4) != -0.5320){
+    fail("The 'log(nox)' coefficient doesn't look quite right.") }
+  pass()
+})
 ```
