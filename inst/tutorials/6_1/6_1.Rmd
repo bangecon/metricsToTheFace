@@ -1,0 +1,402 @@
+---
+title: "Chapter 6"
+subtitle: "Multiple Regression Analysis - Scaling and Elasticity"
+description: "This tutorial discusses issues of standardization, elasticity, and log transformations."
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+tutorial_options(exercise.eval = TRUE, exercise.reveal_solution = TRUE)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Data Scaling & Units of Measurement
+
+### Smoking and Birthweight
+Estimate and compare the following regressions for a baby's birth weight on an expecting mother's smoking using the $bwght$ data (preloaded with this tutorial):  
+1. $BirthWeight_{oz} = \beta_0 + \beta_1Cigarettes + \beta_2Income + u$
+2. $BirthWeight_{lbs} = \beta_0 + \beta_1Cigarettes + \beta_2Income + u$
+3. $BirthWeight_{oz} = \beta_0 + \beta_1Packs + \beta_2Income + u$  
+Where:  
+$BirthWeight_{oz} =$ Birthweight in ounces, `bwght`  
+$BirthWeight_{lbs} =$ Birthweight in pounds, `bwghtlbs`  
+$Cigarettes =$ Cigarettes the mother smoked per day during pregnancy, `cigs`  
+$Packs =$ Packs of cigarettes the mother smoked per day during pregnancy, `packs`  
+$Income =$ Family Income, `faminc`
+
+Summarize your output in a text table using `stargazer()`
+
+```{r bwght, exercise = TRUE}
+
+
+```
+
+```{r bwght-hint}
+# Oh Come on, now! You know how to run regressions by now! No peeking!
+```
+
+```{r bwght-solution}
+library(stargazer)
+bwght <- wooldridge::bwght
+bwght.lm1 <- lm(bwght ~ cigs + faminc, data = bwght)
+bwght.lm2 <- lm(bwghtlbs ~ cigs + faminc, data = bwght)
+bwght.lm3 <- lm(bwght ~ packs + faminc, data = bwght)
+stargazer(bwght.lm1, bwght.lm2, bwght.lm3, type = 'text')
+```
+
+```{r bwght-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Standardized Coefficients and Elasticities
+
+To compare coefficients that have different units or that might be scaled differently, we can interpret the results a few different ways: 
+
+1. Transform the raw data (X and y) as zscores (subtract the mean and dividing by the standard deviation). 
+2. Calculate the standardied coefficients: $\hat{b}_j = \frac{\hat\sigma_{x_j}}{\hat\sigma_y}\hat\beta_j$.
+3. Calculate the elasticities: $E_{yx_j} = \frac{\text%\Delta{y}}{\text%\Delta{x_j}} = \frac{\Delta{y}/y}{\Delta{x_j}/x_j} = \beta_j(\frac{\bar{x}_j}{\bar{y}})$
+  
+Note: (1) and (2) are numerically equivalent. Also, in all of the cases, we can standardize partially, which usually means standardizing the x variable(s), but not y.
+
+### Standardizing Variables
+
+Estimate the previous three models using the standardized transformations of the variables using the `scale()` function and print all three results with a text `stargazer()` table. 
+
+```{r scale, exercise = TRUE}
+
+```
+
+```{r scale-setup}
+library(stargazer)
+bwght <- wooldridge::bwght
+bwght.lm1 <- lm(bwght ~ cigs + faminc, data = bwght)
+bwght.lm2 <- lm(bwghtlbs ~ cigs + faminc, data = bwght)
+bwght.lm3 <- lm(bwght ~ packs + faminc, data = bwght)
+```
+
+```{r scale-hint}
+# You can do it!
+```
+
+```{r scale-solution}
+bwght.lm4 <- lm(scale(bwght) ~ scale(cigs) + scale(faminc), data = bwght)
+bwght.lm5 <- lm(scale(bwghtlbs) ~ scale(cigs) + scale(faminc), data = bwght)
+bwght.lm6 <- lm(scale(bwght) ~ scale(packs) + scale(faminc), data = bwght)
+stargazer(bwght.lm4, bwght.lm5, bwght.lm6, type = 'text')
+```
+
+```{r scale-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(paste(random_praise(), "All three estimates are the same when we scale them the same!"))
+  }
+  fail(random_encouragement())
+})
+```
+
+### Standardizing Coefficients
+
+Calculate the beta coefficients for the original coefficients, excluding the intercept.  
+Return a `c()` vector with the standardized ounces-cigarettes coefficients first; the pounds-cigarettes model second; and the ounces-packs model third. 
+
+```{r beta, exercise = TRUE}
+
+
+```
+
+```{r beta-setup}
+library(stargazer)
+bwght <- wooldridge::bwght
+bwght.lm1 <- lm(bwght ~ cigs + faminc, data = bwght)
+bwght.lm2 <- lm(bwghtlbs ~ cigs + faminc, data = bwght)
+bwght.lm3 <- lm(bwght ~ packs + faminc, data = bwght)
+```
+
+```{r beta-hint-1}
+# Each model contains a named vector called "coefficients" containing the ... coefficients!
+# I stored the `lm` objects for the three regressions as `bwght.lm1`, `bwght.lm2`, and `bwght.lm3`.
+```
+
+```{r beta-hint-2}
+# Use indexing (square brackets) to include or exclude (using negation, "-") a position. 
+  # Exclude the intercept coefficient
+  # Also exclude the dependent variable's standard deviation when calculating the vector of x-standard deviations. 
+```
+
+```{r beta-hint-3}
+# `sapply(list, function)` returns a simple vector you get from *apply*ing a function to a *s*equence of values 
+# `bwght.lm1(model)` pulls the variables *and observations* included in `bwght.lm1`, including `y`.
+```
+
+```{r beta-solution}
+c(bwght.lm1$coefficients[-1]*sapply(bwght.lm1$model, sd)[-1]/sd(bwght.lm1$model$bwght),
+  bwght.lm2$coefficients[-1]*sapply(bwght.lm2$model, sd)[-1]/sd(bwght.lm2$model$bwght),
+  bwght.lm3$coefficients[-1]*sapply(bwght.lm3$model, sd)[-1]/sd(bwght.lm3$model$bwght))
+```
+
+```{r beta-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(paste(random_praise(), " Same as the previous standardized coefficient estimates!"))
+  }
+  fail(random_encouragement())
+})
+```
+
+### Elasticities *at the Mean*
+
+The simplest way to calculate the elasticity is to note that: 
+
+$$E = \frac{dy/y}{dx/x} = \frac{dy}{dx}\cdot \frac{x}{y}$$
+Evaluating this expression at the sample means of $x$ and $y$ gives 
+$$E_{MEM} = \frac{dy}{dx}\cdot \frac{\bar{x}}{\bar{y}}$$
+which is a good approximation of the elasticity called the *marginal effect at the mean (MEM)*. The (right-hand side) partial elasticity using the MEM formula would be: 
+$$E_{MEM} = \frac{dy}{dx/\bar{x}} = \frac{dy}{dx}\cdot \bar{x}.$$
+
+Calculate the (1) full and (2) partial elasticities for the first (unscaled) model using the `sapply()` function (except applying the mean to the model data frame instead of standard deviation).  
+Report your result as `cbind(fullElasticities, partialElasticities)`.
+
+```{r eMeans, exercise = TRUE}
+
+```
+
+```{r eMeans-setup}
+library(stargazer)
+bwght <- wooldridge::bwght
+bwght.lm1 <- lm(bwght ~ cigs + faminc, data = bwght)
+bwght.lm2 <- lm(bwghtlbs ~ cigs + faminc, data = bwght)
+bwght.lm3 <- lm(bwght ~ packs + faminc, data = bwght)
+```
+
+```{r eMeans-hint-1}
+# `sapply(list, function)` returns a simple vector you get from *apply*ing a function to a *s*equence of values 
+# `bwght.lm1(model)` pulls the variables *and observations* included in `bwght.lm1`, including `y`.
+```
+
+```{r eMeans-hint-2}
+# Each model contains a named vector called "coefficients" containing the ... coefficients!
+# I stored the `lm` objects for the three regressions as `bwght.lm1`, `bwght.lm2`, and `bwght.lm3`.
+```
+
+```{r eMeans-hint-3}
+# Use indexing (square brackets) to include or exclude (using negation, "-") a position. 
+  # Exclude the intercept coefficient
+  # Also exclude the dependent variable's standard deviation when calculating the vector of x-standard deviations. 
+```
+
+```{r eMeans-solution}
+cbind(
+  bwght.lm1$coefficients[-1]*sapply(bwght.lm1$model, mean)[-1]/mean(bwght.lm1$model$bwght), 
+  bwght.lm1$coefficients[-1]*sapply(bwght.lm1$model, mean)[-1])
+```
+
+```{r eMeans-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### *Average* Elasticities 
+
+A better calculation of the elasticity for a model estimated in levels uses the concept of the *average marginal effect (AME)*.
+
+Implementing AME starts from the same point, 
+$$E = \frac{dy/y}{dx/x} = \frac{dy}{dx}\cdot \frac{x}{y},$$
+but then inserts each individual observation's *observed* value, 
+$$E_i = \frac{d\hat{y}_i}{dx_i}\cdot \frac{x_i}{\hat{y}_i},$$
+and averages them:  
+$$E_{AME} = \sum_{i=1}^n{\frac{d\hat{y}_i}{dx_i}\cdot \frac{x_i}{\hat{y}_i}}.$$
+The (right-hand side) partial elasticities would be:  
+$$E_{AME} = \sum_{i=1}^n{\frac{d\hat{y}_i}{dx_i}\cdot x_i}.$$
+
+Estimate the (1) full and (2) partial elasticities for the first model by printing a `summary()` of the results of `marginaleffects()` using the `marginaleffects` package.  
+
+Report your result as a `list(fullElasticities, partialElasticities)`. 
+
+```{r eAME, exercise = TRUE}
+
+
+```
+
+```{r eAME-hint-1}
+# Get the full elasticity (%dy/%dx) by setting `slope = 'eyex'`
+# Get the x partial (dy/%dx) elasticity with `slope ='dyex'`
+# get the y partial (%dy/dx) elasticity with `slope = 'eydx'`
+```
+
+```{r eAME-hint-2}
+# By itself, `marginaleffects()` stores/reports the marginal effect for each individual observation. 
+# Use `by = TRUE` to get the averaged margins instead of the margins for each observation. 
+# An alternative to `by = TRUE` is to use run `marginaleffects()` followed by `summary()`. 
+```
+
+```{r eAME-setup}
+bwght <- wooldridge::bwght
+bwght.lm1 <- lm(bwght ~ cigs + faminc, data = bwght)
+bwght.lm2 <- lm(bwghtlbs ~ cigs + faminc, data = bwght)
+bwght.lm3 <- lm(bwght ~ packs + faminc, data = bwght)
+```
+
+```{r eAME-solution}
+library(marginaleffects)
+list(
+  marginaleffects(bwght.lm1, slope = 'eyex', by = TRUE), 
+  marginaleffects(bwght.lm1, slope = 'dyex', by = TRUE))
+```
+
+```{r eAME-check}
+grade_this({
+  if (identical(unlist(.result[[1]]), unlist(.solution[[1]])) & 
+      identical(unlist(.result[[2]]), unlist(.solution[[2]]))) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+Note: Calculating standard errors for nonlinear functions of multiple parameters ($\hat{\beta}, \bar{x}, \bar{y}$) is a little tricky, and I won't address it. If you're interested a couple of methods include the delta method (which is more theoretically-grounded and used by `marginaleffects()`) and the bootstrap. 
+
+## Interpreting Effects for Transformed Variables
+
+Choice of functional form should be guided by theory as well as the data.
+
+### Logs 
+
+1. Log-linear form: $ln(y) = \beta_0 + \beta_1x_1 + controls + u$
+  
+  $$ \beta_1 = \frac{\delta ln(y)}{\delta x_1} = \frac{\delta y/y}{\delta x_1} = \frac{\text%\Delta y}{\Delta x_1} $$
+  
+2. Linear-log form: $y = \beta_0 + \beta_1ln(x_1) + controls + u$
+  
+  $$ \beta_1 = \frac{\delta y}{\delta ln(x_1)} = \frac{\delta y}{\delta x_1/x_1} = \frac{\Delta y}{\text%\Delta x_1} $$
+
+3. Double-log form: $ln(y) = \beta_0 + \beta_1ln(x_1) + controls + u$
+  
+  $$ \beta_1 = \frac{\delta ln(y)}{\delta ln(x_1)} = \frac{\delta y/y}{\delta x_1/x_1} = \frac{\text%\Delta y}{\text%\Delta x_1} = E_{yx} $$
+  
+### Family Income and Birthweight 
+
+Estimate the birth weight model using: 
+1. The log of birth weight and levels of the explanatory variables
+2. The log of family income and levels of birth weight and other variables
+3. The logs of birth weight *and* family income
+
+Output the results using a text `stargazer` table.
+
+```{r log, exercise = TRUE}
+
+```
+
+```{r log-setup}
+library(stargazer)
+bwght <- wooldridge::bwght
+bwght.lm1 <- lm(bwght ~ cigs + faminc, data = bwght)
+bwght.lm2 <- lm(bwghtlbs ~ cigs + faminc, data = bwght)
+bwght.lm3 <- lm(bwght ~ packs + faminc, data = bwght)
+bwght.lm4 <- lm(scale(bwght) ~ scale(cigs) + scale(faminc), data = bwght)
+bwght.lm5 <- lm(scale(bwghtlbs) ~ scale(cigs) + scale(faminc), data = bwght)
+bwght.lm6 <- lm(scale(bwght) ~ scale(packs) + scale(faminc), data = bwght)
+```
+
+```{r log-hint}
+
+```
+
+```{r log-solution}
+bwght.lm7 <- lm(log(bwght) ~ cigs + faminc, data = bwght)
+bwght.lm8 <- lm(bwght ~ cigs + log(faminc), data = bwght)
+bwght.lm9 <- lm(log(bwght) ~ cigs + log(faminc), data = bwght)
+stargazer(bwght.lm7, bwght.lm8, bwght.lm9, type = 'text')
+```
+
+```{r log-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+  
+### Quadratics
+
+The coefficients themselves do not reveal the effect of $x_j$ on $y$ because that effect depends on the value of $x_j$. Some calculus shows that 
+
+$$\frac{\delta{y}}{\delta{x_j}} = \beta_1 + 2\beta_2x_1$$
+
+This also means that there is a value of $x$ that maximizes or minimizes the predicted value of $y$. 
+  
+Choice of functional form should be guided by theory as well as the data. 
+  
+## Family Income and Birthweight
+
+Estimate the birth weight model using a quadratic of family income and summarize the results with `summary()`.  
+Calculate the effect of a \$1,000/year increase in family income for a family with a *median* income level in which the mother smoked the *median* number of cigarettes per day (the units for `faminc` are in \$1,000/year). 
+
+```{r quadratic, exercise = TRUE}
+
+
+```
+
+```{r quadratic-setup}
+library(marginaleffects)
+library(stargazer)
+bwght <- wooldridge::bwght
+```
+
+```{r quadratic-hint-1}
+# Remember to use the as-is function `I()` when we apply exponents inside a formula object.
+```
+
+```{r quadratic-hint-2}
+# Use the `newdata` option to specify the values of the explanatory variables (the medians) for calculating `marginaleffects()`. 
+# Find the medians as a `data.frame` object either one at a time using: 
+  # data.frame(x1 = median(df$x1), x2 = median(df$x2), ...)
+  # transposing `sapply(lm$model, median) from a row to a column vector with `t()` and converting it with `data.frame()`
+```
+
+```{r quadratic-solution}
+bwght.lmX <- lm(bwghtlbs ~ cigs + faminc + I(faminc^2), data = bwght)
+newdata <- data.frame(t(sapply(bwght.lmX$model, median)))
+marginaleffects(bwght.lmX, newdata = newdata, by = TRUE)
+```
+
+```{r quadratic-check}
+grade_this({
+  if (identical(unlist(.result), unlist(.solution))) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```

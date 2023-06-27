@@ -1,0 +1,179 @@
+---
+title: "Chapter 4"
+subtitle: "Multiple Regression Analysis - Inference"
+description: "This tutorial introduces inference for multiple-parameter tests following multiple regression."
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+tutorial_options(exercise.eval = TRUE, exercise.reveal_solution = FALSE)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Crime by Region
+
+### Estimation
+
+Estimate the model from the previous practice exercises *with and without region variables*. Report the output using `stargazer()`.
+$$\begin{align}
+ln(CrimeRate) = &\beta_0 + \beta_1ln(LawExpendPC) + \beta_2ln(IncomePC) + \beta_3ln(PopulationDensity) + \\
+& \beta_4West + \beta5Northeast + \beta_6South + u
+\end{align}$$  
+```{r crime, exercise=TRUE, exercise.reveal_solution = TRUE}
+
+```
+
+```{r crime-solution}
+library(stargazer)
+crime2 <- wooldridge::crime2
+crime.lm1 <- lm(log(crmrte) ~ log(lawexpc) + log(pcinc) + log(popden) + west + nrtheast + south, 
+                data = crime2)
+crime.lmr <- lm(log(crmrte) ~ log(lawexpc) + log(pcinc) + log(popden), data = crime2)
+stargazer(crime.lm1, crime.lmr, type = 'text')
+```
+
+```{r crime-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Differences between (Non-Baseline) Regions
+
+The excluded ("baseline") is the Midwest region, which does not have a separately-defined variable in the dataset. The t-tests for the included regions (West, Northeast, and South) represent a test involving the comparison of these other regions to the Midwest region.  
+Test whether the crime rates in the Northeast region differ significantly from crime rates in the South region using *both* `glht()` *and* `lht()`.  
+Report your result as a `list()` consisting of (1) the output of the `glht()` test, and (2) the output of the `lht()` test.
+
+```{r lincom, exercise=TRUE, exercise.reveal_solution = TRUE}
+
+```
+
+```{r lincom-hint-1}
+# `glht()` from the `multcomp` package requires: 
+  # an `lm` or other model with estimated parameters 
+  # a linear function (`linfct`) of the variables in quotation marks
+  # e.g. `glht(lm, linfct = "x1 - x2 = 0")`
+# The output value for `glht()` does not report the full results for the test. Use `summary.glht()` to get the test statistic, p-value, df, etc. 
+```
+
+```{r lincom-hint-2}
+# `lht()` from the `car` (companion to applied regression) package requires: 
+  # a model, a hypothesis matrix, `hypothesis.matrix`, representing the left-hand side 
+  # a vector of right-hand side numerical values, `rhs` (same dimensions as hypothesis.matrix) 
+  # e.g. `lht(lm, hypothesis.matrix = "x1 - x2", rhs = 0)` 
+```
+
+```{r lincom-setup}
+crime2 <- wooldridge::crime2
+crime.lm1 <- lm(log(crmrte) ~ log(lawexpc) + log(pcinc) + log(popden) + west + nrtheast + south, data = crime2)
+```
+
+```{r lincom-solution}
+library(multcomp)
+library(car)
+list(glht(crime.lm1, linfct = "nrtheast - south = 0"),
+     lht(crime.lm1, hypothesis.matrix = c("nrtheast - south"), rhs = 0))
+```
+
+```{r lincom-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Jointly Testing Regional Effects 
+
+Calculate the test statistic and p-value for the presence of risk-adjusted (controlling for other factors) regional differences in crime rates *by hand* using the restricted and unrestricted $R^2$.  
+Report the result as a `c()` vector consisting of (1) the F-statistic; and (2) the p-value. 
+
+```{r crimeF, exercise=TRUE, exercise.reveal_solution = TRUE}
+
+```
+
+```{r crimeF-hint}
+# The numerator degrees of freedom equals the number of parameter restrictions in the test. 
+# You can hard-code this by just counting (west, nrtheast, and south is three). 
+# You can also get this from the difference in the residual degrees of freedom stored by the `lm` objects.
+  # Remember that the restricted model has more residual df than the unrestricted (fewer parameters).
+  # Number of restrictions = `lm.restricted$df.residual` - `lm.unrestricted$df.residual`
+```
+
+```{r crimeF-setup}
+crime2 <- wooldridge::crime2
+crime.lm1 <- lm(log(crmrte) ~ log(lawexpc) + log(pcinc) + log(popden) + west + nrtheast + south, data = crime2)
+crime.lmr <- lm(log(crmrte) ~ log(lawexpc) + log(pcinc) + log(popden), data = crime2)
+```
+
+```{r crimeF-solution}
+r2.u <- summary(crime.lm1)$r.squared 
+r2.r <- summary(crime.lmr)$r.squared 
+c(F <- ((r2.u-r2.r)/(crime.lmr$df.residual-crime.lm1$df.residual)) / ((1-r2.u)/crime.lm1$df.residual),
+  1-pf(F, crime.lmr$df.residual-crime.lm1$df.residual, crime.lm1$df.residual))
+```
+
+```{r crimeF-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Using `lht()`
+
+Perform the test again using `lht()`.
+
+```{r lht, exercise=TRUE, exercise.reveal_solution = TRUE}
+
+```
+
+```{r lht-setup}
+crime2 <- wooldridge::crime2
+crime.lm1 <- lm(log(crmrte) ~ log(lawexpc) + log(pcinc) + log(popden) + west + nrtheast + south, data = crime2)
+crime.lmr <- lm(log(crmrte) ~ log(lawexpc) + log(pcinc) + log(popden), data = crime2)
+```
+
+```{r lht-solution}
+lht(crime.lm1, 
+    hypothesis.matrix = c('west', 'nrtheast', 'south'), 
+    rhs = c(0, 0, 0))
+```
+
+```{r lht-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```

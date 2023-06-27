@@ -1,0 +1,135 @@
+---
+title: "Chapter 4"
+subtitle: "Multiple Regression Analysis - Inference"
+description: "This tutorial introduces inference for single-parameter tests following multiple regression."
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+gradethis::gradethis_setup()
+tutorial_options(exercise.reveal_solution = FALSE)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Population Density and Crime 
+
+1. Estimate the following model using the `crime2` dataset.
+$$ln(CrimeRate) = \beta_0 + \beta_1ln(LawExpendPC) + \beta_2ln(IncomePC) + \beta_3ln(PopulationDensity) + \beta_4West + \beta5Northeast + \beta_6South + u$$
+2. Construct a 99% confidence interval for the law-enforcement expenditure elasticity of crime rates using `confint`.
+
+```{r crime, exercise=TRUE}
+
+```
+
+```{r crime-solution, exercise.reveal_solution = FALSE}
+crime2 <- wooldridge::crime2
+crime.lm1 <- lm(log(crmrte) ~ log(lawexpc) + log(pcinc) + log(popden) + west + nrtheast + south, data = crime2)
+confint(crime.lm1, "log(lawexpc)", level = 0.99)
+```
+
+```{r crime-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Skipping Class (Also a Crime!)
+
+### Estimation
+
+Use the `colGPA` to estimate the following model:  
+$$CollegeGPA = \beta_0 + \beta_1HSGPA + \beta_2ACT + \beta_3Skipped + u,$$ 
+where `skipped` measures the average number of classes a student missed each week. 
+
+Print a `summary()` of your results.
+
+```{r gpaSkip, exercise = TRUE}
+
+```
+
+```{r gpaSkip-hint}
+
+```
+
+```{r gpaSkip-solution}
+gpa1 <- wooldridge::gpa1
+colGPA.lm2 <- lm(colGPA ~ hsGPA + ACT + skipped, data = gpa1)
+summary(colGPA.lm2)
+```
+
+```{r gpaSkip-check}
+grade_this({
+  if (identical(.result$call, .solution$call)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Testing
+
+Test the hypothesis that skipping more classes decreases your college GPA at the $\alpha = 0.01$ level of significance.  
+Report the test statistic, degrees of freedom, t-critical value, and p-value for the test as a `c()` vector.  
+
+```{r skipTest, exercise = TRUE}
+
+```
+
+```{r skipTest-hint-1}
+# The test statistic is stored as part of the `summary.lm()` object in the `coefficients` table in the row named for the variable and the column named `t value`. 
+```
+
+```{r skipTest-hint-2}
+# The degrees of freedom are stored in the `lm` object itself under the name `df.residual`. 
+```
+
+```{r skipTest-hint-3}
+# The t-critical value is the quantile of the t-distribution, `qt()`, corresponding to placing probability `alpha` in the left tail (left-tailed test, lower.tail = TRUE, default), `alpha` in the right tail (right-tailed test, lower.tail = FALSE), or `alpha/2` in each of the left and right tails. 
+```
+
+```{r skipTest-setup}
+gpa1 <- wooldridge::gpa1
+colGPA.lm2 <- lm(colGPA ~ hsGPA + ACT + skipped, data = gpa1) 
+```
+
+```{r skipTest-solution}
+tstat <- summary(colGPA.lm2)$coefficients['skipped', 't value']
+df <- colGPA.lm2$df.residual
+tcrit <- qt(0.01, df)
+pval <- pt(tstat, df)
+c(tstat, df, tcrit, pval)
+```
+
+```{r skipTest-check}
+grade_this({
+  if (identical(unname(.result), .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```

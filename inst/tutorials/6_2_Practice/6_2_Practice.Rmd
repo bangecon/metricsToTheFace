@@ -1,0 +1,160 @@
+---
+title: "Chapter 6"
+subtitle: "Multiple Regression Analysis - "
+description: "This tutorial practices interactions and comparing specification."
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+tutorial_options(exercise.eval = TRUE, exercise.reveal_solution = FALSE)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Square Footage, Bedrooms, and Home Prices 
+
+Estimate the following models using the `hprice1` dataset.
+
+1. $Price = \beta_0 + \beta_1Lot\text{ }Size + \beta_2Square\text{ }Feet + \beta_3Bedrooms + u$
+2. $Price = \beta_0 + \beta_1Lot\text{ }Size + \beta_2Square\text{ }Feet + \beta_3Bedrooms + \beta4Square\text{ }Feet \cdot Bedrooms + u$
+3. $Price = \beta_0 + \beta_1Lot\text{ }Size + \beta_2Square\text{ }Feet + \beta_3Bedrooms + \beta4(Square\text{ }Feet - \mu_{Sq.\text{ }Ft.}) \cdot (Bedrooms - \mu_{Bedrooms}) + u$
+
+Present all three sets of estimates in the same **text** table using `stargazer.`
+
+```{r housePricePractice, exercise=TRUE, exercise.reveal_solution = FALSE}
+
+```
+
+```{r housePricePractice-solution}
+library(stargazer)
+hprice1 <- wooldridge::hprice1
+hprice.lm1 <- lm(price ~ lotsize + sqrft + bdrms, data = hprice1)
+hprice.lm2 <- lm(price ~ lotsize + sqrft*bdrms, data = hprice1)
+hprice.lm3 <- lm(
+  price ~ lotsize + sqrft + bdrms + I(scale(sqrft, T, F)*scale(bdrms, T, F)),
+  data = hprice1)
+stargazer(hprice.lm1, hprice.lm2, hprice.lm3, type = 'text')
+```
+
+```{r housePricePractice-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Comparing Nested Specifications
+
+Add the squares of square footage and number of bedrooms using the centered interactions from the third specification in the previous question.  
+Calculate and store the AICs for all three unique models (no interaction and no squares, interaction but no squares, interaction with squares).  Return a `c()` vector including the AIC for all three specifications (only linear terms, linear with scaled interaction, and linear with interactions and quadratics).
+
+```{r AIC, exercise = TRUE}
+
+```
+
+```{r, AIC-setup}
+library(stargazer)
+hprice1 <- wooldridge::hprice1
+hprice1 <- wooldridge::hprice1
+hprice.lm1 <- lm(price ~ lotsize + sqrft + bdrms, data = hprice1)
+hprice.lm2 <- lm(price ~ lotsize + sqrft*bdrms, data = hprice1)
+hprice.lm3 <- lm(
+  price ~ lotsize + sqrft + bdrms + I(scale(sqrft, T, F)*scale(bdrms, T, F)),
+  data = hprice1)
+```
+
+```{r, AIC-hint}
+# The exercise setup includes the `lm()` objects from the previous example as `hprice.lm1`, `hprice.lm2`, and `hprice.lm3`. 
+```
+
+```{r, AIC-solution}
+hprice.lm4 <- lm(
+  price ~ lotsize + sqrft + bdrms + I(scale(sqrft, T, F)*scale(bdrms, T, F)) +  
+  I(sqrft^2) + I(bdrms^2), data = hprice1)
+c(AIC(hprice.lm1), AIC(hprice.lm3), AIC(hprice.lm4))
+```
+
+```{r, AIC-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Adding Diagnostic Stats to `stargazer()` Output
+
+You may specify specific statistics to add or keep for your table output in `stargazer()` using the `keep.stat` (if `stargazer` supports calcculating a specific internally for your model type) or `add.lines`.
+
+`stargazer` does support calculating AICs, but for some reason not for simplie `lm()` classes. Add the AIC to the table for each of the three models you calculated AIC for in the previous exercise. 
+
+```{r stargazer, exercise = TRUE}
+
+```
+
+```{r, stargazer-setup}
+library(stargazer)
+hprice1 <- wooldridge::hprice1
+hprice.lm1 <- lm(price ~ lotsize + sqrft + bdrms, data = hprice1)
+hprice.lm3 <- lm(
+  price ~ lotsize + sqrft + bdrms + I(scale(sqrft, T, F)*scale(bdrms, T, F)),
+  data = hprice1)
+hprice.lm4 <- lm(
+  price ~ lotsize + sqrft + bdrms + I(scale(sqrft, T, F)*scale(bdrms, T, F)) +  
+  I(sqrft^2) + I(bdrms^2), data = hprice1)
+hprice.aic1 <- AIC(hprice.lm1) 
+hprice.aic3 <- AIC(hprice.lm3)
+hprice.aic4 <- AIC(hprice.lm4)
+```
+
+```{r, stargazer-hint-1}
+# The exercise setup includes the `AIC()` statistics from the previous example as `hprice.aic1`, `hprice.aic3`, and `hprice.aic4`. 
+```
+
+```{r, stargazer-hint-2}
+# `add.lines` takes a `list()` of `c()` vectors, where each vector in the list specifies the values for each column of the line it adds, including row label. 
+# `add.lines = list(c("Label for first line added", column1value, column2value, ...))
+```
+
+```{r, stargazer-solution}
+stargazer(
+  hprice.lm1, hprice.lm3, hprice.lm4, type = 'text', 
+  add.lines = list(
+    c("AIC", round(hprice.aic1, 3), round(hprice.aic3, 3), round(hprice.aic4, 3))
+    )
+  )
+```
+
+```{r, stargazer-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```

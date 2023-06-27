@@ -1,0 +1,276 @@
+---
+title: "Chapter 6"
+subtitle: "Multiple Regression Analysis - Interactions and Comparing Specifications"
+description: "This tutorial discusses interactions and comparing specification."
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+tutorial_options(exercise.eval = TRUE, exercise.reveal_solution = TRUE)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Interactions between Variables
+
+### Interactions between Continous Variables
+
+Suppose we want to estimate the following model of (standardized) final exam scores: 
+
+$$ Final = \beta_0 + \beta_1Attendance + \beta_2PriorGPA + \beta_3ACT + \beta_4PriorGPA^2 + \beta_5ACT^2$$
+where: 
+
+$Attendance =$ percentage of classes the student attended, `atndrte`<br>
+$PriorGPA =$ student's GPA in previous classes, `priGPA`<br>
+$ACT =$ student's ACT score, `ACT`<br>
+
+We may suspect that the *effect* of attendance depends on, or is *moderated by*, prior GPA: Attendance might not matter as much for students who do perform well generally. Then, 
+
+$$ Final = \beta_0 + \beta_1Attendance + \beta_2PriorGPA + \beta_3ACT + \beta_4PriorGPA^2 + \beta_5ACT^2 + \beta_6PriorGPA \cdot Attendance + u $$
+$\hat\beta_1 =$ effect of attendance on final performance *when prior GPA equals zero*. 
+
+What we (probably) want to know: The effect of attendance on final performance *at the mean* (of prior GPA and other variables): $\frac{\delta{Final}}{\delta{Attendance}}\Big\rvert_{PriorGPA = \bar{x}_{PriorGPA}} = \beta_1 + \beta_6 \cdot \bar{x}_{PriorGPA}$ 
+  
+### Interactions in `R`
+
+1. Estimate the above regressions using the `attend` dataset. 
+2. Calculate $\frac{\delta{Final}}{\delta{Attendance}}\Big\rvert_{PriorGPA = \bar{x}_{PriorGPA}}$ for each model.  
+Report your result as a `c()` vector.
+
+```{r attend, exercise = TRUE}
+
+
+```
+
+```{r attend-hint1}
+# Using the "*" operator between two variables in the formula gives both the interaction term *and* the non-interacted linear effects for the variables. 
+```
+
+```{r attend-hint2}
+# Recall that in order for R to read polynomial terms (e.g. `x^2`) properly, you need to use the "asis" function, `I()`.
+```
+
+```{r attend-hint3}
+# Always use the relevant sample for the estimation to calculate marginal effects in case the model had to omit observations due to missing data. Calculate the mean based on attend.lm2$model$variable. 
+# For these examples it doesn't usually matter because there are no missing observations, but developing good habits now will save you headaches later. 
+```
+
+```{r attend-solution}
+attend <- wooldridge::attend
+attend.lm1 <- lm(stndfnl ~ atndrte + priGPA + ACT + I(priGPA^2) + I(ACT^2), data = attend)
+attend.lm2 <- lm(stndfnl ~ atndrte*priGPA + ACT + I(priGPA^2) + I(ACT^2), data = attend)
+c(attend.lm1$coefficients['atndrte'], 
+  attend.lm2$coefficients['atndrte'] + 
+    attend.lm2$coefficients['atndrte:priGPA'] * mean(attend.lm1$model$priGPA))
+```
+
+```{r attend-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Centering Continous Interactions
+
+A trick to make things less cumbersome is to *center* the variables in the interaction. This estimates: 
+$$ Final = \beta_0 + \beta_1Attendance + \beta_2PriorGPA + \beta_3ACT + \beta_4PriorGPA^2 + \beta_5ACT^2 + \beta_6(PriorGPA - \mu_{PriorGPA}) \cdot (Attendance - \mu_{Attendance}) + u $$
+
+Re-estimate the second specification using the `scale()` function with `scale = FALSE` for the interactions and summarize all three models using `stargazer()`. 
+
+```{r attend-scale, exercise = TRUE}
+
+
+```
+
+```{r attend-scale-setup}
+attend <- wooldridge::attend
+attend.lm1 <- lm(stndfnl ~ atndrte + priGPA + ACT + I(priGPA^2) + I(ACT^2), data = attend)
+attend.lm2 <- lm(stndfnl ~ atndrte*priGPA + ACT + I(priGPA^2) + I(ACT^2), data = attend)
+```
+
+```{r attend-scale-hint-1}
+# The setup stores the specifications from the previous exercise as `attend.lm1` and `attend.lm2`. 
+```
+
+```{r attend-scale-hint-2}
+# Interacting scaled variables within the `lm()` function also requires the `I()` function, and you have to add the linear variables  separately.
+```
+
+```{r attend-scale-solution}
+library(stargazer)
+attend.lm3 <- lm(
+  stndfnl ~ atndrte + priGPA + ACT + I(priGPA^2) + I(ACT^2) + 
+    I(scale(atndrte, T, F)*scale(priGPA, T, F)), data = attend)
+stargazer(attend.lm1, attend.lm2, attend.lm3, type = 'text')
+```
+
+```{r attend-scale-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Comparing Specifications
+
+### Adjusted $R^2$
+
+$$\bar{R}^2 = 1 - \frac{SSR/(n-k-1)}{SST/(n-1)} = 1 - \frac{\hat\sigma_u^2}{\hat\sigma_y^2}$$
+
+Useful for comparing nonnested models, e.g. switching one control for another, and alternate forms of the dependent variable. 
+
+### Information Criteria for Nested Models
+
+Choose the *Lowest*-Valued Specification
+
+Akaike Information Criteria (Normal Error Distribution): <br>
+  $-2\frac{\ell}{n} + 2\frac{k}{n} = C + ln(\frac{\sum_{i=1}^n{u_i^2}}{n}) + 2\frac{k}{n}$
+
+Bayes/Schwartz Information Criteria (Normal Error Distribution): <br>
+  $-2\frac{\ell}{n} + ln(n)\frac{k}{n} = C + ln(\frac{\sum_{i=1}^n{u_i^2}}{n}) + ln(n)\frac{k}{n}$
+
+## Inappropriate Controls 
+
+Adding a control that directly causes $y$ and is *uncorrelated* with $x$ generally helps by reducing $\hat\sigma_u^2$.
+
+Adding a control that directly causes $y$ and is *correlated* with $x$ is tricky: 
+1. Adding the control helps by reducing omitted-variable bias; 
+2. Adding the control hurts by increasing the variance. 
+
+Things get even trickier when the control only *indirectly* causes $y$ through $x$ (collider bias), or when $x$ inflences the control on the way to causing the outcome (post-treatment effect bias). 
+
+Be careful adding controls! 
+
+### Overfitting
+
+Controlling for too many things risks overfitting the sample (and threatens exteernal validity). 
+
+1. Forward/Backward Stepwise Regression
+2. Ridge Regression
+3. Least-Angle Regression (LARS)
+4. Least Absolute Shrinkage & Selection Operator (LASSO)
+5. Validation Sample/Cross-Validation
+
+### Colliders
+
+Controlling for a variable that *causes* your treatment introduces *collider bias*. 
+
+```{r, echo = FALSE}
+library(tidyverse)
+library(gganimate)
+library(gifski)
+library(ggthemes)
+df <- data.frame(X = rnorm(200)+1,Y=rnorm(200)+1,time="1") %>%
+  mutate(C = as.integer(X+Y+rnorm(200)/2>2)) %>%
+  group_by(C) %>%
+  mutate(mean_X=mean(X),mean_Y=mean(Y)) %>%
+  ungroup()
+#Calculate correlations
+before_cor <- paste("1. Start with raw data, ignoring C. Correlation between X and Y: ",round(cor(df$X,df$Y),3),sep='')
+after_cor <- paste("7. Analyze what's left! Correlation between X and Y controlling for C: ",round(cor(df$X-df$mean_X,df$Y-df$mean_Y),3),sep='')
+#Add step 2 in which X is demeaned, and 3 in which both X and Y are, and 4 which just changes label
+dffull <- rbind(
+  #Step 1: Raw data only
+  df %>% mutate(mean_X=NA,mean_Y=NA,C=0,time=before_cor),
+  #Step 2: Raw data only
+  df %>% mutate(mean_X=NA,mean_Y=NA,time='2. Separate data by the values of C.'),
+  #Step 3: Add x-lines
+  df %>% mutate(mean_Y=NA,time='3. Figure out what differences in X are explained by C'),
+  #Step 4: X de-meaned 
+  df %>% mutate(X = X - mean_X,mean_X=0,mean_Y=NA,time="4. Remove differences in X explained by C"),
+  #Step 5: Remove X lines, add Y
+  df %>% mutate(X = X - mean_X,mean_X=NA,time="5. Figure out what differences in Y are explained by C"),
+  #Step 6: Y de-meaned
+  df %>% mutate(X = X - mean_X,Y = Y - mean_Y,mean_X=NA,mean_Y=0,time="6. Remove differences in Y explained by C"),
+  #Step 7: Raw demeaned data only
+  df %>% mutate(X = X - mean_X,Y = Y - mean_Y,mean_X=NA,mean_Y=NA,time=after_cor))
+p <- ggplot(dffull,aes(y=Y,x=X,color=as.factor(C)))+geom_point()+
+  geom_vline(aes(xintercept=mean_X,color=as.factor(C)), na.rm = TRUE)+
+  geom_hline(aes(yintercept=mean_Y,color=as.factor(C)), na.rm = TRUE)+
+  guides(color=guide_legend(title="C"))+
+  scale_color_colorblind()+
+  labs(title = 'Inventing a Correlation Between X and Y by Controlling for Collider C \n{next_state}', caption="Graph Code Credit: Nick Huntington-Klein, 'causalgraphs' https://github.com/NickCH-K/causalgraphs")+
+  transition_states(time,transition_length=c(1,12,32,12,32,12,12),state_length=c(160,125,100,75,100,75,160),wrap=FALSE)+
+  ease_aes('sine-in-out')+
+  exit_fade()+enter_fade()
+animate(p,nframes=200)
+```
+
+### Post-Treatment Effects
+
+Controlling for a variable that is *caused by* the treatment and subsequently causes the outcome introduces post-treatment effect bias. 
+
+```{r, echo = FALSE}
+library(tidyverse)
+library(gganimate)
+library(gifski)
+library(ggthemes)
+df <- data.frame(X = rnorm(200)+1,Y=rnorm(200)+1,time="1") %>%
+  mutate(C = as.integer(X+Y+rnorm(200)/2>2)) %>%
+  group_by(C) %>%
+  mutate(mean_X=mean(X),mean_Y=mean(Y)) %>%
+  ungroup()
+#Calculate correlations
+before_cor <- paste("1. Start with raw data, ignoring C. Correlation between X and Y: ",round(cor(df$X,df$Y),3),sep='')
+after_cor <- paste("7. Analyze what's left! Correlation between X and Y controlling for C: ",round(cor(df$X-df$mean_X,df$Y-df$mean_Y),3),sep='')
+#Add step 2 in which X is demeaned, and 3 in which both X and Y are, and 4 which just changes label
+dffull <- rbind(
+  #Step 1: Raw data only
+  df %>% mutate(mean_X=NA,mean_Y=NA,C=0,time=before_cor),
+  #Step 2: Raw data only
+  df %>% mutate(mean_X=NA,mean_Y=NA,time='2. Separate data by the values of C.'),
+  #Step 3: Add x-lines
+  df %>% mutate(mean_Y=NA,time='3. Figure out what differences in X are explained by C'),
+  #Step 4: X de-meaned 
+  df %>% mutate(X = X - mean_X,mean_X=0,mean_Y=NA,time="4. Remove differences in X explained by C"),
+  #Step 5: Remove X lines, add Y
+  df %>% mutate(X = X - mean_X,mean_X=NA,time="5. Figure out what differences in Y are explained by C"),
+  #Step 6: Y de-meaned
+  df %>% mutate(X = X - mean_X,Y = Y - mean_Y,mean_X=NA,mean_Y=0,time="6. Remove differences in Y explained by C"),
+  #Step 7: Raw demeaned data only
+  df %>% mutate(X = X - mean_X,Y = Y - mean_Y,mean_X=NA,mean_Y=NA,time=after_cor))
+p <- ggplot(dffull,aes(y=Y,x=X,color=as.factor(C)))+geom_point()+
+  geom_vline(aes(xintercept=mean_X,color=as.factor(C)), na.rm = TRUE)+
+  geom_hline(aes(yintercept=mean_Y,color=as.factor(C)), na.rm = TRUE)+
+  guides(color=guide_legend(title="C"))+
+  scale_color_colorblind()+
+  labs(title = 'Inventing a Correlation Between X and Y by Controlling for Collider C \n{next_state}', caption="Graph Code Credit: Nick Huntington-Klein, 'causalgraphs' https://github.com/NickCH-K/causalgraphs")+
+  transition_states(time,transition_length=c(1,12,32,12,32,12,12),state_length=c(160,125,100,75,100,75,160),wrap=FALSE)+
+  ease_aes('sine-in-out')+
+  exit_fade()+enter_fade()
+animate(p,nframes=200)
+
+```
+
+## Further Issues
+
+  - Prediction Intervals
+  - Residual Analysis
+  - Predicting $y$ when $log(y)$ is the dependent variable

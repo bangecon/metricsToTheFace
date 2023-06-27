@@ -1,0 +1,239 @@
+---
+title: "Chapter 7"
+subtitle: "Regression with Qualitative Information"
+description: "This tutorial introduces binary regressors (dummy variables)."
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+tutorial_options(exercise.eval = TRUE, exercise.reveal_solution = TRUE)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Dummy (Binary) Independent Variables
+
+Qualitative Information (Categorical/Factor Variables)
+
+  - Gender, Race, Industry, Occupation
+  - Create separate dummy variables for each category. 
+  - Avoid the *dummy variable trap*!
+  - R automatically does this for you. 
+  
+![](https://media.giphy.com/media/lk0TFUdop2JTW/giphy.gif)
+
+### Single Dummy Independent Variable
+
+Estimate the wage differential for women, controlling for education, experience, and experience squared. Run a `summary()` of the results. 
+
+```{r gender, exercise = TRUE}
+
+```
+
+```{r gender-solution}
+wage1 <- wooldridge::wage1
+wage.lm9 <- lm(wage ~ educ + exper + I(exper^2) + female, data = wage1)
+summary(wage.lm9)
+```
+
+```{r gender-check}
+grade_this({
+  if (identical(.result$call, .solution$call)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Dummy Variables for Multiple Categories
+
+1. Use the `factor()` function to create a factor, `occ`, as a variable in `wage1` from the occupational dummy variables in `wage1` (`profocc`, `clerocc`, and `servocc`) that takes integer values from one to four. Use the `labels` option to assign the labels `Manufacturing`, `Professional`,` Clerical`, and `Services` to the values.
+2. Regress the wage on education, experience and experience squared, controlling for occupation using the factor variable you created. Print a `summary()` of your result.
+
+```{r occupation, exercise = TRUE}
+
+
+```
+
+```{r occupation-setup}
+wage1 <- wooldridge::wage1
+wage.lm9 <- lm(wage ~ educ + exper + I(exper^2) + female, data = wage1)
+```
+
+```{r occupation-hint}
+# The variables profocc, clerocc, and servocc take values of 0 or 1.
+# To make them to each take sequential integer values, you can just multiply them by a constant.
+# Get them to take values {0,1} for profocc, {0,2} for clerocc, and {0,3} for servocc. 
+# Add one to scale it from 1 through 4 (more natural for categories) instead of 0 through 3. 
+```
+
+```{r occupation-solution}
+wage1$occ <- factor(
+  wage1$profocc + 2*wage1$clerocc + 3*wage1$servocc, 
+  labels = c("Manufacturing", "Professional", "Clerical", "Services"))
+wage.lm10 <- lm(wage ~ educ + exper + I(exper^2) + tenure + occ, data = wage1)
+summary(wage.lm10)
+```
+
+```{r occupation-check}
+grade_this({
+  if (identical(.result$call, .solution$call)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Interactions 
+
+### Interactions among Dummy Variables
+
+Estimate the wage effect of marriage differ across gender by interacting `female` with `married`, controlling for education, experience, and job tenure. Print a `summary()` of the results.
+
+```{r marriage, exercise = TRUE}
+
+```
+
+```{r marriage-setup}
+wage1 <- wooldridge::wage1
+wage.lm9 <- lm(wage ~ educ + exper + I(exper^2) + female, data = wage1)
+```
+
+```{r marriage-hint}
+# You can do this one!
+```
+
+```{r marriage-solution}
+wage.lm11 <- lm(wage ~ educ + exper + tenure + female*married, data = wage1) 
+summary(wage.lm11)
+```
+
+```{r marriage-check}
+grade_this({
+  if (identical(.result$call, .solution$call)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Different Slopes
+
+Estimate the effect of gender on wages *and the returns to education*, controlling for experience and job tenure. Print a text `stargazer()` of this result along with the results of the previous exercises. 
+
+```{r genderEducation, exercise = TRUE}
+
+```
+
+```{r genderEducation-setup}
+wage1 <- wooldridge::wage1
+wage.lm9 <- lm(wage ~ educ + exper + I(exper^2) + female, data = wage1)
+wage.lm11 <- lm(wage ~ educ + exper + tenure + female*married, data = wage1) 
+```
+
+```{r genderEducation-hint}
+# Do I have to start hiding the solution? 
+```
+
+```{r genderEducation-solution}
+wage.lm12 <- lm(wage ~ educ + exper + tenure + female*educ, data = wage1) 
+summary(wage.lm12)
+```
+
+```{r genderEducation-check}
+grade_this({
+  if (identical(.result$call, .solution$call)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Binary Dependent Variables
+
+### Probability of Arrest
+
+Estimate the effect of prior convictions (`pcnv`) on *whether* a person was arrested in 1986, controlling for the average sentence of prior convictions (`avesen`), total time spent in prison prior to 1986 (`tottime`), total number of months spent in prison in 1986 (`ptime86`), and total number of quarters officially employed in 1986 (`qemp86`). Print a `summary()` of your result.
+
+```{r arrests, exercise = TRUE}
+
+```
+
+```{r arrests-hint}
+# We don't have the dependent variable we need in the data, but we don't need to create it separately.
+  # The formula argument understands logical functions. 
+  # We have the number of times a person was arrested, `narr86`, so we can apply a logical condition within the `lm()` formula for `(narr86 > 0)`. 
+```
+
+```{r arrests-solution}
+crime1 <- wooldridge::crime1
+crime.lm1 <- lm((narr86 > 0) ~ pcnv + avgsen + tottime + ptime86 + qemp86, data = crime1)
+summary(crime.lm1)
+```
+
+```{r arrests-check}
+grade_this({
+  if (identical(.result$call, .solution$call)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+What does the coefficient on prior convictions represent? 
+
+### Linear Probability Model
+
+$$\begin{align}Arrest_i^{86} ={} &\beta_0 + \beta_1Priors_i + \beta_2\bar{Sentence}_i + \beta_3PriorTime_i + \\ &\beta_4PrisonTime_i^{86} + \beta_5QuaartersEmployed_i^{86} + u_i \end{align}$$
+$$Arrest_i^{86} = \begin{cases} 1 \text{ if number of arrests} > 0; \\ 0 \text{ otherwise} \end{cases}$$
+$$\hat{y}_i = \hat{P}(Arrest_i^{86}=1|x) = X\beta$$
+$$\beta_j = \frac{\Delta\hat{P}(Arrest_i^{86}=1|x)}{\Delta x_j}$$
+
+### Problems with the Linear Probability Model
+
+Estimate the model including the respondent's income in 1986 (`inc86`) and name it `crime.lm2`. Summarize the `fitted.values` stored in the estimation results.
+
+```{r arrestsIncome, exercise = TRUE}
+
+```
+
+```{r arrestsIncome-setup}
+crime1 <- wooldridge::crime1
+crime.lm1 <- lm((narr86 > 0) ~ pcnv + avgsen + tottime + ptime86 + qemp86, data = crime1)
+```
+
+```{r arrestsIncome-solution}
+crime.lm2 <- lm((narr86 > 0) ~ pcnv + avgsen + tottime + ptime86 + qemp86 + inc86, data = crime1)  
+summary(crime.lm2$fitted.values)
+```
+
+```{r arrestsIncome-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```

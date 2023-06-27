@@ -1,0 +1,235 @@
+---
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+title: "Chapter 19"
+subtitle: |
+  | Conducting & Presenting Research: Tables
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+description: >
+  This tutorial practices tools for creating attractive tables and graphs.
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+gradethis::gradethis_setup()
+tutorial_options(exercise.reveal_solution = FALSE)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Summarizing Data
+
+### Summarizing an Entire Data Frame
+
+Calculate the summary statistics for the *salary*, *sales*, *roe*, and *ros* variables. 
+
+```{r multipleSummaryPractice, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r multipleSummaryPractice-hint}
+# Don't forget to load your data!
+```
+
+```{r multipleSummaryPractice-solution}
+ceosal1 <- wooldridge::ceosal1
+summary(ceosal1[ , c('salary', 'sales', 'roe', 'ros')])
+```
+
+```{r multipleSummaryPractice-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Summaries with Categorical Variables
+
+Using the `ceosal1` dataset, create a new variable named `industry` defined as follows: 
+
+$$Industry = \begin{cases} \begin{aligned}
+&1 &\text{ if } &indus = 1 \\
+&2 &\text{ if } &finance = 1 \\
+&3 &\text{ if } &consprod = 1 \\
+&4 &\text{ if } &utility = 1 \\
+\end{aligned} \end{cases}$$
+
+Summarize the variable you create. 
+
+```{r summaryFactors, exercise=TRUE, exercise.eval=FALSE}
+# Create a factor variable for the industry
+
+
+# Summarize it with `summary()`
+
+```
+
+```{r summaryFactors-setup}
+ceosal1 <- wooldridge::ceosal1
+```
+
+```{r summaryFactors-hint}
+# Don't forget to attach the data or include the data frame when you call each variable.
+```
+
+```{r summaryFactors-solution}
+A <- cbind(ceosal1$indus, ceosal1$finance, ceosal1$consprod, ceosal1$utility) 
+f <- c(1:ncol(A))
+ceosal1$industry <- factor(A %*% f, labels = c('Industrial', 'Finance', 'Consumer Products', 'Utilities'))
+summary(ceosal1$industry)
+```
+
+```{r summaryFactors-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Summary by Categorical Group
+
+Create a `gtsummary::` table for `salary`, `sales`, `roe`, and `ros` *by industry*. 
+
+```{r gtsummaryPractice, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r gtsummaryPractice-setup}
+ceosal1 <- wooldridge::ceosal1
+A <- cbind(ceosal1$indus, ceosal1$finance, ceosal1$consprod, ceosal1$utility) 
+f <- c(1:ncol(A))
+ceosal1$industry <- factor(A %*% f, labels = c('Industrial', 'Finance', 'Consumer Products', 'Utilities'))
+```
+
+```{r gtsummaryPractice-hint}
+# Don't forget to load your libraries!
+# Use square column-indexing brackets with "c('var1', ...)" 
+# Don't forget to include your group variable in your indexing!
+# Use the `by` option to create separate columns for each industry. 
+```
+
+```{r gtsummaryPractice-solution}
+library(gtsummary)
+tbl_summary(ceosal1[, c('salary', 'sales', 'roe', 'ros', 'industry')], by = industry, 
+            statistic = list(all_continuous() ~ '{mean} ({sd})'))
+```
+
+```{r gtsummaryPractice-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Summarizing Relationships between Variables
+
+Create a `corrgram` matrix with only correlation coefficients among `salary`, `sales`, `roe`, and `ros`. 
+
+```{r correlationPractice, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r correlationPractice-setup}
+ceosal1 <- wooldridge::ceosal1
+```
+
+```{r correlationPractice-hint}
+# Use square column-indexing brackets with "c('var1', ...)" 
+```
+
+```{r correlationPractice-solution}
+library(corrgram)
+corrgram(ceosal1[ , c('salary', 'sales', 'roe', 'ros')], panel = panel.cor)
+```
+
+```{r correlationPractice-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Other `corrgram` Options
+
+Re-draw the previous `corrgram` with correlation coefficients along the lower panel and scatterplots on the upper panel.
+
+```{r corrgramPractice, exercise = TRUE}
+
+```
+
+```{r corrgramPractice-setup}
+library(corrgram)
+ceosal1 <- wooldridge::ceosal1
+```
+  
+```{r corrgramPractice-hint}
+
+```
+
+```{r corrgramPractice-solution}
+corrgram(ceosal1[ , c('salary', 'sales', 'roe', 'ros')], upper.panel = panel.pts, lower.panel = panel.cor)
+```
+
+```{r corrgramPractice-check}
+grade_this(if (identical(.result, .solution)) {
+    pass("You can also set the `col.regions` option to change the color palette for the color contrasts.")
+  } {
+  fail(random_encouragement)
+})
+```
+
+## Factor Variable Tables
+
+The `ceosal1` data does not have factors other than industry. For practice, we can use `cut()` to make a categorical variable according to the quartiles of `salary`. Do this, and create a crosstabulation between `industry` and the quartile ranks of `salary`. Use `gtsummary::tbl_cross()` to make your table look nice. 
+
+```{r gtcross, exercise=TRUE, exercise.eval=TRUE}
+
+
+```
+
+```{r gtcross-setup}
+library(gtsummary)
+ceosal1 <- wooldridge::ceosal1
+```
+
+```{r gtcross-hint}
+# The margin option helps you specify which variable to condition the proportions on. 
+```
+
+```{r gtcross-solution}
+tbl_cross(ceosal1, row = salary.q4, col = industry, percent = 'cell')
+```
+
+```{r gtcross-check}
+grade_this(if (identical(.result, .solution)) {
+    pass("You can also set the `col.regions` option to change the color palette for the color contrasts.")
+  } {
+  fail(random_encouragement)
+})
+```

@@ -1,0 +1,420 @@
+---
+title: "Chapter 8" 
+subtitle: "Testing for Heteroskedasticity"
+description: "This tutorial explains the consequences of heterodkedasticity and how to test for it."
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+tutorial_options(exercise.eval = FALSE, exercise.reveal_solution = TRUE)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Heteroskedasticity
+
+Heteroskedasticity does *not* affect the unbiased-ness or consistency of $\hat\beta_{OLS}$. 
+
+Heteroskedasticity *does* affect the unbiased-ness of the standard errors of $\hat\beta_{OLS}$, $\hat\sigma_{\hat\beta_{OLS}}$. 
+
+Inferences and interval estimates for $\beta$ will therefore be wrong. 
+
+### Heteroskedasticity-Robust Inference for $log(wage)$ Model
+
+Run the following code to replicate example 8.1 from the book. 
+
+```{r robustHC1, exercise = TRUE}
+library(lmtest);
+library(sandwich);
+library(stargazer);
+wage1 <- wooldridge::wage1
+wage.lm14 <-
+  lm(
+    log(wage) ~ I(married * (1 - female)) + I(married * female) + 
+      I((1 - married) * female) + educ + exper + I(exper ^ 2) + tenure +  
+      I(tenure ^ 2),data = wage1
+  )
+wage.lm14r <-
+  coeftest(wage.lm14, vcov = vcovHC(wage.lm14, type = "HC1"))
+stargazer(wage.lm14, wage.lm14r, type = 'text', digits = 4)
+```
+
+```{r robustHC1-solution}
+library(lmtest)
+library(sandwich)
+library(stargazer)
+wage1 <- wooldridge::wage1
+wage.lm14 <-
+  lm(
+    log(wage) ~ I(married * (1 - female)) + I(married * female) + 
+      I((1 - married) * female) + educ + exper + I(exper ^ 2) + tenure + 
+      I(tenure ^ 2), data = wage1
+  )
+wage.lm14r <-
+  coeftest(wage.lm14, vcov = vcovHC(wage.lm14, type = "HC1"))
+stargazer(wage.lm14, wage.lm14r, type = 'text', digits = 4)
+```
+
+```{r robustHC1-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Heteroskedasticity-Robust F-Test for College GPAs
+
+Run the following code to replicate example 8.2 from the book.
+
+```{r robustF, exercise = TRUE}
+library(car);
+gpa3 <- wooldridge::gpa3
+collGPA.lm <- lm(
+  cumgpa ~ sat + hsperc + tothrs + female + black + white, data = gpa3,
+  subset = (spring == 1)
+)
+collGPA.lmr <-
+  coeftest(collGPA.lm, vcov = vcovHC(collGPA.lm, type = "HC1"))
+fStat <- linearHypothesis(collGPA.lm, c('black', 'white'))
+fStat.r <-
+  linearHypothesis(collGPA.lm, c('black', 'white'), 
+                   vcov = hccm(collGPA.lm, type = "hc0"))
+stargazer(
+  collGPA.lm,
+  collGPA.lmr,
+  type = 'text',
+  digits = 4,
+  add.lines = list(
+    c('F-Test (Race)', round(fStat$F[2], 4), round(fStat.r$F[2], 4)),
+    c('Pr(>F)', round(fStat$`Pr(>F)`[2], 4), round(fStat.r$`Pr(>F)`[2], 4))
+  )
+)
+```
+
+```{r robustF-setup}
+library(lmtest)
+library(sandwich)
+library(stargazer)
+```
+
+```{r robustF-solution}
+library(car)
+gpa3 <- wooldridge::gpa3
+collGPA.lm <- lm(
+  cumgpa ~ sat + hsperc + tothrs + female + black + white, data = gpa3,
+  subset = (spring == 1)
+)
+collGPA.lmr <-
+  coeftest(collGPA.lm, vcov = vcovHC(collGPA.lm, type = "HC1"))
+fStat <- linearHypothesis(collGPA.lm, c('black', 'white'))
+fStat.r <-
+  linearHypothesis(collGPA.lm, c('black', 'white'), 
+                   vcov = hccm(collGPA.lm, type = "hc0"))
+stargazer(
+  collGPA.lm,
+  collGPA.lmr,
+  type = 'text',
+  digits = 4,
+  add.lines = list(
+    c('F-Test (Race)', round(fStat$F[2], 4), round(fStat.r$F[2], 4)),
+    c('Pr(>F)', round(fStat$`Pr(>F)`[2], 4), round(fStat.r$`Pr(>F)`[2], 4))
+  )
+)
+```
+
+```{r robustF-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Testing for Heteroskedasticity  
+
+Heteroskedasticity tests involve estimating the model by OLS followed by estimating the residuals as a function of the explanatory variables from that model. 
+
+### Breusch-Pagan Test
+
+1. Estimate the model of interest using OLS. 
+2. Regress the squared residuals from (1) on the $x$ variables from your model. 
+3. Calculate the $F$ statistic *or* the $LM$ statistic for this regression. <br>
+$F = \frac{R_{\hat{u}^2}^2/k}{(1-R_{\hat{u}^2}^2)/(n-k-1)}$<br>
+$LM = nR_{\hat{u}^2}^2$
+4. Test the statistic you calculated on $F \sim F(k, n-k-1)$ or $LM \sim \chi^2(k)$
+
+### House Prices
+
+1. Estimate the model of house prices given in by:  
+$Price = \beta_0 + \beta_1LotSize + \beta_2SquareFeet + \beta_3Bedrooms + u$
+2. Estimate the regression of the squared residuals on the explanatory variables. 
+3. Calculate the Breusch-Pagan statistic as the F-Statistic of the residual regression and the corresponding p-value. 
+4. Calculate the Breusch-Pagan LM-Statistic "by hand". 
+5. Calculate the Breusch-Pagan LM-Statistic using `bptest`.  
+Report the result as a vector consisting of (1) the BP F-stat; (2) the p-value of the F-stat; (3) the BP LM stat "by hand"; (4) the BP LM using `bptest`; and (5) the p-value of the BP LM stat. 
+
+```{r bpTest, exercise = TRUE}
+
+```
+
+```{r bpTest-setup}
+```
+
+```{r bpTest-hint-1}
+# Don't forget to load the `car`, `lmtest`, and `sandwich` libraries. 
+# You do not need to create a new variable for the residuals; use `resid(lm)^2` within the `lm()` formula.
+# `summary.lm()` stores the regression F-stat as `fstatistic`.
+```
+
+```{r bpTest-hint-2}
+# `summary.lm()` stores the objects `fstatistic` and `r.squared` for regressions. 
+# The `fstatistic` from a `summary.lm()` object has three values: (1) the F-stat (`value`), (2) numerator df (`numdf`), and (3) denominator df (`dendf`). 
+# Use `pf(value, numdf, dendf)` to calculate the p-value.  
+```
+
+```{r bpTest-solution}
+library(car)
+library(lmtest)
+library(sandwich)
+hprice1 <- wooldridge::hprice1
+hprice.lm1 <- lm(price ~ lotsize + sqrft + bdrms, data = hprice1)
+ureg1 <- lm(resid(hprice.lm1) ^ 2 ~ lotsize + sqrft + bdrms, data = hprice1)
+bpF1 <- summary(ureg1)$fstatistic
+bpF1p <- pf(bpF1[1], bpF1[2], bpF1[3], lower.tail = FALSE)
+bpLM1 <- nrow(ureg1$model)*summary(ureg1)$r.squared
+bp1 <- bptest(hprice.lm1)
+c(bpF1[1], bpF1p, bpLM1, bp1[[1]], bp1[[4]])
+```
+
+```{r bpTest-check}
+grade_this({
+  if (identical(unname(.result), unname(.solution))) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Taking Logs to Reduce Heteroskedasticity
+
+Repeat the previous exercise using `log(Price)` as the dependent variable. 
+
+```{r bpLogs, exercise = TRUE}
+
+```
+
+```{r bpLogs-setup}
+library(car)
+library(lmtest)
+library(sandwich)
+hprice1 <- wooldridge::hprice1
+hprice.lm1 <- lm(price ~ lotsize + sqrft + bdrms, data = hprice1)
+ureg1 <- lm(resid(hprice.lm1) ^ 2 ~ lotsize + sqrft + bdrms, data = hprice1)
+bpF1 <- summary(ureg1)$fstatistic
+bpF1p <- pf(bpF1[1], bpF1[2], bpF1[3], lower.tail = FALSE)
+bpLM1 <- nrow(ureg1$model)*summary(ureg1)$r.squared
+bp1 <- bptest(hprice.lm1)
+```
+
+```{r bpLogs-hint1}
+# You do not need to create a new variable for the residuals. 
+# Use `resid(lm)^2` within the `lm()` command to get the squared residuals.
+# `summary.lm()` stores the regression F-stat as `fstatistic`.
+```
+
+```{r bpLogs-hint2}
+# `summary.lm()` stores the `fstatistic` for the regression as well as the `r.squared` as objects. 
+# The `fstatistic` from a `summary.lm()` object has three values: (1) the F-stat itself, (2) the numerator df, and (3) the denominator df. 
+# Use `pf(F, df1, df2)` to calculate the p-value for F using the three values from `fstatisitc`.  
+```
+
+```{r bpLogs-solution}
+hprice.lm2 <- lm(log(price) ~ lotsize + sqrft + bdrms, data = hprice1)
+ureg2 <- lm(resid(hprice.lm2) ^ 2 ~ lotsize + sqrft + bdrms, data = hprice1)
+bpF2 <- summary(ureg2)$fstatistic
+bpF2p <- pf(bpF2[1], bpF2[2], bpF2[3], lower.tail = FALSE)
+bpLM2 <- nrow(ureg2$model)*summary(ureg2)$r.squared
+bp2 <- bptest(hprice.lm2)
+c(bpF2[1], bpF2p, bpLM2, bp2[[1]], bp2[[4]])
+```
+
+```{r bpLogs-check}
+grade_this({
+  if (identical(unname(.result), unname(.solution))) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### White Test
+
+The White test for heteroskedasticity is similar to the Breusch-Pagan test, except it includes all possible interactions among the variables, including with themselves (i.e. quadratic terms). 
+
+1. Estimate the model.
+2. Estimate $\hat{u}^2 = \delta_0 + \delta_1x_1 + \delta_2x_2 + \delta_3x_1^2 + \delta_4x_2^2 + \delta_5x_1x_2 + v$, <br> 
+which is equivalent to $\hat{u}^2 = \delta_0 + \delta_1\hat{y} + \delta_2\hat{y}^2 + v$.
+3. Calculate $F \sim F(2, n-3)$ or $LM \sim \chi^2(2)$ as you did in the Breusch-Pagan test. 
+
+Note: none of the degrees of freedom in $F$ or $LM$ depend on $k$ because you always only estimate three parameters in the squared-residuals regression. 
+
+### House Prices
+
+Calculate the White test for the housing models you conducted Breusch-Pagan tests for in the previous exercise (named `hprice.lm1` and `hprice.lm2` in the setup). 
+
+```{r white, exercise = TRUE}
+
+```
+
+```{r white-setup}
+library(car)
+library(lmtest)
+library(sandwich)
+library(stargazer)
+hprice1 <- wooldridge::hprice1
+hprice.lm1 <- lm(price ~ lotsize + sqrft + bdrms, data = hprice1)
+hprice.lm2 <- lm(log(price) ~ lotsize + sqrft + bdrms, data = hprice1)
+```
+
+```{r white-solution}
+ureg1w <-
+  lm(resid(hprice.lm1) ~ fitted(hprice.lm1) + I(fitted(hprice.lm1) ^ 2))
+whiteF1 <- summary(ureg1w)$fstatistic
+whiteF1p <- pf(whiteF1[1], whiteF1[2], whiteF1[3], lower.tail = FALSE)
+white1 <-
+  bptest(hprice.lm1, ~ fitted(hprice.lm1) + I(fitted(hprice.lm1) ^ 2))
+c(whiteF1[1], whiteF1p, white1[[1]], white1[[4]])
+```
+
+```{r white-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Specification Tests in `stargazer()` Tables
+
+We can use `add.lines` to insert the specification tests (BP F, BP F p-value, BP LM, and BP LM p-value) for heteroskedasticity at the bottom of a `stargazer()` table without previously running `coeftest()`. 
+
+Try this below.
+
+```{r bpGazer, exercise = TRUE}
+
+```
+
+```{r bpGazer-setup}
+library(car)
+library(lmtest)
+library(sandwich)
+hprice1 <- wooldridge::hprice1
+# Levels
+## Breusch-Pagan
+hprice.lm1 <- lm(price ~ lotsize + sqrft + bdrms, data = hprice1)
+ureg1 <- lm(resid(hprice.lm1) ^ 2 ~ lotsize + sqrft + bdrms, data = hprice1)
+bpF1 <- summary(ureg1)$fstatistic
+bpF1p <- pf(bpF1[1], bpF1[2], bpF1[3], lower.tail = FALSE)
+bpLM1 <- nrow(ureg1$model)*summary(ureg1)$r.squared
+bp1 <- bptest(hprice.lm1)
+c(bpF1[1], bpF1p, bpLM1, bp1[[1]], bp1[[4]])
+## White
+ureg1w <-
+  lm(resid(hprice.lm1) ~ fitted(hprice.lm1) + I(fitted(hprice.lm1) ^ 2))
+whiteF1 <- summary(ureg1w)$fstatistic
+whiteF1p <- pf(whiteF1[1], whiteF1[2], whiteF1[3], lower.tail = FALSE)
+white1 <-
+  bptest(hprice.lm1, ~ fitted(hprice.lm1) + I(fitted(hprice.lm1) ^ 2))
+c(whiteF1[1], whiteF1p, white1[[1]], white1[[4]])
+# Logs
+## Breusch-Pagan
+hprice.lm2 <- lm(log(price) ~ lotsize + sqrft + bdrms, data = hprice1)
+ureg2 <- lm(resid(hprice.lm2) ^ 2 ~ lotsize + sqrft + bdrms, data = hprice1)
+bpF2 <- summary(ureg2)$fstatistic
+bpF2p <- pf(bpF2[1], bpF2[2], bpF2[3], lower.tail = FALSE)
+bpLM2 <- nrow(ureg2$model)*summary(ureg2)$r.squared
+bp2 <- bptest(hprice.lm2)
+c(bpF2[1], bpF2p, bpLM2, bp2[[1]], bp2[[4]])
+## White
+ureg2w <-
+  lm(resid(hprice.lm2) ~ fitted(hprice.lm2) + I(fitted(hprice.lm2) ^ 2))
+whiteF2 <- summary(ureg2w)$fstatistic
+whiteF2p <- pf(whiteF2[1], whiteF2[2], whiteF2[3], lower.tail = FALSE)
+white2 <-
+  bptest(hprice.lm2, ~ fitted(hprice.lm2) + I(fitted(hprice.lm2) ^ 2))
+c(whiteF2[1], whiteF2p, white2[[1]], white2[[4]])
+```
+
+```{r bpGazer-hint-1}
+# The setup chunk stores the following objects: 
+  # `bpF1`     = levels Breusch-Pagan F statistic; 
+  # `bpF1p`    = levels Breusch-Pagan F statistic p-value; 
+  # `bp1`      = levels Breusch-Pagan LM (LM-stat, df, method, p-value, lm name)
+  # `whiteF1`  = levels White F statistic; 
+  # `whiteF1p` = levels White F statistic p-value;
+  # `white1`   = levels White LM (LM-stat, df, method, p-value, lm name)
+  # corresponding objects for the log model with "2" instead of "1"
+```
+
+```{r bpGazer-hint-2}
+# `add.lines` requires a `list()` containing a number of character vectors equal to the number of lines (diagnostic test statistics) you want to add. 
+# The character vector for each line should have a value for the row name followed by the same number of values as the number of columns in the table. 
+```
+
+```{r bpGazer-hint-3}
+# To match exactly with the solution output you need to specify the following order and attributes: 
+  # Row order and names: (1) BP-F statistic = "Breusch-Pagan F"; (2) BP-F pval = "Pr(F>BP)"; (3) BP-LM statistic = "Breusch-Pagan LM"; (4) BP-LM pval = "Pr(Chi-Sq>LM)"; White F statistic = "White F"; White F pval = "P(F>White)"; White LM statistic = "White LM"; White LM pval = "P(Chi-Sq>LM)". 
+  # Round values to four decimal places using `round(value, 4)`. 
+# Otherwise you may manually check to make sure the numbers line up with the labels you chose using your result from the previous exercises. 
+```
+
+```{r bpGazer-solution}
+library(stargazer)
+stargazer(hprice.lm1, hprice.lm2, type = 'text', digits = 4,
+  add.lines = list(
+    c('Breusch-Pagan F', round(bpF1[1], 4), round(bpF2[1], 4)),
+    c('Pr(F>BP)', round(bpF1p, 4), round(bpF2p, 4)),
+    c('Breusch-Pagan LM', round(bp1$statistic, 4), round(bp2$statistic, 4)),
+    c('Pr(Chi-Sq>LM)', round(bp1$p.value, 4), round(bp2$p.value, 4)),
+    c('White F', round(whiteF1[1], 4), round(bpF2[1], 4)),
+    c('Pr(F>BP)', round(bpF1p, 4), round(whiteF2p, 4)),
+    c('White LM', round(white1$statistic, 4), round(white2$statistic, 4)),
+    c('Pr(Chi-Sq>LM)', round(white1$p.value, 4), round(white2$p.value, 4))
+    )
+  )
+```
+
+```{r bpGazer-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail("Check to see if `stargazer()` added the tests and p-values correctly. Don't forget that the list should have 8 vectors (4 test statistics and 4 p-values) corresponding to the added rows. Each vector should have *three* elements: the row name (in quotes), and the numerical values of the statistic for each column (specification).")
+})
+```

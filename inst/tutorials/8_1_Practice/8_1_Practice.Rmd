@@ -1,0 +1,156 @@
+---
+title: "Chapter 8" 
+subtitle: "Testing for Heteroskedasticity"
+description: "This tutorial explains the consequences of heterodkedasticity and how to test for it."
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+tutorial_options(exercise.eval = TRUE, exercise.reveal_solution = FALSE)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Net Total Financial Wealth
+
+Use the `k401ksubs` dataset to estimate the effect of income (`inc`) on total net financial assets (`nettfa`) for *single-member households only* (`fsize == 1`) with simple regression analysis and multiple regression analysis, controlling for gender (`male`), 401k plan eligibility (`e401k`), and the square of the difference between a person's current age and 25 years old $(`age` - 25)^2$. 
+
+Present your results as a formatted text table with `stargazer()`.
+
+```{r nettfa, exercise = TRUE}
+
+```
+
+```{r nettfa-setup}
+
+```
+
+```{r nettfa-hint}
+# Remember to use the as-is function, `I()`, for squaring `age` - 25. 
+# Select single households by setting the option `subset = (variable.name == value)` option. 
+```
+
+```{r nettfa-solution}
+library(stargazer)
+k401ksubs <- wooldridge::k401ksubs
+nettfa.lm1 <- lm(nettfa ~ inc, data = k401ksubs, subset = (fsize == 1))
+nettfa.lm2 <- lm(nettfa ~ inc + male + e401k + I((age - 25)^2), data = k401ksubs, subset = (fsize == 1))
+stargazer::stargazer(nettfa.lm1, nettfa.lm2, type = 'text')
+```
+
+```{r nettfa-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Breusch-Pagan Test
+
+For the net financial assets regression *with controls*, calculate the Breusch-Pagan F-statistic (by hand), and LM statistic (howeverso you like) with the corresponding p-values. (The `lm()` estimates for the specification that includes controls are stored as `nettfa.lm2`.)  
+
+Print your response as a list consisting of (1) a vector containing the Breusch-Pagan F-stat (including degrees of freedom) and p-value; and (2) the Breusch-Pagan LM test result from `bptest()`.
+
+```{r bp, exercise = TRUE}
+
+```
+
+```{r bp-setup}
+library(stargazer)
+k401ksubs <- wooldridge::k401ksubs
+nettfa.lm1 <- lm(nettfa ~ inc, data = k401ksubs, subset = (fsize == 1))
+nettfa.lm2 <- lm(nettfa ~ inc + male + e401k + I((age - 25)^2), data = k401ksubs, subset = (fsize == 1))
+```
+
+```{r bp-hint}
+
+```
+
+```{r bp-solution}
+library(lmtest)
+ureg1 <- lm(resid(nettfa.lm2) ^ 2 ~ inc + male + e401k + I((age - 25)^2), data = subset(k401ksubs, fsize == 1))
+bpF1 <- summary(ureg1)$fstatistic
+bpF1p <- pf(bpF1[1], bpF1[2], bpF1[3], lower.tail = FALSE)
+bp1 <- bptest(nettfa.lm2)
+list(c(bpF1, bpF1p), bp1)
+```
+
+```{r bp-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## White Test
+
+For the net financial assets regression *with controls*, calculate the White F-statistic (by hand), and LM statistic (howeverso you like) with the corresponding p-values. (The `lm()` estimates for the specification that includes controls are stored as `nettfa.lm2`.)  
+
+Present your result as a list just like the previous example. 
+
+```{r white, exercise = TRUE}
+
+```
+
+```{r white-setup}
+library(stargazer)
+k401ksubs <- wooldridge::k401ksubs
+nettfa.lm1 <- lm(nettfa ~ inc, data = k401ksubs, subset = (fsize == 1))
+nettfa.lm2 <- lm(nettfa ~ inc + male + e401k + I((age - 25)^2), data = k401ksubs, subset = (fsize == 1))
+library(lmtest)
+ureg1 <- lm(resid(nettfa.lm2) ^ 2 ~ inc + male + e401k + I((age - 25)^2), data = subset(k401ksubs, fsize == 1))
+bpF1 <- summary(ureg1)$fstatistic
+bpF1p <- pf(bpF1[1], bpF1[2], bpF1[3], lower.tail = FALSE)
+bp1 <- bptest(nettfa.lm2)
+list(c(bpF1, bpF1p), bp1)
+```
+
+```{r white-hint}
+
+```
+
+```{r white-solution}
+ureg1w  <- lm(resid(nettfa.lm2) ~ fitted(nettfa.lm2) + I(fitted(nettfa.lm2)^2))
+whiteF  <- summary(ureg1w)$fstatistic
+whiteFp <- pf(whiteF[1], whiteF[2], whiteF[3], lower.tail = FALSE)
+white1 <- bptest(nettfa.lm2, ~ fitted(nettfa.lm2) + I(fitted(nettfa.lm2)^2), 
+                 data = subset(k401ksubs, fsize == 1))
+list(c(whiteF1, whiteF1p), white1)
+```
+
+```{r white-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+Note: Since *net* total financial assets can (and do!) take negative values, we cannot simply fix the problem with logs (to the extent that taking logs really "fixes" anything.

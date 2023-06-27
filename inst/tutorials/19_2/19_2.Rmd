@@ -1,0 +1,251 @@
+---
+title: "Chapter 19"
+subtitle: "Conducting & Presenting Research: Graphics"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+description: >
+  This tutorial introduces tools for creating attractive graphs.
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+library(ggcheck)
+gradethis::gradethis_setup()
+tutorial_options(exercise.reveal_solution = TRUE)
+knitr::opts_chunk$set(echo = FALSE, fig.align = 'center', fig.height = 6)
+```
+
+## Base Graphics 
+
+A little familiarity with both plot syntaxes in R will help you understand some of the functions in various packages. Graphics in `base` are awesome and very flexible but you need to know (and specify) more to change the options how you want. The `ggplot2` package automates a lot of things intuitively, but can sometimes be difficult to customize, especially when bundled into a `plot()` function in another package. 
+
+### Example: CEO Salaries
+
+Plot the following: 
+
+- A histogram of CEO salary *relative* frequencies using the base-graphics hist() function;
+- A scatterplot of CEO salaries with ROE using the plot() function.
+
+Make sure your plots have descriptive (English) titles: *Histogram of Salary*, *Salary versus ROE*, *Salary*, and *ROE*.
+
+```{r basePlots, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r basePlots-hint-1}
+# `hist()` requires a single variable. 
+# Use `main`, `xlab`, and `ylab` to add descriptive titles. 
+# Use `freq` and `probability` options to switch between absolute and relative frequencies. 
+# `plot()` requires variables x and y as inputs, or a data frame. 
+```
+
+```{r basePlots-hint-2}
+# `plot()` requires variables x and y as inputs, or a data frame. 
+```
+
+```{r basePlots-solution}
+ceosal1 <- wooldridge::ceosal1
+hist(ceosal1$salary, main = "Histogram of Salary", xlab = "Salary", freq = FALSE)
+plot(ceosal1$salary, ceosal1$roe, main = "Salary versus ROE", xlab = "Salary", ylab = "ROE")
+```
+
+```{r basePlots-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Grammar of Graphics (ggplot2)
+
+Some people prefer base graphics; some prefer gg. Base graphics start from a more spartan default, and allow for more user customization depending on your knowledge and experience. `ggplot2` has lots of context-specific tools and themes that come ready-to-use. Depending on what packages you use, you should know a little of each. You can call the ggplot() function with no arguments (but add them in layers) or inline. Either way, the main arguments you need to specify include (1) data and (2) aesthetics (aes). 
+
+### Example: CEO Salaries and Returns on Equity
+
+Replicate the previous plots using ggplot geom_hist() and geom_point syntax. 
+
+```{r ggplot, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r ggplot-setup}
+ceosal1 <- wooldridge::ceosal1
+```
+
+```{r ggplot-hint-1}
+# Don't forget to load the `ggplot2` library!
+# You may specify the data and mapping in the `ggplot()` or in each `geom` layer. 
+```
+
+```{r ggplot-hint-2}
+# `geom_histogram()` requires a dataframe and aes(x). 
+# You may also specify a "y" in aes() to change the scale of the bars.  
+```
+
+```{r ggplot-hint-3}
+# `geom_point()` requires a dataframe, and aes(x, y). 
+```
+
+```{r ggplot-solution}
+library(ggplot2)
+# Specifying data and mapping in `ggplot()`
+ggplot(data = ceosal1, mapping = aes(salary)) +
+  geom_histogram()
+# Specifying data and mapping in `geom` layer.
+ggplot() + 
+  geom_point(data = ceosal1, mapping = aes(salary, roe))
+```
+
+```{r ggplot-check}
+grade_this({
+  if (uses_geoms(.result, "point")) {
+    pass("That's great, but it might be useful to plot the relative frequency instead of the counts. Try adjusting the y aesthetics to `after_stat(density)`.")
+  }
+  fail(random_encouragement())
+})
+```
+
+### Options in `ggplot`
+
+Implement the suggestion in the feedback for your histogram. 
+
+Use `labs(title, subtitle, x, y)`, to add titles and customize the axis labels. 
+
+```{r ggrelfreq, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r ggrelfreq-setup}
+library(ggplot2)
+ceosal1 <- wooldridge::ceosal1
+```
+
+```{r ggrelfreq-hint}
+# In the `geom_histogram(..., mapping)`, set `y = after_stat(count)/sum(count)` 
+```
+
+```{r ggrelfreq-solution}
+ggplot(data = ceosal1) +
+  geom_histogram(mapping = aes(x = salary, y = after_stat(count)/sum(count))) + 
+  labs(title = "Figure 1", subtitle = "Distribution of Salaries", x = "Salary", y = "Relative Frequency")
+```
+
+```{r ggrelfreq-check}
+grade_this({
+  if (uses_geoms(.result, "histogram") &  
+      uses_mappings(.result, aes(x = salary, y = after_stat(count)/sum(count))) & 
+      uses_labels(.result, "title") & 
+      uses_labels(.result, "x") & 
+      uses_labels(.result, "y")) {
+    pass("You can also use 'geom_freqpoly' to give you something similar, but this will create a line plot connecting the heights of the relative frequencies instead of a true histogram.")
+  }
+  fail(random_encouragement(), " Make sure to give your figure a title and label the axes.")
+})
+```
+
+### Plotting Groups by `color` using `ggplot()`
+
+One thing that ggplot makes it easy to do is group plots according to different categories using different fill, line, and point colors. 
+
+1. Rebuild `industry` based on the combination of `indus`, `finance`, `consprod`, and `utility` like in 19-1 Practice. 
+2. Reconstruct the scatterplot of salary versus return on equity by industry.
+
+```{r ggplotBy, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r ggplotBy-setup}
+library(ggplot2)
+ceosal1 <- wooldridge::ceosal1
+```
+
+```{r ggplotBy-hint}
+# `geom_point()` requires a dataframe, and aes(x, y). 
+```
+
+```{r ggplotBy-solution}
+ceosal1$Industry <- factor(
+  ceosal1$indus + 2*ceosal1$finance + 3*ceosal1$consprod + 4*ceosal1$utility, 
+  labels = c('Industrial', 'Finance', 'Consumer Products', 'Utilities'))
+ggplot() + 
+  geom_point(data = ceosal1, mapping = aes(roe, salary, color = Industry)) + 
+  labs(title = "Figure 1", subtitle = "ROE versus Salary") + 
+  xlab("Return on Equity") +
+  ylab("CEO Salary")
+```
+
+```{r ggplotBy-check}
+grade_this({
+  if (uses_geoms(.result, point) & 
+      uses_mappings(.result, aes(x = roe, y = salary, color = Industry))) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+We can do this in base R graphics also, but base R doesn't automatically add the corresponding legend for the colors. 
+
+```{r, echo = TRUE}
+ceosal1$Industry <- factor(
+  ceosal1$indus + 2*ceosal1$finance + 3*ceosal1$consprod + 4*ceosal1$utility, 
+  labels = c('Industrial', 'Finance', 'Consumer Products', 'Utilities'))
+with(ceosal1, plot(salary, roe, col = Industry))
+legend('topright', legend = levels(ceosal1$Industry), 
+       col = factor(levels(ceosal1$industry)), pch = 1)
+```
+
+Note: You can assign your `ggplot` to an object, which allows you to store the information for the plot and add additional `geom` layers or formatting options later.  
+
+```{r, echo = TRUE}
+g <- ggplot(data = ceosal1, mapping = aes(salary, roe)) + 
+  geom_point()
+g
+```
+
+Hmmm... I don't like the scaling of the x-axis, maybe a log transform... 
+
+```{r, echo = TRUE}
+g <- g + 
+  scale_x_continuous(trans = 'log10')
+g
+```
+
+Now maybe make the axes a little prettier...
+
+```{r, echo = TRUE}
+g <- g + 
+  labs(title = "Figure 1", subtitle = "ROE versus Salary") + 
+  xlab("Return on Equity") +
+  ylab("CEO Salary")
+g
+```
+
+Now add color-coded industry groups...
+
+```{r, echo = TRUE}
+g <- g + geom_point(aes(color = Industry))
+g
+```

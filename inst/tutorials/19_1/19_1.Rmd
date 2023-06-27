@@ -1,0 +1,486 @@
+---
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+title: "Chapter 19"
+subtitle: |
+  | Conducting & Presenting Research: Tables
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+description: >
+  This tutorial introduces tools for creating attractive tables.
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+gradethis::gradethis_setup()
+tutorial_options(exercise.reveal_solution = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Doing Economics: A Primer
+
+### Posing a question
+
+- Topic – the beginning of your search, not the end
+  - Narrow it down
+  - Talk to (other) faculty
+  - Research existing literature
+  - Find a niche or replicate?
+- Assess feasibility
+  - Are data sufficient?
+  - Are my tools and other resources sufficient? 
+- Focus on a testable hypothesis
+
+### Literature Review
+
+- Review the *literature*, not individual contributions
+  - Organize papers into different “threads” of the literature
+  -Differentiate by type of analysis (theory vs. empirical, causal vs. descriptive), type of result (positive, negative, none), type of data (geographic location, macro vs. micro, time periods), sub-topics…
+- State your paper’s contribution
+  - Niche 
+  - Replication
+  - ~~Literature Review~~
+  - ~~Meta-Analysis~~
+- Databases
+
+### Research Databases
+
+- [Library](http://www.sau.edu/Library/Resources/Find_Articles.html): EBSCO Host, JSTOR, Science Direct
+- [Google Scholar](http://scholar.google.com)
+  - Pro tip: Select "Endnote" as your bibliography manager in "Search results" and search and add "SAU" to the "Library links" in [settings](https://scholar.google.com/scholar_settings). 
+
+### Structure of the Paper 
+
+- Introduction
+- Conceptual Framework
+- Data and Methods
+- Results and Discussion
+- Conclusion
+
+### Data Collection
+
+- Online Sources
+  - Formatted Electronic Data (.xls, .csv, .dta, .dat, etc….)
+  - PDFs (require some manual entry/editing)
+- Merging Data 
+  - ID variable (Key)
+  - Dealing with mismatches?
+- Cleaning Data
+  - Dealing with (and reformatting) NA’s
+  - Naming, labelling, and storing data (.Rdata files, .Rproj files, and project directories) 
+
+## Summarizing Data
+
+### Single Variables
+
+Do the following: 
+- Explore the objects in your environment using `ls()`
+- Using the `ceosal1` data, separately calculate the mean, median, and standard deviation of the `salary` variable. 
+- Calculate the summary statistics for the `salary` variable using `summary()`.
+
+```{r singleSummary, exercise = TRUE}
+
+```
+
+```{r singleSummary-hint}
+# Don't forget to load your data!
+```
+
+```{r singleSummary-solution}
+ceosal1 <- wooldridge::ceosal1
+ls()
+mean(ceosal1$salary)
+median(ceosal1$salary)
+sd(ceosal1$salary)
+summary(ceosal1$salary)
+```
+
+```{r singleSummary-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Summarizing an Entire Data Frame
+
+- Calculate the summary statistics for all of the variables in *ceosal1*. 
+
+```{r multipleSummary, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r multipleSummary-setup}
+ceosal1 <- wooldridge::ceosal1
+```
+
+```{r multipleSummary-hint}
+# Don't forget to oad your data!
+```
+
+```{r multipleSummary-solution}
+summary(ceosal1)
+```
+
+```{r multipleSummary-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Creating Pretty Tables
+
+The `gtsummary` package has useful tools for making very nice summary statistics tables for your research. 
+
+### Standard Output
+
+Create a summary table of `ceosal1` using the `tbl_summary()` function in the `gtsummary::` package.
+
+```{r gtmedian, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r gtmedian-setup}
+ceosal1 <- wooldridge::ceosal1
+```
+
+```{r gtmedian-hint}
+# The tbl_summary() function *requires* a data frame (or subset of one). . 
+# It has many options that can adjust things like: 
+  # `by` to split the sample into subgroups (e.g. by industry?)
+  # `statistic` to change the statistics it reports 
+    # default stats for continuous variables are "{median} ({p25}, {p75})"
+    # default stats for categorical variables are "{n} ({p}%)"
+  # `digits` for the number of decimal places 
+```
+
+```{r gtmedian-solution}
+  library(gtsummary)
+  tbl_summary(ceosal1)
+```
+
+```{r gtmedian-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise(), " Well, we implemented the function correctly, but it gave us the median and the inter-quartile range (statistic = {median} ({p25}, {p75})). We are economists. We want the mean and standard deviation (sd). Adjust the 'statistic' option to give us what we want. Give me a couple of digits after the decimal place using digits = list() while you're at it!")
+  }
+  fail(random_encouragement(), " Well, we implemented the function correctly, but it gave us the median and the inter-quartile range (statistic = {median} ({p25}, {p75})). We are economists. We want the mean and standard deviation (sd). Adjust the 'statistic' option to give us what we want. Give me a couple of digits after the decimal place using digits = list() while you're at it!")
+})
+```
+
+### Means and Standard Deviations
+
+Input the request from the feedback below.
+
+```{r gtsummary, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r gtsummary-setup}
+library(gtsummary)
+ceosal1 <- wooldridge::ceosal1
+```
+
+```{r gtsummary-hint}
+# The "statistic" and "digits" options require a list() defining 
+  # Groups or types of variables together (more common): 
+    # `statistic = list(all_continuous() ~ "{mean} ({sd})")
+    # Note the use of `~` for between the variable type and its reporting format. 
+    # Note the use of curly brackets `{...}` for statistics within quotes. 
+    # Text not inside curly brackets appears as-is, e.g. parentheses around `{sd}`.
+  # Each variable individually, such as: 
+    # `statistic = list(salary ~ "{mean} ({sd})", pcsalary ~ salary ~ "{mean} ({sd})", ...)`
+    # Unspecified variables take the default for that type.
+```
+
+```{r gtsummary-solution}
+tbl_summary(ceosal1, 
+            statistic = list(all_continuous() ~ "{mean} ({sd})"), 
+            digits = list(all_continuous() ~ c(2,2)))
+```
+
+```{r gtsummary-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Relationships between Variables
+
+### Correlation Matrix
+
+Calculate the following:
+
+- The correlation of salary with ROE;
+- The correlation matrix for all numeric variables.
+
+```{r correlation, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r correlation-setup}
+ceosal1 <- wooldridge::ceosal1
+```
+
+```{r correlation-hint}
+# The cor() function requires variables x and y as inputs, or a data frame. 
+```
+
+```{r correlation-solution}
+cor(ceosal1$salary, ceosal1$roe)
+cor(ceosal1)
+```
+
+```{r correlation-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Pretty Correlation Matrix
+
+Use the `corrgram` function (part of the `corrgram` package) to create a correlogram.
+
+```{r corrheatmap, exercise=TRUE, exercise.eval=TRUE}
+
+
+```
+
+```{r corrheatmap-setup}
+library(corrgram)
+ceosal1 <- wooldridge::ceosal1
+```
+
+```{r corrheatmap-hint}
+ 
+```
+
+```{r corrheatmap-solution}
+corrgram(ceosal1)
+```
+
+```{r corrheatmap-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass("Hmm... you entered this correctly, but it's not quite what we want. Try setting the options for 'panel' differently so we get scatterplots below the diagonal and correlation coefficients above the diagonal.")
+  }
+  fail(random_encouragement())
+})
+```
+
+### Pretty *Numerical* Correlation Matrix with Plots
+
+Input the suggestion from the feedback below. 
+
+```{r corrgram, exercise=TRUE, exercise.eval=TRUE}
+
+
+```
+
+```{r corrgram-setup}
+library(corrgram)
+ceosal1 <- wooldridge::ceosal1
+```
+
+```{r corrgram-hint}
+# The options for the panel option are: panel.pts, panel.pie, panel.shade, panel.fill, 'panel.bar, panel.ellipse, panel.conf, and panel.cor 
+# Refer to the tutorial for Appendix B (tutorial "B_2") for a refresher?
+```
+
+```{r corrgram-solution}
+corrgram(ceosal1, panel = panel.cor)
+```
+
+```{r corrgram-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### More Fancy Stuff with `corrgram`
+
+You can add any plot to `corrgram` (or any other plot) by creating user-defined functions. Run the following code, which creates user-defined functions `panel.hist` and `panel.lm` to add a histogram along the diagonal and a scatter with linear fit. It also uses `outer.labels` to orient the variable names around the margins. 
+
+```{r corrgramFancy, exercise = TRUE}
+# Create a user-defined function, panel.hist, to make a histogram along the diagonals.
+panel.hist <- function(x, ...) {
+    usr <- par("usr")
+    on.exit(par(usr))
+    par(usr = c(usr[1:2], 0, 1.5))
+    his <- hist(x, plot = FALSE, breaks = 30)
+    breaks <- his$breaks
+    nB <- length(breaks)
+    y <- his$counts
+    y <- y/max(y)
+    rect(breaks[-nB], 0, breaks[-1], y, col = rgb(0, 1, 1, alpha = 0.5), ...)
+}
+# Create a user-defined function, panel.lm, to add a quick regression line to a panel.plot.
+panel.lm <- function (x, y, corr = NULL, col.regions, cor.method, ...) {
+    if (!is.null(corr)) 
+        return()
+    plot.xy(xy.coords(x, y), type = "p", ...)
+    abline(lm(y ~ x)) # The lm command runs a simple linear regression.
+}
+corrgram(ceosal1[, -which(names(ceosal1) %in% 
+                            c('indus', 'finance', 'consprod', 'utility', 'lsalary', 'lsales'))], 
+         upper.panel = panel.cor, 
+         lower.panel = panel.lm, 
+         diag.panel = panel.hist, 
+         text.panel = NULL,
+         cex.cor = 4, # This line gives an error, but does what you want!
+         outer.labels = list(top  = list(names(ceosal1), cex = 1.25, srt = 30), 
+                             left = list(names(ceosal1), cex = 1.25, srt = 30)),
+         col.regions = colorRampPalette(c('black'))) 
+```
+
+```{r corrgramFancy-setup}
+ceosal1 <- wooldridge::ceosal1
+```
+
+```{r corrgramFancy-solution}
+# Create a user-defined function, panel.hist, to make a histogram along the diagonals.
+panel.hist <- function(x, ...) {
+    usr <- par("usr")
+    on.exit(par(usr))
+    par(usr = c(usr[1:2], 0, 1.5))
+    his <- hist(x, plot = FALSE, breaks = 30)
+    breaks <- his$breaks
+    nB <- length(breaks)
+    y <- his$counts
+    y <- y/max(y)
+    rect(breaks[-nB], 0, breaks[-1], y, col = rgb(0, 1, 1, alpha = 0.5), ...)
+}
+# Create a user-defined function, panel.lm, to add a quick regression line to a panel.plot.
+panel.lm <- function (x, y, corr = NULL, col.regions, cor.method, ...) {
+    if (!is.null(corr)) 
+        return()
+    plot.xy(xy.coords(x, y), type = "p", ...)
+    abline(lm(y ~ x)) # The lm command runs a simple linear regression.
+}
+corrgram(ceosal1[, -which(names(ceosal1) %in% 
+                            c('indus', 'finance', 'consprod', 'utility', 'lsalary', 'lsales'))], 
+         upper.panel = panel.cor, 
+         lower.panel = panel.lm, 
+         diag.panel = panel.hist, 
+         text.panel = NULL,
+         cex.cor = 4, # This line gives an error, but does what you want!
+         outer.labels = list(top  = list(names(ceosal1), cex = 1.25, srt = 30), 
+                             left = list(names(ceosal1), cex = 1.25, srt = 30)),
+         col.regions = colorRampPalette(c('black'))) 
+```
+
+```{r corrgramFancy-check}
+grade.code()
+```
+
+## Factor Variables
+
+### Crosstabulation Tables
+
+Using the *affairs* data, do the following: 
+
+- Generate the factor variables *haskids* and *marriage* for kids and ratemarr labels with labels *no*/*yes* and *very unhappy*/*unhappy*/*average*/*happy*/*very happy*, respectively;
+- Create a table that displays the proportions of each outcome of marriage happiness rating; 
+- Create a table that displays the proportions of each outcome of marriage happiness rating *and having kids*.
+
+```{r crosstab, exercise=TRUE, exercise.eval=TRUE}
+
+
+```
+
+```{r crosstab-setup}
+affairs <- wooldridge::affairs
+affairs$kids <- factor(affairs$kids, labels = c("No","Yes"))
+affairs$ratemarr <- factor(affairs$ratemarr, labels = c("Very Unhappy","Unhappy","Average","Happy", "Very Happy"))
+```
+
+```{r crosstab-hint}
+# The prop.table() function requires a table input. You can nest a table() function inside prop.table() if you will not need the counts table later. 
+# Piping is also a good option:
+  # table(df$var) |> 
+    # prop.table(options...)
+```
+
+```{r crosstab-solution}
+table(affairs$ratemarr) |> 
+  prop.table()
+table(affairs$ratemarr,affairs$kids) |> 
+  prop.table()
+```
+
+```{r crosstab-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Pretty Crosstab Tables
+
+- Replicate the previous tables using "tbl_cross" (using percent to generate percentages instead of proportions) to generate a more attractive layout that you can save as html. 
+- Combine counts and percentages in one table with each cell displaying percentages in parentheses next to its count.
+
+```{r tbl_cross, exercise=TRUE, exercise.eval=TRUE}
+
+
+```
+
+```{r tbl_cross-setup}
+affairs <- wooldridge::affairs
+affairs$kids <- factor(affairs$kids, labels = c("No","Yes"))
+affairs$ratemarr <- factor(affairs$ratemarr, labels = c("Very Unhappy","Unhappy","Average","Happy", "Very Happy"))
+```
+
+```{r tbl_cross-hint}
+# Typical statistic options are "{n}" (default), "{p}%", or "{n}, ({p}%)". 
+# Typical percent options are "none" (default), "column", "row", or "cell". 
+```
+
+```{r tbl_cross-solution}
+tbl_cross(affairs, row = ratemarr, col = kids)
+tbl_cross(affairs, row = ratemarr, col = kids, statistic = "{p}%")
+tbl_cross(affairs, row = ratemarr, col = kids, statistic = "{n} ({p}%)")
+```
+
+```{r tbl_cross-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass("Note that there are two ways to achieve the last format: statistic = \"{n} ({p}%)\" or percent = \"cell\" ")
+  }
+  fail(random_encouragement())
+})
+```

@@ -1,0 +1,116 @@
+---
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+title: "Appendix B"
+subtitle: |
+  | Fundamentals of Probability
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+description: "This tutorial practices basic concepts about relationships between two variables."
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+gradethis_setup()
+tutorial_options(exercise.reveal_solution = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+## Appendix B #10
+
+Suppose that at a large university, college GPA and SAT score are related by the conditional expectation $E(GPA|SAT) = 0.70 + 0.002 SAT$
+  - Find expected $GPA$ when $SAT = 800$. Find $E(GPA|SAT = 1400)$. 
+  - If average $SAT$ at the university is 1,100, what is the expected average GPA? 
+
+```{r gpaSAT, exercise=TRUE}
+
+```
+
+```{r gpaSAT-solution}
+  0.7 + 0.002*800
+  0.7 + 0.002*1100
+```
+
+```{r gpaSAT-check}
+grade_this({if (identical(.result, .solution)) {
+  pass(random_praise())}
+  fail(random_encouragement())})
+```
+
+```{r singleObservation, echo=FALSE}
+question("If an individual student's $SAT$ is 1,100, does this mean they will have the same GPA as the previous question?",
+    answer("Yes"),
+    answer("No", correct = TRUE),
+    allow_retry = TRUE
+  )
+```
+
+## Correlogram Practice
+
+Make a correlogram of the affairs dataset that includes the following variables: 
+
+  - Age (age)
+  - Years married (yrsmarr)
+  - Years of education (educ)
+  - Number of affairs (naffairs)
+
+Give your corrgram the following panel attributes: 
+  
+  - Scatter plots in the lower panel;
+  - Correlation coefficients in the upper panel;
+  - Estimated empirical uni-variate densities in the diagonal panel; 
+
+```{r corrgramPractice, exercise=TRUE}
+
+```
+
+```{r corrgramPractice-hint-1}
+# Use square brackets to include specific columns:  df[rows, columns]
+  # by row/column number: df[c(1, 2, 3,...), c(1, 2, 3,...)]  
+  # by row/column name: df(c('rowname1', 'rowname2',...), c('colname1', colname2',...))
+  # leaving the row blank includes all rows: df[ , c(1,2)] for the entire first 2 rows
+```
+
+```{r corrgramPractice-hint-2}
+# Use the upper.panel, lower.panel, and diag.panel to set the types of information in each part. 
+  # `upper.panel = panel.cor` fpr correlation coefficients in the triangle above the diagonal. 
+  # `lower.panel =`panel.pts` for scatter plots in the triangle below the diagonal. 
+  # `diag.panel = 'panel.density` for a density plot (like a smoothed histogram) along the diagonal.
+```
+
+```{r corrgramPractice-hint-3}
+# I used a black, monochrome (i.e. boring) color palette `col.regions = colorRampPalette(c('black'))
+# Look up color options and experiment.
+```
+
+```{r corrgramPractice-solution}
+library(corrgram)
+affairs <- wooldridge::affairs
+corrgram(affairs[, c('age', 'yrsmarr', 'educ', 'naffairs')], 
+         upper.panel = panel.cor, 
+         lower.panel = panel.pts, 
+         diag.panel = panel.density, 
+         col.regions = colorRampPalette(c('black'))) 
+```
+
+```{r corrgramPractice-check}
+grade_this({
+  if (!inherits(.result, c("matrix", "array"))) {
+    fail("Your class of your answer should be c('matrix', 'array').")}
+  if (length(.result) != 16) {
+    fail("Your table should have a length of 16. Make sure you plot the variables specified.")}
+  if (nrow(.result) != 4) {
+    fail("Your table should have 4 rows. Make sure you plot the variables specified.")}
+  pass()
+})
+```

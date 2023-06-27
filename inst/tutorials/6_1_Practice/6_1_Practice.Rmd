@@ -1,0 +1,134 @@
+---
+title: "Chapter 6"
+subtitle: "Multiple Regression Analysis - Scaling and Elasticities"
+description: "This tutorial practices standardizing variables, elasticities, and log transformations."
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+tutorial_options(exercise.eval = TRUE, exercise.reveal_solution = FALSE)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Crime and House Prices
+
+### Standardized Coefficients
+
+1. Estimate the following model using the `hprice2` dataset as `hprice.lm1`: 
+$$Price = \beta_0 + \beta_1NO2 + \beta_2Crime + \beta_3Rooms + \beta4Employer\text{ }Distance + \beta_5Student\text{-}Teacher\text{ }Ratio + u \text{ : (hprice.lm1)}$$ 
+2. Reestimate the same model *with and without a constant* using the `scale` function in your formula argument to estimate the standardized coefficients (`hprice.lm2` and `hprice.lm3`). 
+
+```{r housePriceBetas, exercise=TRUE, exercise.reveal_solution = TRUE}
+
+```
+
+```{r housePriceBetas-solution}
+library(stargazer)
+hprice2 <- wooldridge::hprice2
+hprice.lm1 <- lm(price ~ nox + crime + rooms + dist + stratio, data = hprice2)
+hprice.lm2 <- lm(scale(price) ~ scale(nox) + scale(crime) + scale(rooms) + scale(dist) + scale(stratio), data = hprice2)
+hprice.lm3 <- lm(scale(price) ~ 0 + scale(nox) + scale(crime) + scale(rooms) + scale(dist) + scale(stratio), data = hprice2)
+stargazer(hprice.lm1, hprice.lm2, hprice.lm3, type = 'text')
+```
+
+```{r housePriceBetas-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Elasticities
+
+Calculate the elasticities for the model estimated in (1) and present the estimates in the same text table using `stargazer()`.
+
+```{r housePriceEYEX, exercise=TRUE, exercise.reveal_solution = TRUE}
+
+```
+
+```{r housePriceEYEX-setup}
+library(stargazer)
+hprice2 <- wooldridge::hprice2
+hprice.lm1 <- lm(price ~ nox + crime + rooms + dist + stratio, data = hprice2)
+hprice.lm2 <- lm(scale(price) ~ scale(nox) + scale(crime) + scale(rooms) + scale(dist) + scale(stratio), data = hprice2)
+hprice.lm3 <- lm(scale(price) ~ 0 + scale(nox) + scale(crime) + scale(rooms) + scale(dist) + scale(stratio), data = hprice2)
+```
+
+```{r housePriceEYEX-hint}
+# `stargazer()` has options to replace the coefficients (`coef = list()`) or standard errors (`se = list()`) with marginal effects or robust standard errors (see chapter 8).
+# The `data.frame` that `summary.marginaleffects()` stores the coefficients and standard errors in columns named `estimate` and `std.error`. 
+```
+
+```{r housePriceEYEX-solution}
+library(marginaleffects)
+hprice.eyex1 <- marginaleffects(hprice.lm1, slope = 'eyex') |> 
+  summary()
+stargazer(hprice.lm1,                              # Tell it the structure of the original model
+          coef = list(hprice.eyex1[['estimate']]), # Tell it where to find the elasticities
+          se = list(hprice.eyex1[['std.error']]),  # Tell it where to find the se's
+          type = 'text')                           # Remember to specify type
+```
+
+```{r housePriceEYEX-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Log Transofrmation
+
+Estimate the following model and print a `summary()` of the result.  
+$$ln(Price) = \beta_0 + \beta_1ln(NO2) + \beta_2ln(Crime) + \beta_3Rooms + \beta_4Rooms^2 + \beta5Employer\text{ }Distance + \beta_5Student\text{-}Teacher\text{ }Ratio + u \text{ : (lnhprice.lm1)}$$ 
+```{r lnHousePrice, exercise=TRUE, exercise.reveal_solution = TRUE}
+
+```
+
+```{r lnHousePrice-setup}
+hprice2 <- wooldridge::hprice2
+```
+
+```{r lnHousePrice-solution}
+lnhprice.lm1 <- lm(log(price) ~ log(nox) + log(crime) + rooms + I(rooms^2) + log(dist) + log(stratio), data = hprice2)
+summary(lnhprice.lm1)
+```
+
+```{r lnHousePrice-hint}
+# Remember that in order to use math operations (*, /, ^, etc.) within a formula, you need to wrap these terms within the I() function (but not with functions like `log()` or `sqrt()`. 
+```
+
+```{r lnHousePrice-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```

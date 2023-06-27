@@ -1,0 +1,181 @@
+---
+title: "Chapter 8" 
+subtitle: "Correcting for Heteroskedasticity"
+description: "This tutorial practice the HC1, HC3, and WLS approaches to correcting heteroskedasticity."
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+tutorial_options(exercise.eval = TRUE, exercise.reveal_solution = TRUE)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE, fig.height= 9, fig.width=8)
+```
+
+## Net Total Financial Wealth
+
+### OLS with Robust Standard Errors
+
+Use the `k401ksubs` dataset to estimate the effect of income (`inc`) on total net financial assets (`nettfa`) for *single-member households only* (`fsize == 1`) controlling for gender (`male`), 401k plan eligibility (`e401k`), and the square of the difference between a person's current age and 25 years old, $(age - 25)^2$.
+
+Estimate OLS coefficients. Plot the four default diagnostic plots of the result in a 2-by-2 plot area.
+
+```{r nettfa, exercise = TRUE}
+
+```
+
+```{r nettfa-setup}
+
+```
+
+```{r nettfa-hint}
+# Remember to use the as-is function, `I()`, for squaring `age` - 25. 
+# Select single households by setting the option `subset = (variable.name == value)` option. 
+```
+
+```{r nettfa-solution}
+k401ksubs <- wooldridge::k401ksubs
+nettfa.lm2 <- lm(nettfa ~ inc + male + e401k + I((age - 25)^2), data = k401ksubs, subset = (fsize == 1))
+par(mfrow = c(2,2))
+plot(nettfa.lm2)
+```
+
+```{r nettfa-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### WLS and FGLS
+
+Suppose that we believe that individuals with higher incomes will not only have higher net financial assetss, but that their deviations from the fitted values will be higher on average. 
+
+Print a list containint a `summary()` of each result.
+
+```{r nettfaWLS, exercise = TRUE}
+
+```
+
+```{r nettfaWLS-setup}
+k401ksubs <- wooldridge::k401ksubs
+nettfa.lm2 <- lm(nettfa ~ inc + male + e401k + I((age - 25)^2), data = k401ksubs, subset = (fsize == 1))
+```
+
+```{r nettfaWLS-hint}
+# Remember to use the as-is function, `I()`, for squaring `age` - 25. 
+# Select single households using the `subset(data.frame, variable.name == value)` function.
+```
+
+```{r nettfaWLS-solution}
+nettfa.wls <- lm(
+  nettfa ~ inc + male + e401k + I((age - 25) ^ 2),
+  data = subset(k401ksubs, fsize == 1),
+  weights = 1 / inc
+)
+varreg <- lm(
+  log(nettfa.lm2$residuals ^ 2) ~ inc + male + e401k + I((age - 25) ^ 2),
+  data = subset(k401ksubs, fsize == 1),
+  subset = (fsize == 1)
+  )
+nettfa.fgls <- lm(
+  nettfa ~ inc + male + e401k + I((age - 25) ^ 2),
+  data = subset(k401ksubs, fsize == 1),
+  weights = 1 / exp(fitted(varreg))
+  )
+list(summary(nettfa.wls), summary(nettfa.fgls))
+```
+
+```{r nettfaWLS-check}
+grade_this({
+  if (identical(.result$call, .solution$call)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Presenting Results
+
+Present the results from all five combinations of coefficients and standard errors (OLS coefficients with OLS standard errors, OLS with HC1 standard errors, OLS with HC3 standard errors, WLS coefficients and standard errors, and FGLS coefficients and standard errors) in a text `stargazer()` table. 
+
+```{r table, exercise = TRUE}
+
+```
+
+```{r table-setup}
+k401ksubs <- wooldridge::k401ksubs
+nettfa.lm2 <- lm(
+  nettfa ~ inc + male + e401k + I((age - 25)^2), 
+  data = k401ksubs, subset = (fsize == 1))
+nettfa.wls <- lm(
+  nettfa ~ inc + male + e401k + I((age - 25) ^ 2),
+  data = k401ksubs, subset = (fsize == 1),
+  weights = 1 / inc
+)
+varreg <- lm(
+    log(nettfa.lm2$residuals ^ 2) ~ inc + male + e401k + I((age - 25) ^ 2),
+    data = subset(k401ksubs, fsize == 1),
+)
+nettfa.fgls <- lm(
+  nettfa ~ inc + male + e401k + I((age - 25) ^ 2),
+  data = subset(k401ksubs, fsize == 1),
+  weights = 1 / exp(fitted(varreg))
+  )
+```
+
+```{r table-hint-1}
+# The setup stores the OLS estimates as `nettfa.lm2`; the WLS estimates as `nettfa.wls`; and the FGLS estimates as `nettfa.fgls`.
+```
+
+```{r table-hint-2}
+# Remember that you can estimat the HC1 and HC3 (or other) robust standard errors within `stargazer()` in the `se` option. 
+# Just remember to extract the `diag()` of the variance matrix and take the `sqrt()` of the resulting vector. 
+```
+
+```{r table-solution}
+library(sandwich)
+library(stargazer)
+stargazer::stargazer(
+  nettfa.lm2, nettfa.lm2, nettfa.lm2, nettfa.wls, nettfa.fgls, type = 'text', 
+  se = list(sqrt(diag(vcovHC(nettfa.lm2, "const"))), 
+              sqrt(diag(vcovHC(nettfa.lm2, "HC1"))), 
+              sqrt(diag(vcovHC(nettfa.lm2, "HC3"))), 
+              sqrt(diag(vcovHC(nettfa.wls, "const"))), 
+              sqrt(diag(vcovHC(nettfa.fgls, "const")))
+              ), 
+    column.labels = c("OLS", "HC1", "HC3", "WLS", "FGLS")
+  )
+```
+
+```{r table-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```

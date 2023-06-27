@@ -1,0 +1,205 @@
+---
+title: "Chapter 3"
+subtitle: "Multiple Regression Analysis - Omitted Variable Bias and Multicollinearity"
+description: "This tutorial illustrates the problems of omitted variable bias and multicollinearity."
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+gradethis::gradethis_setup()
+tutorial_options(exercise.reveal_solution = FALSE)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Omitted Variables Bias
+
+Simulate the bias term from the omitted variable bias formula, $E(\tilde\beta_1) = \beta_1 + \beta_2\delta$ for the model $CollegeGPA = \beta_0 + \beta_1HighSchoolGPA + \beta_2ACTScore + u$ using the $gpa1$ data. 
+
+1. Summarize the (biased) results of the OLS regression of college GPA on ACT score.
+2. Extract the (unbiased-ish) coefficient vector (`coef()`) from the OLS estimates of college GPA on ACT score *and* HS GPA. 
+3. Extract the coefficient vector from the OLS estimates of high school GPA on ACT score. 
+4. Calculate the formula for the biased simple regression model, $\tilde\beta_1 = \hat\beta_1 + \hat\beta_2\hat\delta$. 
+
+```{r omittedVariableBias, exercise=TRUE}
+
+```
+
+```{r omittedVariableBias-solution, exercise.reveal_solution = FALSE}
+gpa1 <- wooldridge::gpa1
+summary(lm(colGPA ~ ACT, data=gpa1))
+beta.hat <- lm(colGPA ~ ACT+hsGPA, data=gpa1) |> 
+  coef()
+delta.tilde <- lm(hsGPA ~ ACT, data=gpa1) |>
+  coef()
+beta.hat["ACT"] + beta.hat["hsGPA"]*delta.tilde["ACT"]
+```
+
+```{r omittedVariableBias-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass("Notice that the biased estimate of the effect of ACT is the same as the unbiased estimate of the effect of ACT *plus* the bias that we calculated by hand in step 3 (the assiciation of high-school GPA with ccollege GPA times the association of ACT with high-school GPA.")
+  }
+  fail(random_encouragement())
+})
+```
+
+## Multicollinearity
+
+### Estimation
+
+Use the `crime4` dataset to estimate the effect of policing (measured by police per capita, `polpc`) on county crime rates (`crmrte`), controlling for population density (`density`), and average weekly wages of federal employees (`wfed`).
+
+Reestimate the model adding average weekly wages of in manufacturing (`wfmg`). 
+
+Summarize both results with a text table using `stargazer()`.
+
+```{r mcCrime, exercise = TRUE}
+
+```
+
+```{r mcCrime-hint}
+
+```
+
+```{r mcCrime-solution}
+library(stargazer)
+crime4 <- wooldridge:: crime4
+crmrte.lm1 <- lm(crmrte ~ polpc + density + wfed, data = crime4)
+crmrte.lm2 <- lm(crmrte ~ polpc + density + wfed + wmfg, data = crime4)
+stargazer(crmrte.lm1, crmrte.lm2, type = 'text')
+```
+
+```{r mcCrime-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Correlations among Variables
+
+Create a correlogram of the determinants in the second crime regression with correlation coefficients on the upper panel, scatterplots on the lower panel, and densities along the diagonal. Use a monochrome (black) color palette. 
+
+```{r crimeCor, exercise = TRUE}
+
+```
+
+```{r crimeCor-setup}
+crime4 <- wooldridge:: crime4
+crmrte.lm1 <- lm(crmrte ~ polpc + density + wfed, data = crime4)
+crmrte.lm2 <- lm(crmrte ~ polpc + density + wfed + wmfg, data = crime4)
+```
+
+```{r crimeCor-hint-1}
+# Use square brackets to include specific columns:  df[rows, columns]
+  # by row/column number: df[c(1, 2, 3,...), c(1, 2, 3,...)]  
+  # by row/column name: df(c('rowname1', 'rowname2',...), c('colname1', colname2',...))
+  # leaving the row blank includes all rows: df[ , c(1,2)] for the entire first 2 rows
+```
+
+```{r crimeCor-hint-2}
+# Use the upper.panel, lower.panel, and diag.panel to set the types of information in each part. 
+  # `upper.panel = panel.cor` fpr correlation coefficients in the triangle above the diagonal. 
+  # `lower.panel =`panel.pts` for scatter plots in the triangle below the diagonal. 
+  # `diag.panel = 'panel.density` for a density plot (like a smoothed histogram) along the diagonal.
+```
+
+```{r crimeCor-hint-3}
+# I used a black, monochrome (i.e. boring) color palette `col.regions = colorRampPalette(c('black'))
+# Look up color options and experiment.
+```
+
+```{r crimeCor-solution}
+library(corrgram)
+crime4 <- wooldridge::crime4
+corrgram(crime4[, c('polpc', 'density', 'wfed', 'wmfg')], 
+         upper.panel = panel.cor, 
+         lower.panel = panel.pts, 
+         diag.panel = panel.density, 
+         col.regions = colorRampPalette(c('black'))) 
+```
+
+```{r crimeCor-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Variance Inflation Factor
+
+1. Calculate the "uninflated" part of the standard error for the weekly federal employee wage for the model with and without the weekly manufacturing wage. 
+2. Calculate the variance inflation factor for the weekly federal employee wage for the model with and without the weekly manufacturing wage. 
+
+Report the result as a matrix with rows corresponding to the models (model 1 and model 2?) and columns corresponding the parts of the formula for the decomposed variance of $\hat{\beta}_{wfed}$
+
+```{r vif, exercise = TRUE}
+
+```
+
+```{r vif-setup}
+crime4 <- wooldridge:: crime4
+crmrte.lm1 <- lm(crmrte ~ polpc + density + wfed, data = crime4)
+crmrte.lm2 <- lm(crmrte ~ polpc + density + wfed + wmfg, data = crime4)
+```
+
+```{r vif-hint-1}
+# To extract the standard error of the regression, extract the value `sigma` from the `summary()` of the regression output. 
+# Don't forget to square it to get s^2
+```
+
+```{r vif-hint-2}
+# The VIF is 1/(1-R_j^2), where R_j^2 is the R^2 from the regression of x_j (weekly federal wage) on the other x's.
+```
+
+```{r vif-hint-3}
+# Extract the R^2 of the auxiliary federal wage regressions in a similar way as extracting the standard error of the regression. 
+# R^2 is the `r.squared` value stored by `summary.lm()`. 
+```
+
+```{r vif-solution}
+s2.tilde1 <- (summary(crmrte.lm1)$sigma)^2/((nrow(crime4)-1)*var(crime4$wfed))
+s2.tilde2 <- (summary(crmrte.lm2)$sigma)^2/((nrow(crime4)-1)*var(crime4$wfed))
+wfed.lm1 <- lm(wfed ~ polpc + density, data = crime4)
+wfed.lm2 <- lm(wfed ~ polpc + density + wmfg, data = crime4)
+vif1 <- 1/(1 - summary(wfed.lm1)$r.squared)
+vif2 <- 1/(1 - summary(wfed.lm2)$r.squared)
+matrix(c(s2.tilde1, s2.tilde2, vif1, vif2, sqrt(s2.tilde1*vif1), sqrt(s2.tilde2*vif2)), 
+       nrow = 2, dimnames = list(c("Model 1", "Model 2"), c("s2.tilde", "VIF", "sbhat")))
+```
+
+```{r vif-check}
+grade_this({
+  if (identical(unname(.result), unname(.solution))) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+
+```

@@ -1,0 +1,369 @@
+---
+title: "Chapter 3"
+subtitle: "Multiple Regression Analysis - Estimation"
+description: "This tutorial introduces linear estimation with multiple variables."
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+tutorial_options(exercise.eval = TRUE, exercise.reveal_solution = TRUE)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Multiple Regression
+
+### Wages and Education AND MORE!
+
+Using the wage1 data: 
+
+1. Regress wages on education (with an intercept). 
+2. Regress wages on education *and experience* (with an intercept). 
+3. Create a `list()` summarizing each regression object using `summary()`.
+
+```{r multipleLM, exercise = TRUE}
+
+
+```
+
+```{r multipleLM-hint-1}
+# Don't forget to load your data! 
+```
+
+```{r multipleLM-hint-2}
+# The "lm" function requires two main arguments: function (y ~ x1 + x2...) and data (a data frame) 
+```
+
+```{r multipleLM-solution}
+wage1 <- wooldridge::wage1
+wage.lm1 <- lm(wage ~ educ, data = wage1)
+wage.lm2 <- lm(wage ~ educ + exper, data = wage1)
+list(summary(wage.lm1), 
+     summary(wage.lm2))
+```
+
+```{r multipleLM-check}
+grade_this({
+  if (length(.result) == length(.solution) &
+      (identical(.solution[[1]]$call, .result[[1]]$call) | 
+       identical(.solution[[1]]$call, .result[[2]]$call) 
+       )
+      ) 
+    {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Table Output for Regressions
+
+Display a formatted side-by-side table of both of the previous regressions using the `stargazer()` function in the `stargazer` package using the `type = 'text'` option.  
+
+```{r gtLM, exercise = TRUE}
+
+```
+
+```{r gtLM-setup}
+wage1 <- wooldridge::wage1
+wage.lm1 <- lm(wage ~ educ, data = wage1)
+wage.lm2 <- lm(wage ~ educ + exper, data = wage1)
+```
+
+```{r gtLM-hint}
+# Don't forget to load the `stargazer` library. 
+# Use the `type = 'text'` option to display a readable text table. 
+```
+
+```{r gtLM-solution}
+library(stargazer)
+stargazer(wage.lm1, wage.lm2, type = 'text')
+```
+
+```{r gtLM-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+In general, it's more useful to use `type = 'html'` and `out = 'filename.html'`, which creates a formatted table that you can paste in the word-processing application of your choice.  
+Even better, you can use `type = 'tex'` and `out = 'filename.tex'`, which automatically embeds in your `LaTeX` document in `Markdown`!
+
+### Raw Stargazer HTML Output 
+
+```{r, echo = TRUE}
+library(stargazer)
+wage.lm1 <- lm(wage ~ educ, data = wage1)
+wage.lm2 <- lm(wage ~ educ + exper, data = wage1)
+stargazer(wage.lm1, wage.lm2, type = 'html')
+```
+
+### Formatted Stargazer HTML Output 
+
+You can directly insert a `stargazer` table in an `html` Rmarkdown document. One is to include the command that generates the `html` in an `R` chunk (with the option `results='asis'`) that itself is inside an `html` code chunk.  
+
+```{r, echo = TRUE, eval=FALSE}
+stargazer(
+  wage.lm1,
+  wage.lm2,
+  title = "Education and Wages",
+  type = "html",
+  float = TRUE,
+  no.space = TRUE,
+  header = FALSE,
+  covariate.labels = c("Education", "Experience")
+)
+```
+
+```{=html}
+```{r, results='asis'}
+stargazer(
+  wage.lm1,
+  wage.lm2,
+  title = "Education and Wages",
+  type = "html",
+  float = TRUE,
+  no.space = TRUE,
+  header = FALSE,
+  covariate.labels = c("Education", "Experience")
+)
+```
+```
+
+Alternately, you might want to run your code from a `R` source file, save your pretty tables as html files, and include the content of those files in your `html` (or other) document. 
+
+One way to achieve this is to insert a code chunk with the `htmltools::includeHTML()` function:
+
+```{r, echo = TRUE, results='asis'}
+library(htmltools)
+includeHTML('output/wage.html')
+```
+
+Equivalently, you could do the same thing using the `xfun::file_string()` function: 
+
+```{r, echo = TRUE, results='asis'}
+library(xfun)
+file_string('output/wage.html')
+```
+
+Since this tutorial knits as an `html` document I needed to use some extra tricks. More commonly, you would knit your document as a `pdf`, and in this case you would want to leave out the `html` wrap, and set `type = "latex"`. 
+
+## Implementing Regression
+
+### Assumptions of the Classical Regression Model
+
+1. Linear in the parameters
+2. Random Sampling: $(X_i, Y_i)$ are independently and identically distributed
+3. No Perfect Multicollinearity
+4. $E[u|x] = 0$
+5. Homoskedasticity: $u_i{'s}$ have constant variance regardless of the value of $x$
+6. Large Outliers are Unlikely: $X$ and $Y$ have finite fourth moments
+$$E(X^4)< \infty$$
+$$E(Y^4)< \infty$$
+
+### Eyeball Testing the Assumptions
+
+The `lm()` function creates an `lm` object as its stored output. We've already seen that some functions behave differently depending on the type of object you apply them to. For example, when applied to a data frame, `summary()` generates a table for each variable containing the minimum, 25th percentile, median, mean, 75th percentile, and maximum for quantitative variables and a (abbreviated) frequency table for factors. When applied to an `lm` object, `summary()` (or, `summary.lm()` if you're not into the whole brevity thing) reports a list that includes: (1) the call function; (2) descriptive statistics for the residuals; (3) the table of coefficients, standard errors, t-values, and p-values; (4) footnotes with significance codes; and (5) various regression diagnostics (standard error of regression, residual degrees of freedom, $R^2$, $\bar{R}^2$, and the F statistic with its associated degrees of freedom and p-value). 
+
+The same is true for the `plot()` function: It behaves differently applying it to different classes of objects. Applying `plot()` to an `lm` function generates four graphs:  
+1. Residuals versus fitted values: This plot mainly helps identify heteroskedasticity by identifying a trend relationship between the residuals and all of the X's. If the residuals exhibit the assumption of homoskedasticity, the "trend" will be a horizontal line (at zero). It can also identify "extreme" values of the residuals. 
+2. Q-Q plot of the residuals: This plot helps identify non-normality in the residuals by plotting the actual (standardized) residuals against the theoretical quantiles of the residuals *if they exhibited a normal distribution*. If the residuals are normally disbributed, the points of the Q-Q plot should align on a $y = x$ equality line. 
+3. Scale-location plot ($\sqrt{|\text{standardized residuals}|}$ versus fitted values): This plot complements plotting the non-standardized residuals to the fitted values. If the homoskedasticity assumption holds, then this plot will show a horizontal trend line. The variation of the residuals around the trend should also be roughly constant. 
+4. Standardized residuals versus leverage: This plot helps identify disproportionately influential observations and extreme outliers by plotting the standardized residuals against "leverage" (measured by "Cook's distance," see details). Observations with very high residuals may indicate the presence of extreme outliers; observations with very high leverage may influence the slope estimates disproportionately.
+
+<details style="line-height:105%"><summary>Click here to see the mathematical definition of leverage.</summary>
+
+The matrix definition of the OLS estimator (see next section!) is: 
+$$\hat{\beta} = (X'X)^{-1}X'y$$
+
+This means that we can write the predicted values of y, $\hat{y}$, as: 
+$$\hat{y} = X\hat{\beta} = X(X'X)^{-1}X'y$$
+
+If we define $H = X(X'X)^{-1}X'$, then we can rewrite the predicted values ("y-hat") as: 
+$$\hat{y} = Hy$$
+By this definition, some say that $H = X(X'X)^{-1}X'$ "puts the hat on y" and has dimensions $n \times n$. For a given observation, the leverage is the $i^{th}$ value of the diagonal of $H$. 
+
+</details>
+
+### Deriving the OLS Estimator
+
+One variable
+
+$$ \min_{\hat\beta_0,\hat\beta_1} \sum_{i=1}^n{(y_i-\hat{\beta}_0-\hat{\beta}_1x_{i1})^2} $$
+
+Two variables
+
+$$ \min_{\hat\beta_0,\hat\beta_1,\hat\beta_2} \sum_{i=1}^n{(y_i-\hat{\beta}_0-\hat{\beta}_1x_{i1}-\hat{\beta}_2x_{i2})^2} $$
+
+$k$ variables
+
+$$ \min_{\hat\beta_0,\hat\beta_1,...,\hat\beta_k} \sum_{i=1}^n{(y_i-\hat{\beta}_0-\hat{\beta}_1x_{1i}-...-\hat{\beta}_kx_{ki})^2} $$
+
+Taking the derivative with respect to each of the $\hat{\beta}$'s separately yields a system of equations equal to the number of $\hat{\beta}$'s {$k + 1$). 
+
+$$\begin{pmatrix}  
+\frac{\partial f}{\partial\hat{\beta_0}} \\ 
+\frac{\partial f}{\partial\hat{\beta_1}}  \\ 
+\vdots 
+\\ \frac{\partial f}{\partial\hat{\beta_k}} 
+\end{pmatrix} = \begin{pmatrix} 
+\vphantom{\frac{\partial f}{\partial x_1}} -2\big[\sum_{i=1}^n{(y_i-\hat{\beta}_0-\hat{\beta}_1x_{1i}-...-\hat{\beta}_kx_{ki})}\big] \\ 
+\vphantom{\frac{\partial f}{\partial x}} -2x_{1i}\big[\sum_{i=1}^n{(y_i-\hat{\beta}_0-\hat{\beta}_1x_{1i}-...-\hat{\beta}_kx_{ki})}\big] \\ 
+\vphantom{\frac{\partial f}{\partial x_1}} \vdots \\
+\vphantom{\frac{\partial f}{\partial x_1}} -2x_{ki}\big[\sum_{i=1}^n{(y_i-\hat{\beta}_0-\hat{\beta}_1x_{1i}-...-\hat{\beta}_kx_{ki})}\big] \\ 
+ \end{pmatrix} = \begin{pmatrix} 
+\vphantom{\frac{\partial f}{\partial x_1}} 0 \\ 
+\vphantom{\frac{\partial f}{\partial x}} 0 \\ 
+\vphantom{\frac{\partial f}{\partial x_1}} \vdots \\
+\vphantom{\frac{\partial f}{\partial x_1}} 0 \\ 
+ \end{pmatrix} 
+$$
+Cancelling the -2 from each line (since $0/-2 = 0$) n matrix form this becomes: 
+$$-2X'(y - X\hat{\beta}) = 0$$
+
+### Interpretating the Coefficients
+
+Predicted values of y:
+$$\hat{wage}=\hat{\beta}_0+\hat{\beta}_1educ+\hat{\beta}_2exper$$
+Changes in $\hat{y}$:
+$$ \Delta \hat{wage}=\hat{\beta}_0+\hat{\beta}_1 \Delta educ + \hat{\beta}_2 \Delta exper$$
+*Ceteris paribus* the predicted change in $y$ in response to an observed change in $x$ is:
+$$ \Delta \hat{wage}=0+\hat{\beta}_1 \Delta educ+\hat{\beta}_2 (0)$$
+$$ \Delta \hat{wage}=\hat{\beta}_1 \Delta educ $$
+The predicted change in wage is $\hat\beta_1$ dollars per hour *for each additional year of education*. 
+
+### Optimization by Hand Demo
+
+The following code very closely replicates the method used in the $lm$ function for minimizing the sum of squared residuals.
+
+```{r optimDemo, echo = TRUE}
+ssr <- function(b, y, x1, x2) {
+  b1 <- b[1]
+  b2 <- b[2]
+  b0 <- b[3]
+  sum((y - b0 - b1 * x1 - b2 * x2) ^ 2)
+}
+b.ols <-
+  optim(
+    par = c(mean(wage1$wage), 0, 0),
+    fn = ssr,
+    method = "BFGS",
+    y = wage1$wage,
+    x1 = wage1$educ,
+    x2 = wage1$exper
+  )
+b.ols$par
+sqrt(b.ols$value / (length(wage1$wage) - length(b.ols$par)))
+```
+
+Note: the value of the function at the minimum is the SSR, so $\hat\sigma^2 = b.ols\$value/(n-k)$
+
+## Partition Regression
+
+### Partialing Out Control Variables
+
+Regress wages on experience and then education on experience. 
+
+Summarize the auxiliary regression of education. 
+
+```{r partials, exercise = TRUE, exercise.reveal_solution = FALSE}
+
+
+```
+
+```{r partials-setup}
+wage1 <- wooldridge::wage1
+wage.lm1 <- lm(wage ~ educ, data = wage1)
+wage.lm2 <- lm(wage ~ educ + exper, data = wage1)
+```
+
+```{r partials-hint}
+# The "lm" function requires two main arguments: function (y ~ x1 + x2...) and data (a data frame) 
+```
+
+```{r partials-solution, exercise.reveal_solution = FALSE}
+wage.p <- lm(wage~exper, data = wage1)
+educ.p <- lm(educ~exper, data = wage1)
+summary(educ.p)
+```
+
+```{r partials-check}
+grade_this({
+  if (identical(.solution$call, .result$call)) 
+    {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Regressing the Residuals
+
+Print a text-formatted `stargazer()` table summarizing (1) the simple regression of the residuals of the regressions in the previous example on each other and (2) the multiple regression of wages on education and experience.
+
+```{r residReg, exercise = TRUE}
+```
+
+```{r residReg-setup}
+wage1 <- wooldridge::wage1
+wage.lm1 <- lm(wage ~ educ, data = wage1)
+wage.lm2 <- lm(wage ~ educ + exper, data = wage1)
+wage.p <- lm(wage~exper, data = wage1)
+educ.p <- lm(educ~exper, data = wage1)
+```
+
+```{r residReg-hint}
+# We do not need to store the argument. We can just nest or pipe the lm() function with summary()
+```
+
+```{r residReg-solution, exercise.reveal_solution = FALSE}
+wage.lmr <- lm(wage.p$resid~educ.p$residuals)
+stargazer(wage.lmr, wage.lm2, type = 'text')
+```
+
+```{r residReg-check}
+grade_this({
+  if (identical(.solution, .result)) 
+    {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Properties of OLS Redux
+
+- $\sum_{i=1}^{n}{\hat{u}_i = 0}$
+- $\sum_{i=1}^{n}{x_i\hat{u_i} = 0}$
+- The *Total* Sum of Squares, $SST = \sum_{i=1}^n{(y_i-\bar{y})^2}$
+- The *Explained* Sum of Squares, $SSE = \sum_{i=1}^n{(\hat{y}_i-\bar{y})^2}$
+- The *Residual* Sum of Squares, $SSR = \sum_{i=1}^n{(y_i-\hat{y})^2}$
+- SST = SSE + SSR (see section 2.3 for proof)
+- Goodness of Fit, $R^2 = SSE/SST = 1 - SSR/SST$
+
+We will discuss issues with using the (unadjusted) $R^2$ more in Chapter 6. 

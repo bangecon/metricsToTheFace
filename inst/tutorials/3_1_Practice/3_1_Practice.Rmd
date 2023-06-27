@@ -1,0 +1,191 @@
+---
+title: "Chapter 3"
+subtitle: "Multiple Regression Analysis - Estimation"
+description: "This tutorial introduces linear estimation with multiple variables."
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+library(ggcheck)
+gradethis::gradethis_setup()
+tutorial_options(exercise.reveal_solution = FALSE)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Exercise
+
+Using the `gpa1` dataset do the following:  
+1. Regress college GPA (`colGPA`) on ACT score(`ACT`); 
+2. Regress college GPA on high school GPA (`hsGPA`) and ACT score. 
+3. Summarize the results as a `stargazer` table.
+
+```{r colGPA, exercise=TRUE, exercise.reveal_solution = FALSE}
+
+```
+
+```{r colGPA-solution}
+library(stargazer)
+gpa1 <- wooldridge::gpa1
+GPA.lm1 <- lm(colGPA ~ ACT, data=gpa1)
+GPA.lm2 <- lm(colGPA ~ hsGPA + ACT, data=gpa1)
+stargazer(GPA.lm1, GPA.lm2, type = 'text')
+```
+
+```{r colGPA-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Partition Regression
+
+Partition regression is useful because it allows us to plot the "true" effect of x on y in two dimensions while controlling for a 3rd (and 4th and 5th...) variable(s). 
+
+### Estimation
+
+Use partitioned regression to partial out the effect of a company's matching rate to their employees' 401k plan on the plan's participation rates, controlling for the plan's age. Recall that to do this you need to: 
+
+1. Regress the outcome (`prate`) on the treatment (`mrate`) without controlling for `age`.
+2. Regress the outcome (`prate`) on the control (`age`) and extract the residuals;
+3. Regress the *treatment* (`mrate`) on the control (`age`) and extract the residuals; 
+4. Regress the residuals of the outcome regression on the residuals of the treatment regression; 
+5. Regress `prate` on the `mrate`, controlling for `age`. 
+6. Summarize regressions 3 and 4 using `stargazer` (`type = 'text'`). 
+
+```{r k401k, exercise=TRUE, exercise.reveal_solution = FALSE}
+
+```
+
+```{r k401k-hint}
+# There are two ways to extract the residuals from the regression: 
+  # The `residuals()` function.
+  # A stored `lm` object is a list that includes an element named `residuals`. `lm$residuals` extradts them, where `lm` is whatever name you assigned to your regression output.
+```
+
+```{r k401k-setup}
+library(stargazer)
+```
+
+```{r k401k-solution}
+k401k <- wooldridge::k401k
+prate.lm0 <- lm(prate ~ mrate, data = k401k)
+prate.u <- lm(prate ~ age, data = k401k)$residuals
+mrate.u <- residuals(lm(mrate ~ age, data = k401k))
+prate.lm1 <- lm(prate.u ~ mrate.u)
+prate.lm2 <- lm(prate ~ mrate + age, data = k401k)
+stargazer(prate.lm0, prate.lm1, prate.lm2, type = 'text')
+```
+
+```{r k401k-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise(), "Notice that the coefficient on the mrate in the residual regression is identical to the mrate residual in the regression that controls for age, but not the same as when we do not control for age.")
+  }
+  fail(random_encouragement())
+})
+```
+
+### Plotting the "true" effect of `mrate`. 
+
+1. Plot the outcome residuals on the treatment residuals.  
+2. Add the regression line using ggplot.
+
+```{r k401kPlot, exercise=TRUE, exercise.reveal_solution = FALSE}
+
+```
+
+```{r k401kPlot-hint}
+# Start by creating a data frame with the residuals from the previous exercise. 
+```
+
+```{r k401kPlot-setup}
+k401k <- wooldridge::k401k
+prate.u <- lm(prate ~ age, data = k401k)$residuals
+mrate.u <- residuals(lm(mrate ~ age, data = k401k))
+```
+
+```{r k401kPlot-solution}
+library(ggplot2)
+df <- data.frame(prate.u = residuals(lm(prate ~ age, data = k401k)), 
+                 mrate.u = residuals(lm(mrate ~ age, data = k401k)))
+ggplot(df, aes(mrate.u, prate.u)) + 
+  geom_point() +
+  geom_smooth(method = 'lm')
+```
+
+```{r k401kPlot-check}
+grade_this({
+  if (uses_geoms(.result, c("point", "smooth"), exact = FALSE) & 
+      uses_mappings(.result, aes(x = mrate.u, y = prate.u), exact = FALSE) & 
+      .result$layers[[2]]$constructor$method == 'lm') {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Diagnostics
+
+Plot the residuals versus the fitted values for regression of `prate` versus `mrate` and `age`. 
+
+```{r residPlot, exercise = TRUE}
+
+```
+
+```{r residPlot-hint}
+# To plot just *one* of the plots from `plot.lm()`, set the option `which` to the plot you want: 
+  # `which = 1` corresponds to residuals versus fitted 
+  # `which = 2` corresponds to residual Q-Q 
+  # `which = 3` corresponds to scale-location
+  # `which = 4` corresponds to Cook's distance
+  # `which = 5` corresponds to residuals versus leverage (hat diagonal)
+  # `which = 6` corresponds to Cook's distance versus leverage/(1-leverage)
+# The default set of four plots is `c(1:3, 5)`
+```
+
+```{r residPlot-setup}
+k401k <- wooldridge::k401k
+prate.u <- lm(prate ~ age, data = k401k)$residuals
+mrate.u <- residuals(lm(mrate ~ age, data = k401k))
+prate.lm1 <- lm(prate.u ~ mrate.u)
+prate.lm2 <- lm(prate ~ mrate + age, data = k401k)
+```
+
+```{r residPlot-solution}
+plot(prate.lm2)
+```
+
+```{r residPlot-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass("Holy heteroskedasticity!")
+  }
+  fail(random_encouragement())
+})
+```
+

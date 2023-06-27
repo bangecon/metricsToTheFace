@@ -1,0 +1,272 @@
+---
+title: "Chapter 4"
+subtitle: "Multiple Regression Analysis - Inference"
+description: "This tutorial introduces inference for multiple-parameter tests following multiple regression."
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+tutorial_options(exercise.eval = TRUE, exercise.reveal_solution = TRUE)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Occupation and Wages
+
+Regress wage on education, experience, experience squared, job tenure, and occupation type using `wage1`. Summarize the result. 
+$$\begin{align}wage ={} &\beta_0 + \beta_1educ + \beta_2exper + \beta_3exper^2 + \beta_4tenure + \\ & \beta_5profocc + \beta_6clerocc + \beta_7servocc + u \end{align}$$
+
+```{r tTestReview, exercise = TRUE}
+
+
+```
+
+```{r tTestReview-hint}
+# When we include certain arithmetical operations (e.g. x^2), we have to wrap it inside the "as-is" function, `I(x^2)`. 
+```
+
+```{r tTestReview-solution}
+wage1 <- wooldridge:: wage1
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)
+summary(wage.lm7)
+```
+
+```{r tTestReview-check}
+grade_this({
+  if (identical(.result$call, .solution$call)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Question
+
+```{r pValReview, echo=FALSE}
+  question("The p-Value to test whether the wages of clerical occupations differ from the baseline group (manufacturing occupations) is:",
+    answer("0.0208"),
+    answer("0.0824", correct = TRUE),
+    answer("0.9176"),
+    answer("0.3876"),
+    allow_retry = TRUE
+  )
+```
+
+## Testing Linear Combinations of Multiple Coefficients
+
+Suppose we want to test whether clerical and service occupations differ *from each other*, when neither of these started out as the baseline group. One way to write this is: 
+
+$$H_0: \beta_6 = \beta_7$$
+$$H_1: \beta_6 \ne \beta_7$$
+
+A better way to write this is: 
+
+$$H_0: \beta_6 - \beta_7 = 0$$
+$$H_1: \beta_6 - \beta_7 \ne 0$$
+
+Rearranging them this way has a purpose: it places all unknown parameters on the left and numerical constants on the right. 
+
+### Sampling distribution of $\beta_k - \beta_l$
+
+Under $H_0$, $\beta_6 - \beta_7 = 0$
+
+If the OLS assumptions hold, then under $H_0$, $\beta_6 - \beta_7 = 0$. 
+
+1. $E(\hat\beta_6 - \hat\beta_7) = 0$ 
+2. $Var(\hat\beta_6 - \hat\beta_7) = Var(\hat\beta_6) + Var(\hat\beta_7) - 2Cov(\hat\beta_6,\hat\beta_7)$<br>
+$se_{\hat\beta_6 - \hat\beta_7} = \sqrt{Var(\hat\beta_6) + Var(\hat\beta_7) - 2Cov(\hat\beta_6,\hat\beta_7)}$
+
+Since the parameter estimates are normally distributed, and the variances are $\chi^2$, the test statistic, 
+
+$$ t_{\hat\beta_6-\hat\beta_7} = \frac{(\hat\beta_6 - \hat\beta_7)-0}{s_{\hat\beta_6 - \hat\beta_7}} \sim t(n-k-1) $$
+
+### Comparing Two Occupational Groups' Wages
+
+Use the `glht` function from the `multcomp` package (preloaded with this tutorial) to test the hypothesis that clerical occupations have the same wages as service occupations against the alternative that they differ.  
+Use the `lht` function from the `car` package (also preloaded).  
+Report the result as a `list()` consisting of (1) the result of `glht()` and (2) the result of `lht()`.
+
+```{r lincom, exercise = TRUE}
+
+```
+
+```{r lincom-setup}
+wage1 <- wooldridge:: wage1
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)
+```
+
+```{r lincom-hint-1}
+# `glht()` from the `multcomp` package requires: 
+  # an `lm` or other model with estimated parameters 
+  # a linear function (`linfct`) of the variables in quotation marks
+  # e.g. `glht(lm, linfct = "x1 - x2 = 0")`
+# The output value for `glht()` does not report the full results for the test. Use `summary.glht()` to get the test statistic, p-value, df, etc. 
+```
+
+```{r lincom-hint-2}
+# `lht()` from the `car` (companion to applied regression) package requires: 
+  # a model, a hypothesis matrix, `hypothesis.matrix`, representing the left-hand side 
+  # a vector of right-hand side numerical values, `rhs` (same dimensions as hypothesis.matrix) 
+  # e.g. `lht(lm, hypothesis.matrix = "x1 - x2", rhs = 0)` 
+```
+
+```{r lincom-solution}
+library(multcomp)
+cler_serv.glht <- glht(wage.lm7, linfct = "clerocc - servocc = 0")
+library(car)
+cler_serv.lht <- lht(wage.lm7, hypothesis.matrix = "clerocc - servocc", rhs = 0)
+list(cler_serv.glht, cler_serv.lht)
+```
+
+```{r lincom-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+Note: Use the `summary.glht()` to give the full table of test statistics for the `glht()` function.
+
+Warning: "The difference between 'significant' and 'insignificant' is not itself statistically significant" - Andrew Gelman
+
+## Testing Joint Significance of Multiple Coefficients
+
+We want to test the hypothesis that all of the occupational groups have the same wage against the alternative that *at least* one group has different wages. 
+
+This involves (a vector of) multiple restrictions and we cannot test this hypothesis using a simple t-Test. We must use an F-test (like you might have if you have studied ANoVA). 
+
+$$ H_0: \begin{pmatrix} \beta_{profocc} \\ \beta_{servocc} \\ \beta_{clerocc} \end{pmatrix} = \begin{pmatrix} 0\\ 0 \\ 0 \end{pmatrix} $$
+$$ H_1: \begin{pmatrix} \beta_{profocc} \\ \beta_{servocc} \\ \beta_{clerocc} \end{pmatrix} \ne \begin{pmatrix} 0\\ 0 \\ 0 \end{pmatrix} $$
+
+### Calculating the F-Statitic
+
+There are a couple of different (but equivalent) ways to calculate the F-Statistic for the joint significance of a group of variables. They involve the same basic steps. 
+
+1. Estimate the unrestricted model (the full model) and store the $R^2$ *or* the residual sum of squares (SSR). 
+2. Estimate the restricted model (which *excludes* the variables you wish to test) and store the $R^2$ or SSR. 
+3. Calculate the F statistic: 
+  a. Formula using SSR: $F = \frac{(SSR_r - SSR_u)/q}{SSR_u/(n-k-1)}$
+  b. Formula using $R^2$: $F = \frac{(R_u^2 - R_r^2)/q}{(1-R_u^2/(n-k-1)} $
+  c. These formulas are equivalent since $R^2 = 1 - \frac{SSR}{SST}$
+
+### Differences in Wages among All Occupational Groups
+
+Test the joint significance of occupational choice on wages "by hand" using the $R^2$ formula:  
+
+1. Estimate the unrestricted model and the restricted model (without occupations). 
+2. Extract the R-squareds.
+3. Compute the F statistic using the equation from 3(b) above. 
+4. Calculate and print the p-value.
+
+Report (3) and (4) as a `c()` vector.
+
+```{r fTest, exercise = TRUE}
+
+
+```
+
+```{r fTest-setup}
+wage1 <- wooldridge:: wage1
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)
+```
+
+```{r fTest-hint-1}
+# Estimate both models: R^2 is stored by `summary.lm()` (but not by `lm()` itself); SSR is not.
+# The tutorial setup stored the unrestricted model as `wage.lm7`. 
+```
+
+```{r fTest-hint-2}
+# Use the R^2 formula to calculate the F statistic.
+# p value = 1-cdf of the appropriate F distribution:
+```
+
+```{r fTest-solution}
+wage.lm8 <- lm(wage ~ educ + exper + I(exper^2) + tenure, data = wage1)
+r2.u <- summary(wage.lm7)$r.squared
+r2.r <- summary(wage.lm8)$r.squared
+c(wage.F.occ <- ((r2.u-r2.r)/(wage.lm8$df.residual - wage.lm7$df.residual)) / ((1-r2.u)/wage.lm7$df.residual),
+  1 - pf(wage.F.occ, wage.lm8$df.residual - wage.lm7$df.residual, wage.lm7$df.residual))
+```
+
+```{r fTest-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Using `lht()` for Joint Significance Tests
+
+Repeat the previous F-test using `lht()`.
+
+```{r lhtJoint, exercise = TRUE}
+
+
+```
+
+```{r lhtJoint-setup}
+wage1 <- wooldridge:: wage1
+wage.lm7 <- lm(wage ~ educ + exper + I(exper^2) + tenure + profocc + clerocc + servocc, data = wage1)
+```
+
+```{r lhtJoint-hint}
+# `lht()` from the `car` (companion to applied regression) package requires: 
+  # a model, a hypothesis matrix, `hypothesis.matrix`, representing the left-hand side 
+  # a vector of right-hand side numerical values, `rhs` (same dimensions as hypothesis.matrix) 
+  # e.g. `lht(lm, hypothesis.matrix = "x1 - x2", rhs = 0)` 
+```
+
+```{r lhtJoint-solution}
+lht(wage.lm7, hypothesis.matrix = c('profocc', 'clerocc', 'servocc'), rhs = c(0, 0, 0))
+```
+
+```{r lhtJoint-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Warning about Independent t-Tests and a Note on the *Regression F-Statistic*
+
+```{r independentTTest, echo=FALSE}
+  question("Suppose we test these three parameters independently and reject just one of them at $\\alpha \\le 0.05$ (we do not know the actual p-value or exact t-statistic, only the result of the test for some reason). What is the probability of a type I error if we use this method to test joint significance?",
+    answer("0.000125"),
+    answer("0.05", message = "Careful! We cannot substitute individual t-tests for joint tests and get equivalent levels of significance! The true probability of type I error in this case is $1 - P(\text{none of the hypotheses rejected}) = 1 - 0.95^3$!"),
+    answer("0.10"),
+    answer("0.142625", correct = TRUE),
+    allow_retry = TRUE
+  )
+```
+
+The *regression F-Statistic* (the F-Statistic reported when you `summary()` a model) is simply a joint significance test where the number of restrictions is all of the independent variables. The restricted model is the unconditional mean (regression on a constant). Its formula is: 
+
+$$ F = \frac{SSR/k}{SST/(n-k-1)} $$

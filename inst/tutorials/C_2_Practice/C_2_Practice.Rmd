@@ -1,0 +1,128 @@
+---
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+title: "Appendix C"
+subtitle: |
+  | Fundamentals of Mathematical Statistics
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+always_allow_html: yes
+description: >
+  This tutorial practices general concepts of estimation and testing.
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+gradethis_setup()
+tutorial_options(exercise.reveal_solution = FALSE)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Gender Wage Gap
+
+Use the `wage1` dataset from `woodridge::` to test whether women ($female = 1$) earn less than men. Use $\alpha = 0.05$. Assume that men's and women's wages exhibit equal variances. 
+
+```{r wageGap, exercise=TRUE}
+
+```
+
+```{r wageGap-solution}
+wage1 <- wooldridge::wage1
+t.test(wage ~ female, 
+       data = wage1, 
+       conf.level = 0.95,
+       alternative = 'greater',
+       paired = FALSE, 
+       var.equal = TRUE)
+```
+
+```{r wageGap-hint-1}
+# You can *either*: 
+  # specify the first group of wages (men) and second (women) using `subset()` OR 
+  # use the method for class formula by specifying the outcome (wage) "~" group (female)
+# Either way, make sure you properly specify the data frame using `$` or `data` option.
+```
+
+```{r wageGap-hint-2}
+# Use the `conf.level`, `alternative`, and `var.equal` options to specify the type of test.
+```
+
+```{r wageGap-hint-3}
+# Don't forget that this is a one-tailed test!
+```
+
+```{r wageGap-check}
+grade_this(if (!inherits(.result, "numeric")) {
+    fail("Your class of your answer should be 'numeric'.")}
+  if(round(.result$statistic, 4) != 8.2787) {
+    fail("Your t-stat should be about 8.28.") } 
+  if(.result$conf.int[2] != Inf) {
+    fail("The upper tail for a one-tailed '>' alternative is undefined.") } 
+  pass()
+)
+```
+
+## Exercise 2
+
+Construct a 99% confidence interval for the difference between men's and women's wages. 
+
+```{r wageGapCI, exercise=TRUE, exercise.reveal_solution = FALSE}
+
+```
+
+```{r wageGapCI-setup}
+wage1 <- wooldridge::wage1
+```
+
+```{r wageGapCI-solution}
+t.test(wage ~ female, 
+       data = wage1,
+       conf.level = 0.99,
+       paired = FALSE, 
+       var.equal = TRUE)
+```
+
+```{r wageGapCI-hint-1}
+# You can *either*: 
+  # specify the first group of wages (men) and second (women) using `subset()` OR 
+  # use the method for class formula by specifying the outcome (wage) "~" group (female)
+# Either way, make sure you properly specify the data frame using `$` or `data` option.
+```
+
+```{r wageGapCI-hint-2}
+# Use the `conf.level`, `alternative`, and `var.equal` options to specify the type of test.
+```
+
+```{r wageGapCI-hint-3}
+# Don't forget that this is a one-tailed test!
+```
+
+```{r wageGapCI-check}
+grade_this(if (!inherits(.result, "numeric")) {
+    fail("Your class of your answer should be 'numeric'.")}
+  if(round(.result$statistic, 4) != 8.2787) {
+    fail("Your t-stat should (still) be about 8.28.") } 
+  if(round(.result$conf.int[1], 4) != 1.7274) {
+    fail("The lower tail for the confidence interval equals about 1.73.") } 
+  if(round(.result$conf.int[2], 4) != 3.2962) {
+    fail("The lower tail for the confidence interval equals about 3.30.") } 
+  pass()
+)
+```

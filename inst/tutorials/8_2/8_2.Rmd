@@ -1,0 +1,417 @@
+---
+title: "Chapter 8" 
+subtitle: "Correcting for Heteroskedasticity"
+description: "This tutorial explains describes the HC1, HC3, and WLS approaches to correcting heteroskedasticity."
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+tutorial_options(exercise.eval = TRUE, exercise.reveal_solution = TRUE)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Marriage Wage Penalty for Women
+
+Estimate the log wage equation from example 8.1 in the book. Print a `summary()` of the result.
+
+$$\begin{align} 
+log(wage) = \beta_0 + &\beta_1 MarriedMale + \beta_2 MarriedFemale + \beta_3 SingleFemale + \\
+  &\beta_4 Education + \beta_5 Experience + \beta_6 Experience^2 + \\
+  &\beta_7 Tenure + \beta_8 Tenure^2 + u
+\end{align}$$
+
+Note that in order to identify all of the coefficients in this specification, you need to omit a constant, which R will (probably) do automatically. 
+
+```{r robustHC, exercise = TRUE}
+
+```
+
+```{r robustHC-solution}
+wage1 <- wooldridge::wage1
+wage.lm14 <-
+  lm(
+    log(wage) ~ I(married * (1 - female)) + I(married * female) + 
+      I((1 - married) * female) + educ + exper + I(exper ^ 2) + tenure + 
+      I(tenure ^ 2), data = wage1
+  )
+summary(wage.lm14)
+```
+
+```{r robustHC-check}
+grade_this({
+  if (identical(.result$call, .solution$call)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Robust Standard Errors, Revisited
+
+Recall that the variance of $\hat{\beta}} is: 
+$$\begin{align} 
+Var(\hat\beta) &= (X'X)^{-1}\sigma_\hat{u}^2 \\
+&= (X'X)^{-1}X'X(X'X)^{-1}\sigma_\hat{u}^2 \\
+&=(X'X)^{-1}X'(\sigma_\hat{u}^2I)X(X'X)^{-1} \end{align}$$
+
+Why would we rewrite it this long, complicated way?  
+Some people make an analogy for this form to a "sandwich" with an outer "bread" consisting of  $(X'X)^{-1}$, and "meat" consisting of $X'\hat\sigma_\hat{u}^2IX$.
+
+We can rewrite the "meat" as $X'\Omega X$, so:
+$$Var(\hat\beta) = (X'X)^{-1}\Omega(X'X)^{-1}$$ 
+OLS assumes that the meat is constant for all observations, since it sets the meat equal to $\hat\sigma_{\hat{u}^2}$ along the diagonal (observation-specific residual variances) and zero for all of the off-diagonal values (residual covariances between observations).  
+Fixes for heteroskedasticity focus on the structure of the "meat," and espeicially $\Omega$.
+
+There are many types of robust, or *heteroskedasticity-consistent* - standard errors. We will consider two of them: HC1, the Stata default, and HC3, the default in `coeftest()` for `R`. 
+
+### HC1-type, Heteroskdasticity-Consistent (Robust) Standard Errors
+
+HC1 standard errors are the default in the program used by Woodridge in the book. For HC1 robust standard errors, 
+$$\Omega = \frac{n}{n-k} u^2 I$$
+where $n$ is the number of observations, $k$ is the number of parameters in the model (including the constant), $u^2$ is the vector of squared residuals, $(u_1^2, u_2^2, ... u_n^2)$, and $I$ is an $n \times n$ identity matrix of ones on the diagonal and zeros elsewhere. 
+
+Recall that in the OLS estimate of the variance, $\Omega = \hat\sigma^2 I = [\sum{u_i^2}/(n-k)] I$, so HC1 simply gives each observation's squared residual full weight for its value down the diagonal of $\Omega$ (instead of averaging it with the other squared residuals.  
+
+Calculate the HC1 variance-covariance matrix for $\hat\beta$ for the marriage penalty model "by hand" (by extracting the residual vector, calculating $\Omega$, and then the full variance-covariance matrix). Print the square-root of the diagonal of the variance-covariance matrix for $\hat\beta$. Compare with the standard errors from printing the result of `coeftest(lm, vcov = vcovHC(lm, type = 'HC1'))`.
+
+```{r robustHC1, exercise = TRUE}
+
+```
+
+```{r robustHC1-hint-1}
+# In order to estimate the HC# standard errors, you need to load both the `lmtest` and `sandwich` packages. 
+# `coeftest()` requires a `lm` model. To obtain HC standard errors, set the `vcov` options to `vcovHC(model, HCtype)` where `model` the `lm` model and `HCtype` is the type of HC standard errors (HC3 by default; HC1 is the default in Stata for the book example). 
+```
+
+```{r robustHC1-hint-2}
+# `lm()` stores the model data as `model`; `model.frame(model)` also generates the data matrix. 
+# `model.frame()` includes the outcome, y, in the first column. Exclude this column to manipulate X. 
+# You will need to `cbind(1, lm$model[,-1])` to add a column of ones for the constant.
+# You will need to convert X into a matrix (instead of a `data.frame`). Use `as.matrix(df)`
+```
+
+```{r robustHC1-hint-3}
+# The number of observations is the number of rows in the `model` object stored by `lm()`. 
+# `lm()` stores the residual degrees of freedom (n-k) as `df.residual`. 
+# `lm()` stores the residuals as `residuals`; `residuals(model)` also calculates them.
+```
+
+```{r robustHC1-hint-4}
+# Omega = (n/(n-k))u^2 I
+# Meat = X' Omega X
+# Bread = (X'X)-1
+# Variance =  Bread Meat Bread 
+```
+
+```{r robustHC1-setup}
+wage1 <- wooldridge::wage1
+wage.lm14 <-
+  lm(
+    log(wage) ~ I(married * (1 - female)) + I(married * female) + 
+      I((1 - married) * female) + educ + exper + I(exper ^ 2) + tenure + 
+      I(tenure ^ 2), data = wage1
+  )
+```
+
+```{r robustHC1-solution}
+library(lmtest)
+library(sandwich)
+X <- cbind(1, as.matrix(wage.lm14$model[,-1]))
+bread <- solve(t(X)%*%X)
+n <- nrow(X)
+df.u <- wage.lm14$df.residual
+Omega.hc1 <- (n/df.u) * wage.lm14$residuals^2 * diag(n)
+meat.hc1 <- t(X) %*% Omega.hc1 %*% X
+varb.hc1 <- bread %*% meat.hc1 %*% bread
+sqrt(diag(varb.hc1))
+coeftest(wage.lm14, vcov = vcovHC(wage.lm14, type = 'HC1'))
+```
+
+```{r robustHC1-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### HC3-type, Heteroskdasticity-Consistent (Robust) Standard Errors
+
+HC3 standard errors start from a similar point by only looking at each specific observation's squared residual in how it calculates $\Omega$. However, instead of weighting the squared residuals by $n/(n-k)$, HC3 weights the squared residuals by the $i^th$ element of the diagonal of the "hat" matrix. 
+
+When we derived the variance (and also when we defined the "leverage" in the output of `plot.lm()`), we defined the hat matrix, $H$, as the matrix that "puts the hat on $y$. In other words, since $\hat{y} = X\hat{\beta}$ and $\hat{\beta} = (X'X)^{-1}X'y$, $\hat{y} = X(X'X){-1}X'y = Hy$ where $H_{n\times n} = X(X'X)^{-1}X'$. 
+$$\Omega = \frac{u^2}{1-h^2}I$$
+
+Calculate the HC3 variance-covariance matrix for $\hat\beta$ for the marriage penalty model "by hand" (by extracting the residual vector, calculating the "hat matrix" and $\Omega$, and then the full variance-covariance matrix). Print the square-root of the diagonal of the variance-covariance matrix for $\hat\beta$. Compare with the standard errors from printing the result of `coeftest(lm, vcov = vcovHC(lm, type = 'HC3'))`.
+
+```{r robustHC3, exercise = TRUE}
+
+```
+
+```{r robustHC3-hint-1}
+# The setup chunk defines X, n, n-k (as `df.u), and `bread` to hopefully save you some time. 
+# `lm()` stores the residuals as `residuals`; `residuals(model)` also calculates them.
+```
+
+```{r robustHC3-hint-2}
+# Omega = u^2 / h
+# Meat = X' Omega X
+# Bread = (X'X)-1
+# Variance =  Bread Meat Bread 
+```
+
+```{r robustHC3-setup}
+wage1 <- wooldridge::wage1
+wage.lm14 <-
+  lm(
+    log(wage) ~ I(married * (1 - female)) + I(married * female) + 
+      I((1 - married) * female) + educ + exper + I(exper ^ 2) + tenure + 
+      I(tenure ^ 2), data = wage1
+  )
+library(lmtest)
+library(sandwich)
+X <- cbind(1, as.matrix(wage.lm14$model[,-1]))
+bread <- solve(t(X)%*%X)
+n <- nrow(X)
+df.u <- wage.lm14$df.residual
+Omega.hc1 <- (n/df.u) * wage.lm14$residuals^2 * diag(n)
+meat.hc1 <- t(X) %*% Omega.hc1 %*% X
+varb.hc1 <- bread %*% meat.hc1 %*% bread
+```
+
+```{r robustHC3-solution}
+H <- X%*%solve(t(X)%*%X)%*%t(X)
+Omega.hc3 <- wage.lm14$residuals^2 / (1 - diag(H))^2 * diag(n)
+meat.hc3 <- t(X) %*% Omega.hc3 %*% X
+varb.hc3 <- bread %*% meat.hc3 %*% bread
+sqrt(diag(varb.hc3))
+coeftest(wage.lm14, vcov = vcovHC(wage.lm14, type = 'HC3'))
+```
+
+```{r robustHC3-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Weighted Least Squares
+
+The idea of weighted least squares (WLS) is simple: if some observations have higher variance, give them less weight. If the pattern of the residuals shows that they increase for higher levels of job tenure, for example, then we could weight the observations by $1/Tenure$. This is very easy - and works very well! - *if* we know the pattern of the residuals. 
+
+### WLS with "Known" Structure
+
+With some variables simply applying a weight of $1/x$ might lead to negative (if $x$ takes negative values) or undefined weights (if $x$ equals zero like `tenure` sometimes does). One way to fix this is to use a monotonic transformation that maps any real value of $x$ to a positive, finite weight. 
+
+Re-estimate the wage model using weighted least squares assuming that $Var(u|Income) = \sigma^2 e^{tenure}$ by assigning weights equal to $1/e^{Tenure}$. Print a `summary()` of the result.
+
+```{r wls, exercise = TRUE}
+
+```
+
+```{r wls-setup}
+wage1 <- wooldridge::wage1
+wage.lm14 <-
+  lm(
+    log(wage) ~ I(married * (1 - female)) + I(married * female) + 
+      I((1 - married) * female) + educ + exper + I(exper ^ 2) + tenure + 
+      I(tenure ^ 2), data = wage1
+  )
+```
+
+```{r wls-hint}
+# Remember to use the as-is function, `I()`, for squaring `age` - 25. 
+# Select single households by setting the option `subset = (variable.name == value)` option. 
+# Use the `weight` option in `lm()` to estimate weighted least squares. 
+```
+
+```{r wls-solution}
+wage.lm14w <-
+  lm(
+    log(wage) ~ I(married * (1 - female)) + I(married * female) + 
+      I((1 - married) * female) + educ + exper + I(exper ^ 2) + tenure + 
+      I(tenure ^ 2), data = wage1, weights = 1/exp(tenure)
+  )
+summary(wage.lm14w)
+```
+
+```{r wls-check}
+grade_this({
+  if (identical(.result$call, .solution$call)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### WLS with Unknown Structure
+
+If we don't know for sure what the variance-covariance structure of the residuals is, we might be able to estimate it. However, even if we estimate it, we need to make sure that the "meat" matrix is "positive definite" so that the weights are all positive and finite. 
+
+One way to do this is to assume an exponential structure: $\Omega = \sigma^2e^{\delta_0 + \delta_1 x_1 + ... \delta_k x_k}$. This assumption allows us to write: 
+$$u^2 = \sigma^2 e^{(\delta_0 + \delta_1 x_1 + ... \delta_k x_k)\nu},$$
+where $\nu$ is a random error. Taking logs of both sides we have: 
+$$log(u^2) = log(\sigma^2) + \delta_0 + \delta_1 x_1 + ... \delta_k x_k + log(\nu),$$
+
+which wee can estimate using OLS under the assumption that $log(\nu) = \varepsilon$ is not correlated with the $x$'s. This equations give us the weights we need to estimate the main equation using WLS. 
+
+Estimating the full system of equations for both the outcome and the errors involves a method known as *Generalized Least Squares* (GLS). However, since we don't observe the "true" errors, we have to use an iterative process known as *Feasible Generalized Least Squares* (FGLS), which involves:  
+1. Regress $y$ on $x_1, ... x_k$ using OLS.
+2. Calculate $log(u^2)$ from the residuals of step 1. 
+3. Regress $log(u^2)$ on $x_1, ... x_k$. 
+4. Calculate the exponentiation of the fitted values, $\hat g$ of step 4, $\hat h = e^{\hat g}$.
+5. Regress $y$ on $x_1, ... x_k$ using WLS with $1/\hat h$ as weights.
+Estimate the FGLS estimator for the wage equation we estimated in the previous examples. 
+
+```{r fgls, exercise = TRUE}
+
+```
+
+```{r fgls-setup}
+wage1 <- wooldridge::wage1
+wage.lm14 <-
+  lm(
+    log(wage) ~ I(married * (1 - female)) + I(married * female) + 
+      I((1 - married) * female) + educ + exper + I(exper ^ 2) + tenure + 
+      I(tenure ^ 2), data = wage1
+  )
+```
+
+```{r fgls-hint}
+
+```
+
+```{r fgls-solution}
+wage.lm14 <-
+  lm(
+    log(wage) ~ I(married * (1 - female)) + I(married * female) + 
+      I((1 - married) * female) + educ + exper + I(exper ^ 2) + tenure + 
+      I(tenure ^ 2), data = wage1
+  )
+varreg <-
+  lm(
+    log(wage.lm14$residuals^2) ~ I(married * (1 - female)) + I(married * female) + 
+      I((1 - married) * female) + educ + exper + I(exper ^ 2) + tenure + 
+      I(tenure ^ 2), data = wage1
+  )
+wage.fgls <- 
+  lm(
+    log(wage) ~ I(married * (1 - female)) + I(married * female) + 
+      I((1 - married) * female) + educ + exper + I(exper ^ 2) + tenure + 
+      I(tenure ^ 2), data = wage1, weights = 1/exp(fitted(varreg))
+  )
+summary(wage.fgls)
+```
+
+```{r fgls-check}
+grade_this({
+  if (identical(.result$call, .solution$call)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+If the estimates differ greatly, it might be a good idea to repeat steps 2-5 until the coefficients converge. 
+
+## Comparing Estimates with Different Standard Errors (but Maybe Same Coefficients)
+
+We can recycle the same estimates with different variations of the standard errors (or coefficients, such as standardized coefficients or average elasticities) using the `se` option in `stargazer()`. 
+
+```{r table, exercise = TRUE}
+
+```
+
+```{r table-setup}
+wage1 <- wooldridge::wage1
+wage.lm14 <-
+  lm(
+    log(wage) ~ I(married * (1 - female)) + I(married * female) + 
+      I((1 - married) * female) + educ + exper + I(exper ^ 2) + tenure + 
+      I(tenure ^ 2), data = wage1
+  )
+wage.lm14w <-
+  lm(
+    log(wage) ~ I(married * (1 - female)) + I(married * female) + 
+      I((1 - married) * female) + educ + exper + I(exper ^ 2) + tenure + 
+      I(tenure ^ 2), data = wage1
+  )
+varreg <-
+  lm(
+    log(wage.lm14$residuals^2) ~ I(married * (1 - female)) + I(married * female) + 
+      I((1 - married) * female) + educ + exper + I(exper ^ 2) + tenure + 
+      I(tenure ^ 2), data = wage1
+  )
+wage.fgls <- 
+  lm(
+    log(wage) ~ I(married * (1 - female)) + I(married * female) + 
+      I((1 - married) * female) + educ + exper + I(exper ^ 2) + tenure + 
+      I(tenure ^ 2), data = wage1, weights = 1/exp(fitted(varreg))
+  )
+```
+
+```{r table-hint-1}
+# The setup chunk stores the OLS coefficient as `wage.lm14`; the WLS estimates as `wage.lm14w`, and the FGLS estimates as `wage.fgls`. 
+```
+
+```{r table-hint-2}
+# The `se` option in `stargazer()` takes a `list()` of vectors equal to the number of models (columns). 
+# Each vector in the list must have the same length as the number of coefficients in that model. 
+# In this case, each item in `se` should be `sqrt(diag(vcovHC(model, type)))`. 
+# The `names()` for each vector must match the `names()` in the coefficient vector. 
+# The models do *not* have to have the same numbers of coefficients. 
+```
+
+```{r table-hint-3}
+# The columns of your table should have descriptive names using `column.labels`. 
+# The solution requires column labels "OLS", "HC1", "HC3", "WLS" and "FGLS". 
+```
+
+```{r table-solution}
+library(stargazer)
+stargazer(
+    wage.lm14, wage.lm14, wage.lm14, wage.lm14w, wage.fgls, type = 'text',
+    se = list(sqrt(diag(vcovHC(wage.lm14, "const"))), 
+              sqrt(diag(vcovHC(wage.lm14, "HC1"))), 
+              sqrt(diag(vcovHC(wage.lm14, "HC3"))), 
+              sqrt(diag(vcovHC(wage.lm14w, "const"))), 
+              sqrt(diag(vcovHC(wage.fgls, "const")))
+              ), 
+    column.labels = c("OLS", "HC1", "HC3", "WLS", "FGLS")
+    )
+```
+
+```{r table-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```

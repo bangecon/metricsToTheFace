@@ -1,0 +1,385 @@
+---
+title: "Chapter 19"
+subtitle: |
+  | Conducting & Presenting Research: Graphics
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+description: >
+  This tutorial practices tools for creating attractive graphs.
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+library(ggcheck)
+tutorial_options(exercise.reveal_solution = FALSE)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE, fig.align = 'center', fig.height = 6)
+```
+
+## Crime
+
+### Histogram
+
+Make a histogram of *relative* frequencies for crime rates (`crmrte`) using the `crime4` dataset. 
+
+```{r crimeHist, exercise = TRUE}
+
+```
+
+```{r crimeHist-hint}
+# Remember that in order to get relative frequencies you need to specify the "y" aesthetic as: 
+  # `y = after_stat(count)/sum(count)`
+```
+
+```{r crimeHist-solution}
+library(ggplot2)
+crime4 <- wooldridge::crime4
+ggplot(data = crime4) + 
+  geom_histogram(mapping = aes(x = crmrte, y = after_stat(count)/sum(count))) + 
+  labs(title = "Figure 1", subtitle = "Crime Rates") + 
+  xlab("Crime Rate") +
+  ylab("Relative Frequency")
+```
+
+```{r crimeHist-check}
+grade_this({
+  if (uses_geoms(.result, "histogram") & 
+      uses_mappings(.result, aes(x = crmrte, y = after_stat(count)/sum(count)))) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Crime by Rural/Urban
+
+Convert the `urban` variable to a factor with labels "Rural" for $urban = 0$ and "Urban" for $urban = 1$.
+
+Add a color aesthetic using `fill` or `color` to your previous plot to distinguish the bars according to region. 
+
+```{r crimeRegion, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r crimeRegion-setup}
+library(ggplot2)
+crime4 <- wooldridge::crime4
+```
+
+```{r crimeRegion-hint}
+
+```
+
+```{r crimeRegion-solution}
+crime4$urban <- factor(crime4$urban, labels = c("Rural", "Urban"))
+ggplot(data = crime4) + 
+  geom_histogram(aes(x = crmrte, y = after_stat(count)/sum(count), fill = factor(urban))) +
+  xlab("Crime Rate") +
+  ylab("Relative Frequency")
+```
+
+```{r crimeRegion-check}
+grade_this({
+  if (uses_geoms(.result, "histogram") & 
+      uses_mappings(.result, aes(x = crmrte, y = after_stat(count)/sum(count), fill = factor(urban))) ) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Other Group Options for Histograms
+
+The previous example stacked the relative frequencies. You might instead want to see each subgroup's within-group distribution separately. You can do this two ways:  
+1. `position = dodge` for non-overlapping bars for each subgroup. 
+2. `position = "identity"` (with `alpha = p` to set transparency) for overlapping shading.
+
+Plot both of these options (dodge and identity) as layers on the same `ggplot()`. 
+
+```{r crimeRegion2, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r crimeRegion2-setup}
+library(ggplot2)
+crime4 <- wooldridge::crime4
+crime4$urban <- factor(crime4$urban, labels = c("Rural", "Urban"))
+```
+
+```{r crimeRegion2-hint}
+
+```
+
+```{r crimeRegion2-solution}
+ggplot(data = crime4) + 
+  geom_histogram(
+    aes(x = crmrte, y = after_stat(count)/sum(count), fill = factor(urban)), 
+    position = "dodge") + 
+  geom_histogram(
+    aes(x = crmrte, y = after_stat(count)/sum(count), fill = factor(urban)), 
+    alpha = 0.3, position = "identity") + 
+  xlab("Crime Rate") +
+  ylab("Relative Frequency")
+```
+
+```{r crimeRegion2-check}
+grade_this({
+  if (uses_geoms(.result, "histogram", exact = FALSE) & 
+      uses_mappings(.result, aes(x = crmrte, y = after_stat(count)/sum(count), fill = factor(urban))) & 
+      .result$layers[[1]]$constructor$position == 'dodge' & 
+      .result$layers[[2]]$constructor$position == 'identity') {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Function Plots
+
+In Intermediate Microeconomics we plotted functions (e.g. indifference curves, budget lines) using base graphics. We can make the same graphs in `ggplot2` using `geom_function()` or `stat_function()` layers. 
+
+Add a `stat_function()` curve representing the density of a normal distribution with mean equal to the mean of `crmrte` and variance equal to the variance of `crmrte`. Do not separate the distributions by rural/urban status. 
+
+```{r crimeNorm, exercise = TRUE}
+
+```
+
+```{r crimeNorm-setup}
+library(ggplot2)
+crime4 <- wooldridge::crime4
+```
+
+```{r crimeNorm-hint}
+# Set the `fun` option in stat_function to 
+```
+
+```{r crimeNorm-solution}
+ggplot(data = crime4) + 
+  geom_histogram(
+    mapping = aes(x = crmrte, y = after_stat(density)), 
+    alpha = 0.3) + 
+  stat_function(
+    fun = dnorm, 
+    args = list(mean = mean(crime4$crmrte), sd = sd(crime4$crmrte))) + 
+  labs(title = "Figure 1", subtitle = "Crime Rates", 
+       x = "Crime Rate", y = "Relative Frequency")
+```
+
+```{r crimeNorm-check}
+grade_this({
+  if (uses_geoms(.result, "histogram", exact = FALSE) & 
+      uses_mappings(get_geom_layer(.result, i = 1), aes(x = `crmrte`, y = after_stat(density)), exact = FALSE)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Crime and Punishment
+
+### Simple Scatterplot
+
+1. Define `Region` as
+Create a simple scatterplot of crime rate versus average sentence length using `ggplot`. Title your plot "Figure 1" with the subtitle "Average Sentence versus Crime Rate" and label your axes "Average Sentence" (x-axis) and "Crime Rate" (y-axis). 
+
+Assign your plot to an object and display it by calling its name at the end of your code chunk.
+
+```{r crimePunish, exercise = TRUE}
+# Define `region` in a similar way as we defined `Industry` in the pre-class tutorial.
+
+```
+
+```{r crimePunish-setup}
+library(ggplot2)
+crime4 <- wooldridge::crime4
+```
+
+```{r crimePunish-solution}
+crime4$Region <- with(crime4, factor(
+  central + 2*west, labels = c("East Region", "Central Region", "West Region")))
+fig2 <- ggplot(data = crime4, mapping = aes(avgsen, crmrte)) + 
+  geom_point() + 
+    labs(title = "Figure 2", subtitle = "Average Sentence versus Crime Rate") + 
+    xlab("Average Sentence") + 
+    ylab("Crime Rate")
+fig2
+```
+
+```{r crimePunish-check}
+grade_this({
+  if (uses_geoms(.result, "point", exact = FALSE) & 
+      uses_mappings(.result, aes(x = avgsen, y = crmrte), exact = FALSE)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Scaling Axes
+
+Add `scale_x_continuous()` and `scale_y_continuous()` layer to your plot with the `trans` option set to `log10` to apply a base-10 log transformation to the x- and y-axis scales.  
+Note: Scaling an axis to a base-10 log transform makes equidistant axis labels represent increasing the variable value by a factor of 10; a base-2 log transofrm makes equidistant labels represent doubling the variable. 
+
+```{r crimePunLog, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r crimePunLog-setup}
+library(ggplot2)
+crime4 <- wooldridge::crime4
+crime4$Region <- with(crime4, factor(
+  central + 2*west, labels = c("East Region", "Central Region", "West Region")))
+fig2 <- ggplot(data = crime4, mapping = aes(avgsen, crmrte)) + 
+  geom_point() + 
+    labs(title = "Figure 2", subtitle = "Average Sentence versus Crime Rate") + 
+    xlab("Average Sentence") + 
+    ylab("Crime Rate")
+```
+
+```{r crimePunLog-hint}
+
+```
+
+```{r crimePunLog-solution}
+fig2 <- fig2 + 
+  scale_x_continuous(trans = "log10") + 
+  scale_y_continuous(trans = "log10") 
+fig2
+```
+
+```{r crimePunLog-check}
+grade_this({
+  if (uses_geoms(.result, "point", exact = FALSE) & 
+      uses_mappings(.result, aes(x = avgsen, y = crmrte), exact = FALSE) & 
+      .result$scales$scales[[2]]$trans[1]$name == "log-10" & 
+      .result$scales$scales[[1]]$trans[1]$name == "log-10") {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Grouping by Region
+
+Add a color aesthetic to your previous plot to distinguish the data points according to region.
+
+```{r crimePunRegion, exercise=TRUE, exercise.eval=TRUE}
+
+```
+
+```{r crimePunRegion-setup}
+library(ggplot2)
+crime4 <- wooldridge::crime4
+crime4$Region <- with(crime4, factor(
+  central + 2*west, labels = c("East Region", "Central Region", "West Region")))
+fig2 <- ggplot(data = crime4, mapping = aes(avgsen, crmrte)) + 
+  geom_point() + 
+    labs(title = "Figure 2", subtitle = "Average Sentence versus Crime Rate") + 
+    xlab("Average Sentence") + 
+    ylab("Crime Rate") + 
+  scale_x_continuous(trans = "log10") + 
+  scale_y_continuous(trans = "log10") 
+```
+
+```{r crimePunRegion-hint}
+
+```
+
+```{r crimePunRegion-solution}
+fig2 <- fig2 + 
+  geom_point(data = crime4, aes(color = Region))
+fig2
+```
+
+```{r crimePunRegion-check}
+grade_this({
+  if (uses_geoms(.result, "point", exact = FALSE) & 
+      uses_mappings(.result, aes(x = avgsen, y = crmrte), exact = FALSE) & 
+      .result$scales$scales[[2]]$trans[1]$name == "log-10" & 
+      .result$scales$scales[[1]]$trans[1]$name == "log-10"&
+      uses_extra_mappings(.result, aes(color = Region))) {
+    pass(random_praise(), " Now let's see something about the trends within each group!")
+  }
+  fail(random_encouragement())
+})
+```
+
+### Crime and Punishment Trends by Region
+
+Implement the suggestion in the previous exercise's feedback by adding a `geom_smooth()` layer to the plot. 
+
+```{r crimePunTrends, exercise = TRUE}
+
+```
+
+```{r crimePunTrends-setup}
+library(ggplot2)
+crime4 <- wooldridge::crime4
+crime4$Region <- with(crime4, factor(
+  central + 2*west, labels = c("East Region", "Central Region", "West Region")))
+```
+
+```{r crimePunTrends-hint}
+
+```
+
+```{r crimePunTrends-solution}
+ggplot(data = crime4, mapping = aes(avgsen, crmrte, color = Region)) + 
+    geom_point() + 
+    geom_smooth(method = "lm") +
+    scale_x_continuous(trans = "log10") + 
+    scale_y_continuous(trans = "log10") + 
+    labs(title = "Figure 2", subtitle = "Average Sentence versus Crime Rate") + 
+    xlab("Average Sentence") + 
+    ylab("Crime Rate")
+```
+
+```{r crimePunTrends-check}
+grade_this({
+  if (uses_geoms(.result, "point", exact = FALSE) & 
+      uses_mappings(.result, aes(x = avgsen, y = crmrte, color = Region), exact = FALSE) &
+      uses_extra_mappings(.result, aes(color = Region)) & 
+      .result$scales$scales[[2]]$trans[1]$name == "log-10" & 
+      .result$scales$scales[[1]]$trans[1]$name == "log-10") {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Crime and Policing 
+
+It's always important to look at descriptive trends in your data by subgroup. For the data used in this tutorial, we may or may not see trends in certain variables on the surface, but there may be a lot of difference in variables' associations with an outcome depending on the subpopulation. The following plot examines the relationship between crime rates and police officers per capita by region. 
+
+```{r, echo = TRUE}
+ggplot(data = crime4, mapping = aes(avgsen, crmrte, color = Region)) + 
+    geom_point() + 
+    geom_smooth(method = "lm") +
+    scale_x_continuous(trans = "log10") + 
+    scale_y_continuous(trans = "log10") + 
+    labs(title = "Figure 2", subtitle = "Average Sentence versus Crime Rate") + 
+    xlab("Average Sentence") + 
+    ylab("Crime Rate")
+```
+
+Be careful how you interpret associations! Which variable(s) is (are) really endogenous? Chickens or eggs?

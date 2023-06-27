@@ -1,0 +1,106 @@
+---
+title: "Chapter 3"
+subtitle: "Multiple Regression Analysis - Gauss-Markov Theorem"
+description: "This tutorial practices concepts related to the Gauss-Markov Theorem."
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+gradethis::gradethis_setup()
+tutorial_options(exercise.reveal_solution = FALSE)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Exercise
+
+Using the matrix formula estimate the regression coefficients for the regression of college GPA (`colGPA`) on high school GPA (`hsGPA`) and ACT score (`ACT`) using the `gpa1` dataset. 
+
+```{r colGPA, exercise=TRUE, exercise.reveal_solution = TRUE}
+
+```
+
+```{r colGPA-solution}
+gpa1 <- wooldridge::gpa1
+n <- nrow(gpa1)
+y <- gpa1$colGPA
+X <- cbind(1, gpa1$hsGPA, gpa1$ACT)
+k <- ncol(X) - 1
+bhat <- solve( t(X)%*%X ) %*% t(X)%*%y
+```
+
+```{r colGPA-hint}
+
+```
+
+```{r colGPA-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Standard Errors
+
+Using the matrix formula, estimate the standard errors of the previous exercise.
+
+```{r colGPAse, exercise = TRUE}
+
+```
+
+```{r colGPAse-setup}
+gpa1 <- wooldridge::gpa1
+n <- nrow(gpa1)
+y <- gpa1$colGPA
+X <- cbind(1, gpa1$hsGPA, gpa1$ACT)
+k <- ncol(X) - 1
+bhat <- solve( t(X)%*%X ) %*% t(X)%*%y
+```
+
+```{r colGPAse-hint}
+# The setup stores the sample size as `n`; 
+  # the dependent variable as `y`; 
+  # the matrix of independent variables (including the constant) as `X`; 
+  # the number of slope parameters (excluding the constant, following the book) as `k`; 
+  # the OLS coefficients (including the constant) as `bhat`.
+```
+
+```{r colGPAse-solution}
+uhat <- y - X %*% bhat
+sigsqhat <- as.numeric( t(uhat) %*% uhat / (n-k-1) )
+SER <- sqrt(sigsqhat)
+Vbetahat <- sigsqhat * solve( t(X)%*%X )
+se <- sqrt( diag(Vbetahat) )
+```
+
+```{r colGPAse-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```

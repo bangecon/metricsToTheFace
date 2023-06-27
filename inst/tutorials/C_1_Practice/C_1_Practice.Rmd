@@ -1,0 +1,159 @@
+---
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+title: "Appendix C"
+subtitle: |
+  | Fundamentals of Mathematical Statistics
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+always_allow_html: yes
+description: "This tutorial practices the concepts of the laws of large numbers and central limit theorem."
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+gradethis_setup()
+tutorial_options(exercise.reveal_solution = FALSE)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Simple Regression Simulation
+
+Let $X$ be a random variable that follows a exponential distribution with rate parameter $\lambda = 1$. 
+Let $Y$ be a random variable that depends on $X$ according to the known linear structural population model $Y = \beta_0 + \beta_1X + u$, where: 
+  
+  + $\beta_0 = 2$
+  + $\beta_1 = -0.5$
+  + $u \sim N(0,1)$
+
+Create a loop that does the following: 
+
+1. Simulate samples of sizes 1-1000 for $X$, $u$, and $Y$.
+2. Estimates the equation for Y to obtain $\hat\beta_0$ and $\hat\beta_1$ for each sample size.
+3. Show the convergence of the sample estimate of $\beta_1$ towards the known population value of -1 for sample sizes 1 through 1000 by plotting the squared deviations from the true value.
+4. Print the 'head()` of your simulation output.
+
+```{r llnPractice, exercise=TRUE, exercise.eval=TRUE}
+set.seed(8675309)
+X <- NULL 
+u <- NULL
+Y <- NULL
+b1 <- NULL
+
+
+```
+
+```{r llnPractice-hint-1}
+# Don't forget to set the random seed for reproducibility.
+# Create "NULL" objects for X, u, Y, and b1. 
+# Define a for-loop over different sample sizes. 
+```
+
+```{r llnPractice-hint-2}
+# The elements of X are random exponential draws [`rexp()`] with rate parameter 1.
+# The elements of u are random normal draws [`rnorm()`] with mean 0 and sd 1. 
+# The elements of Y are drawn from the known relationship of Y with X (b0 + b1X + u)
+# Use the "known" values of b0 and b1 (2 and -0.5), with the random u's to generate Y. 
+```
+
+```{r llnPractice-hint-3}
+# The `lm()` function estimates the linear regression.
+# The named `coefficients` value from the `lm()` output extracts the vector of betas
+# The slope beta (b1) is the 2nd element of the coefficient vector: 
+#     b1 = lm(...)$coefficients[2]
+```
+
+```{r llnPractice-solution}
+set.seed(8675309)
+X <- NULL 
+u <- NULL
+Y <- NULL
+b1 <- NULL
+for(i in 1:1000) {
+  X = rexp(n = i, rate = 1)
+  u = rnorm(n = i, mean = 0, sd = 1)
+  Y = 2 - 0.5*X + u
+  b1[i] <- lm(Y ~ X)$coefficients[2]
+}
+df <- data.frame(n = c(1:length(b1)), b1 = b1, v1 = (b1-(-0.5))^2)
+plot(c(1:length(X)), df$v1, type = 'l', 
+     xlab = "Sample Size", ylab = "Squared Deviation", 
+     ylim = c(0,2))
+
+```
+
+```{r llnPractice-check}
+grade_this(if (!inherits(.result, "data.frame")) {
+    fail("Your class of your answer should be 'data.frame'.")}
+  if(length(.result) != 3) {
+    fail("Your table should have a length of 3.") } 
+  if(round(.result[2,2], 4) != 2.0112) {
+    fail("For n=2 b1 should equal about 2.0112.") } 
+  pass()
+)
+```
+
+## Regression CLT Practice
+
+Using the same population parameters and variables as the previous exercise, create a loop that does the following: 
+
+1. Simulate 1000 *distributions* of $\hat\beta_1$ with 1000 values estimates each from samples $X$, $u$, and $Y$ ranging from 1-1000. 
+2. Estimates the equation for Y to obtain $\hat\beta_0$ and $\hat\beta_1$ for each sample size.
+3. Plot the convergence of the distribution of $\hat\beta_1$ towards a normal distribution. 
+4. Print the `head()` of the matrix of values for $\beta_1$. 
+
+```{r cltPractice, exercise=TRUE, exercise.eval=TRUE}
+set.seed(8675309)
+
+
+```
+
+```{r cltPractice-hint}
+# This is similar to the LLN example, but with a double loop (sample sizes and resamples).
+```
+
+```{r cltPractice-solution}
+set.seed(8675309)
+X <- NULL 
+u <- NULL
+Y <- NULL
+b1 <- matrix(NA, nrow = 1000, ncol = 100)
+for(i in 1:100) {
+  for(j in 1:1000) {
+    X <- rexp(n = i, rate = 1) 
+    u <- rnorm(n = i, mean = 0, sd = 1)
+    Y = 2 - 0.5*X + u
+    b1[j, i] = lm(Y ~ X)$coefficients[2]
+  }
+}
+plot(density(b1[,2]), xlim = c(-2, 1), ylim = c(0, 4))
+lines(density(b1[,10]))
+lines(density(b1[,30]))
+lines(density(b1[,100]))
+head(b1)
+```
+
+```{r cltPractice-check}
+grade_this(if (!inherits(.result, c("matrix", "array"))) {
+    fail("Your class of your answer should be c('matrix', 'array').")}
+  if(length(.result) != 600) {
+    fail("Your table should have a length of 600.") } 
+  if(round(.result[2,2], 4) != 8.5484) {
+    fail("For n=2 b1 should equal about 8.5484") } 
+  pass()
+)
+```

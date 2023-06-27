@@ -1,0 +1,232 @@
+---
+title: "Chapter 2"
+subtitle: "The Simple Regression Model: Interpretation"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+description: "This tutorial discusses interpretation of the linear coefficients and the properties of the OLS estimator."
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+gradethis::gradethis_setup()
+tutorial_options(exercise.reveal_solution = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Nonlinearities
+
+```{r linearRegression, echo=FALSE}
+question("What do we mean by 'linear regression?'",
+    answer("that the population regression function is linear in the independent variable(s)", message = random_encouragement()),
+    answer("that the true relationship between the variables must be linear", message = random_encouragement()),
+    answer("that the population regression function is linear in the parameters", correct = TRUE,  message = random_praise()),
+    answer("that the regression line minimizes the sum of squared residuals", message = random_encouragement()),
+    allow_retry = TRUE
+  )
+```
+
+### Wages and Education
+
+- Estimate a linear model for the log of wages on the level of education and call it lwage.lm1.
+- Summarize the output.
+
+```{r logLinear, exercise = TRUE}
+
+
+```
+
+```{r logLinear-hint}
+# You may use mathematical operators on variables within your formula() argument, e.g. log(wage).
+```
+
+```{r logLinear-solution}
+wage1 <- wooldridge::wage1
+lwage.lm1 <- lm(log(wage) ~ educ, data = wage1)
+summary(lwage.lm1)
+```
+
+```{r logLinear-check}
+grade_this({
+  if (identical(.solution$call, .result$call)) 
+    {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Interpreting Regression Coefficients
+
+```{r betaInterpretationLinear, echo=FALSE}
+question("In the regression, $wage = \\beta_0 + \\beta_1educ + u$, what is the economic interpretation of $\\beta_1$?",
+    answer("that a one-year increase in education leads to a $\\beta_1$ dollar increase in hourly wage on average", correct = TRUE, message = random_praise()),
+    answer("that a one-year increase in education leads to a $\\beta_1$ percent increase in hourly wage on average", message = random_encouragement()),
+    answer("that a one percent increase in education leads to a $\\beta_1$ percent increase in hourly wage on average", message = random_encouragement()),
+    answer("that a one-year increase in education leads to a $\\beta_1$ dollar increase in hourly wage always", message = random_encouragement()),
+    random_answer_order = TRUE,
+    allow_retry = TRUE
+  )
+```
+
+```{r betaInterpretationLogLinear, echo=FALSE}
+question("In the regression, $\\log(wage) = \\beta_0 + \\beta_1educ + u$, what is the economic interpretation of $\\beta_1$?",
+    answer("that a one-year increase in education leads to a $\\beta_1$ dollar increase in hourly wage on average", message = random_praise()),
+    answer("that a one-year increase in education leads to a $\\beta_1$ percent increase in hourly wage on average", correct = TRUE, message = random_encouragement()),
+    answer("that a one percent increase in education leads to a $\\beta_1$ percent increase in hourly wage on average", message = random_encouragement()),
+    answer("the log-linear model is better than the linear model", message = random_encouragement()),
+    random_answer_order = TRUE,
+    allow_retry = TRUE
+  )
+```
+
+## Expected Values and Variances of OLS Estimators
+
+Recall in the practice for Appendix C we simulated 1000 resamples of a simple OLS regression for sample sizes from 1 to 100. Run the following code to view the density plots for this simulation with vertical lines colored corresponding to the density they describe and textured differently for visibility. 
+
+```{r E_betaHat, exercise = TRUE}
+library(tidyr); library(ggplot2); set.seed(8675309)
+# Create empty temp objects for X, u, Y, and b1.
+X <- NULL; u <- NULL; Y <- NULL; b1 <- data.frame(NA, nrow = 1000, ncol = 100)
+# Start a loop for each column of 20 different sample size. 
+for (j in 1:20) {
+  # Nest a loop for 1000 replications of each sample size. 
+  for (i in 1:1000) {
+    # Randomly draw X from an exponential distribution with rate parameter = 1.
+    # Sample sizes are 5*j for samples sized {5, 10, 15, ... 100}
+    X <- rexp(n = 5*j, rate = 1) 
+    # Randomly draw u from a normal distribution with mean = 0 and variance = 1.
+    u <- rnorm(n = 5*j, mean = 0, sd = 1)
+    # Define Y = b0 + b1*X + noise (b0 = 2, b1 = -0.5)
+    Y = 2 - 0.5 * X + u
+    # Regress Y on X and assign the value of the second coefficient (b1) to b1[i,j].
+    b1[i, j] = lm(Y ~ X)$coefficients[2]
+  }
+}
+# Make column names for b1 (n5, n10, ... n100)
+colnames(b1) <- paste0("n", 5*c(1:20))
+# Define a correspondence of legend labels to colors. 
+colors = c("n=5" = "red", "n=10" = "darkorange", "n=30" = "blue", "n=100" = "purple")
+# Initialize a `ggplot()` from b1
+ggplot(data = b1) + 
+  # Add layers for density curves sample sizes 5, 10, 30, and 100. 
+  # The legend label for each color goes *inside* the `aes()` mapping.
+  stat_density(aes(x = n5, color = "n=5"), geom = 'line') + 
+  stat_density(aes(x = n10, color = "n=10"), geom = 'line') + 
+  stat_density(aes(x = n30, color = "n=30"), geom = 'line') + 
+  stat_density(aes(x = n100, color = "n=100"), geom = 'line') + 
+  # Using `scale_color_manual()`, set the color scale with `values`. 
+  # Specify the text and order of the legend labels using `limits`.
+  scale_color_manual(values = colors, limits = names(colors)) + 
+  xlim(c(-2, 1)) + # Set tighter axis limits than the too-wide defaults
+  # Add plot and axis titles
+  labs(title = "Figure 3", subtitle = bquote("Distributions of " ~ hat(beta)[1]), 
+       x = bquote(~ hat(beta)[1]), y = "Density", color = "Sample Size") +
+  # Add (dashed) reference lines for the means of the distributions for each sample size.
+  geom_vline(xintercept = c(mean(b1[, 1]), mean(b1[, 2]), mean(b1[, 6]), mean(b1[, 20])),
+             color = colors, linetype = 'dashed') 
+```
+
+```{r E_betaHat-solution}
+library(tidyr); library(ggplot2); set.seed(8675309)
+# Create empty temp objects for X, u, Y, and b1.
+X <- NULL; u <- NULL; Y <- NULL; b1 <- data.frame(NA, nrow = 1000, ncol = 100)
+# Start a loop for each column of 20 different sample size. 
+for (j in 1:20) {
+  # Nest a loop for 1000 replications of each sample size. 
+  for (i in 1:1000) {
+    # Randomly draw X from an exponential distribution with rate parameter = 1.
+    # Sample sizes are 5*j for samples sized {5, 10, 15, ... 100}
+    X <- rexp(n = 5*j, rate = 1) 
+    # Randomly draw u from a normal distribution with mean = 0 and variance = 1.
+    u <- rnorm(n = 5*j, mean = 0, sd = 1)
+    # Define Y = b0 + b1*X + noise (b0 = 2, b1 = -0.5)
+    Y = 2 - 0.5 * X + u
+    # Regress Y on X and assign the value of the second coefficient (b1) to b1[i,j].
+    b1[i, j] = lm(Y ~ X)$coefficients[2]
+  }
+}
+# Make column names for b1 (n5, n10, ... n100)
+colnames(b1) <- paste0("n", 5*c(1:20))
+# Define a correspondence of legend labels to colors. 
+colors = c("n=5" = "red", "n=10" = "darkorange", "n=30" = "blue", "n=100" = "purple")
+# Initialize a `ggplot()` from b1
+ggplot(data = b1) + 
+  # Add layers for density curves sample sizes 5, 10, 30, and 100. 
+  # The legend label for each color goes *inside* the `aes()` mapping.
+  stat_density(aes(x = n5, color = "n=5"), geom = 'line') + 
+  stat_density(aes(x = n10, color = "n=10"), geom = 'line') + 
+  stat_density(aes(x = n30, color = "n=30"), geom = 'line') + 
+  stat_density(aes(x = n100, color = "n=100"), geom = 'line') + 
+  # Using `scale_color_manual()`, set the color scale with `values`. 
+  # Specify the text and order of the legend labels using `limits`.
+  scale_color_manual(values = colors, limits = names(colors)) + 
+  xlim(c(-2, 1)) + # Set tighter axis limits than the too-wide defaults
+  # Add plot and axis titles
+  labs(title = "Figure 3", subtitle = bquote("Distributions of " ~ hat(beta)[1]), 
+       x = bquote(~ hat(beta)[1]), y = "Density", color = "Sample Size") +
+  # Add (dashed) reference lines for the means of the distributions for each sample size.
+  geom_vline(xintercept = c(mean(b1[, 1]), mean(b1[, 2]), mean(b1[, 6]), mean(b1[, 20])),
+             color = colors, linetype = 'dashed') 
+```
+
+```{r E_betaHat-check}
+grade_code()
+```
+
+### Unbiasedness of the OLS Estimator
+
+Assumptions: 
+
+1. Linear in the Parameters
+2. Random Sampling: $(X_i, Y_i)$ are independently and identically distributed
+3. Sample Variation: $x_i$'s vary - rules out perfect collinearity with constant
+4. Zero Conditional Mean of $u$, $E(u|x) = 0$
+
+$$\hat{\beta_1} = \frac{\sum_{i=1}^n (x_i - \bar{x})y_i}{\sum_{i=1}^n (x_i - \bar{x})^2}$$
+
+$$E[\hat{\beta_1}] = E\bigg[\frac{\sum_{i=1}^n (x_i - \bar{x})(\beta_0+\beta_1x_i + u_i)}{\sum_{i=1}^n (x_i - \bar{x})^2}\bigg]$$
+$$ = E\bigg[\frac{\beta_0\sum_{i=1}^n (x_i - \bar{x})}{\sum_{i=1}^n (x_i - \bar{x})^2} + \frac{\beta_1\sum_{i=1}^n (x_i - \bar{x})x_i}{\sum_{i=1}^n (x_i - \bar{x})^2} + \frac{\sum_{i=1}^n (x_i - \bar{x})u_i}{\sum_{i=1}^n (x_i - \bar{x})^2}) \bigg]$$
+The following properties give us the result: 
+1. $\sum_{i=1}^n (x_i - \bar{x}) = \sum_{i=1}^n x_i - n\sum_{i=1}^n \frac{x_i}{n}) =  0 \Rightarrow E\bigg[\frac{\beta_0\sum_{i=1}^n (x_i - \bar{x})}{\sum_{i=1}^n (x_i - \bar{x})^2}\bigg] = 0$
+2. $\sum_{i=1}^n (x_i - \bar{x})x_i = \sum_{i=1}^n x_i^2 - n\bar{x}^2 = \sum_{i=1}^n (x_i - \bar{x})^2 \Rightarrow \frac{\beta_1\sum_{i=1}^n (x_i - \bar{x})x_i}{\sum_{i=1}^n (x_i - \bar{x})^2} = \beta_1$
+3. $E\bigg[\sum_{i=1}^n (x_i - \bar{x})u_i \bigg] = 0$ by the assumption that the expectation of the errors conditional on $x$ equals zero. 
+
+### Variance of the OLS Estimator
+
+Additional Assumption: 
+
+- Homoskedasticity: $u_i{'s}$ have constant variance regardless of the value of $x$. $$Var(u|x) = 0$$
+
+Standard Error of the Regression: $\hat{\sigma} = \sqrt{ \frac{1}{n-2}\sum_{i=1}^n{u_i^2}}$ - the standard deviation of the residuals
+
+$$ \hat{\sigma}_{\hat{\beta}_1}^2 = \frac{\hat{\sigma}^2}{\sum_{i=1}^n(x_i-\bar{x})^2} = \frac{\hat{\sigma}^2}{(n-1)\hat{\sigma}_x^2}$$
+
+$$ \hat{\sigma}_{\hat{\beta}_0}^2 = \frac{\hat{\sigma}^2\sum_{i=1}^n{x_i^2}}{n\sum_{i=1}^n(x_i-\bar{x})^2}= \frac{\hat{\sigma}^2}{(n-1)\hat{\sigma_x}^2} \cdot\frac{\sum_{i=1}^n{x_i^2}}{n} $$
+
+### Sampling Distribution of $\hat{\beta}_1$ & $\hat{\beta}_0$
+
+By the Central Limit Theorem, for sufficiently large $n$, 
+
+$$ \hat{\beta}_1 \sim N(\beta_1, \frac{\sigma_{\hat{\beta_1}}^2}{n})$$
+
+$$ \hat{\beta}_0 \sim N(\beta_0, \frac{\sigma_{\hat{\beta_0}}^2}{n})$$

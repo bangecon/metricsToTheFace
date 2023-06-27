@@ -1,0 +1,124 @@
+---
+title: "Chapter 2"
+subtitle: "The Simple Regression Model: Basic Properties"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+library(ggcheck)
+gradethis_setup()
+tutorial_options(exercise.reveal_solution = FALSE)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## CEO Salaries and Return on Equity
+
+### Estimation
+
+Regress CEO salary on:  
+1. ROE (without a constant - $salary.lm0$); 
+2. ROE (with a constant - name this $salary.lm1$); 
+3. Only a constant($salary.lm2$). Plot all three regression lines with a scatterplot of salary on ROE. 
+4. Print the `summary()` of all three regressions combined as a `list()`. 
+
+```{r lmPractice, exercise=TRUE, exercise.reveal_solution = FALSE}
+
+```
+
+```{r lmPractice-hint-1}
+# Don't forget to load your data!
+```
+
+```{r lmPractice-hint-2}
+# The `formula` argument in `lm()` takes the form `y ~ x`
+# The tilde (~) takes the place of an equals sign, separating the left from the right hand sides of the formula. 
+```
+
+```{r lmPractice-hint-3}
+# Don't forget to specify your data frame!
+```
+
+```{r lmPractice-solution}
+ceosal1 <- wooldridge::ceosal1
+salary.lm1 <- lm(salary ~ roe, data = ceosal1)
+salary.lm2 <- lm(salary ~ roe - 1, data = ceosal1)
+salary.lm3 <- lm(salary ~ 1, data = ceosal1)
+list(summary(salary.lm1),
+     summary(salary.lm2),
+     summary(salary.lm3))
+```
+
+```{r lmPractice-check}
+grade_this({
+  if (length(.result) == length(.solution) &
+      (identical(.solution[[1]]$call, .result[[1]]$call) | 
+       identical(.solution[[1]]$call, .result[[2]]$call) | 
+       identical(.solution[[1]]$call, .result[[3]]$call) 
+       )
+      ) 
+    {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+### Plotting the Regression Line
+
+Plot the data for the previous exercise along with all three of the estimated regression lines.
+
+```{r plotPractice, exercise=TRUE, exercise.reveal_solution = FALSE}
+
+```
+
+```{r plotPractice-setup}
+ceosal1 <- wooldridge::ceosal1
+salary.lm1 <- lm(salary ~ roe, data = ceosal1)
+salary.lm2 <- lm(salary ~ roe - 1, data = ceosal1)
+salary.lm3 <- lm(salary ~ 1, data = ceosal1)
+```
+
+```{r plotPractice-solution}
+library(ggplot2)
+ggplot(ceosal1) + 
+  geom_point(aes(roe, salary)) + 
+  geom_smooth(aes(roe, salary), method = 'lm') + 
+  geom_smooth(aes(roe, salary), method = 'lm', formula = y ~ x - 1, color = 'red') + 
+  geom_smooth(aes(roe, salary), method = 'lm', formula = y ~ 1, color = 'darkgreen') + 
+  labs(title = "Figure 1", subtitle = "Salary and ROE", x = "ROE", y = "Salary") +
+  ylim(c(0,5000))
+```
+
+```{r plotPractice-check}
+grade_this({
+  if (uses_geoms(.result, "point", exact = FALSE) & 
+      uses_geoms(.result, "smooth", exact = FALSE) & 
+      uses_mappings(.result, aes(x = roe, y = salary), exact = FALSE) & 
+      .result$layers[[2]]$constructor$method == 'lm') {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
