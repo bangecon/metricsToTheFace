@@ -18,7 +18,11 @@ Depends:
   wooldridge,
   learnr,
   gradethis,
-  ggcheck,
+  ggcheck, 
+  shiny, 
+  shinytest
+Imports: 
+  ggplot2,
   webshot,
   tidyverse,
   corrgram,
@@ -33,4 +37,5 @@ Depends:
   car, 
   multcomp,
   lmtest,
-  gtsummary
+  gtsummary, 
+  googlesheets4
