@@ -6,8 +6,8 @@ runtime: shiny_prerendered
 title:  "Chapter 1" 
 subtitle:  |
   | 1. Introduction
-  | 2. Installing R and RStudio
-  | 3. The Nature of Econometrics and Econometric Data
+  | 2. Installing R & RStudio
+  | 3. Nature of Econometrics & Data
 author: 
   name: "Created by [Jim Bang](http://www.github.com/bangecon)"
   email: BangJamesT@sau.edu
@@ -16,16 +16,20 @@ date: "`r format(Sys.Date(), '%d %b %Y')`"
 always_allow_html: yes
 description: >
   This tutorial introduces students to the course and demonstrates the basic setup for R and RStudio.
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
+```{=html}
 <style type="text/css">
 h1{font-size: 24pt}
 h2{font-size: 20pt}
 h3{font-size: 18pt}
 h4,h5,h6{font-size: 16pt}
-body{font-size: 16pt}
+body{font-size: 14pt}
 </style>
-
+```
 ```{r setup, include=FALSE}
 library(learnr)
 library(gradethis)
@@ -38,84 +42,113 @@ knitr::opts_chunk$set(echo = FALSE, tidy.opts=list(width.cutoff=80), tidy=TRUE)
 
 ### General Information
 
--   Office Hours: MWF 11am-12:30pm; TR 8:30-10am; liberally by appointment: [book me here](https://calendar.google.com/calendar/selfsched?sstoken=UUFLaDRHQXJVeXZHfGRlZmF1bHR8YjU1MzlmMzk2YjBlMWEzMzUzNTUzZDI0MjVhYzBiMTMA)!
+-   Office Hours: MWF 11am-12:30pm; TR 8:30-10am; liberally by
+    appointment: [book me
+    here](https://calendar.google.com/calendar/selfsched?sstoken=UUFLaDRHQXJVeXZHfGRlZmF1bHR8YjU1MzlmMzk2YjBlMWEzMzUzNTUzZDI0MjVhYzBiMTMA)!
 -   Research Paper Deadlines:
 -   Class Preparation, Participation, and Discussion
-    -   The class participant's engagement actively contributes to general student learning -- particularly important with a very small class.
-    
+    -   The class participant's engagement actively contributes to
+        general student learning -- particularly important with a very
+        small class.
+
 ### What is Econometrics?
 
-Simply put, econometrics seeks to provide valid answers to the question, "How much?"  
-  - The quantitative analysis of economic data
-  - Helps to quantify relationships
+Simply put, econometrics seeks to provide valid answers to the question,
+"How much?"\
+- The quantitative analysis of economic data - Helps to quantify
+relationships
 
-We will use statistical analysis to test economic hypotheses. Econometrics is quantitatively rigorous, but also requires economic intuition. Analyzing data in a modern environment also requires significant computing skills. 
+We will use statistical analysis to test economic hypotheses.
+Econometrics is quantitatively rigorous, but also requires economic
+intuition. Analyzing data in a modern environment also requires
+significant computing skills.
 
 ### Learning Objectives
 
-The successful student will be able to: 
+The successful student will be able to:
 
-1. analyze economic relationships using regression analysis; 
-2. interpret regression results; 
-3. test the validity of the assumptions for regression models; 
-4. conduct empirical economic research; 
-5. perform statistical-computing operations with appropriate packages. 
+1.  analyze economic relationships using regression analysis;
+2.  interpret regression results;
+3.  test the validity of the assumptions for regression models;
+4.  conduct empirical economic research;
+5.  perform statistical-computing operations with appropriate packages.
 
 ### Class Resources
 
-Required:  
-1. Wooldridge, J. 2020/2016. Introductory Econometrics, 7th Edition (Recommended) or [5th Edition](https://economics.ut.ac.ir/documents/3030266/14100645/Jeffrey_M._Wooldridge_Introductory_Econometrics_A_Modern_Approach__2012.pdf), Cengage, Boston.  
-2. Heiss, Florian. 2016. [Using R for Introductory Econometrics](http://www.urfie.net/read/index.html). 
-3. Bang, J. 2023. [`metricsToTheFace`: `learnr` Tutorials for *Introductory Econometrics* using Wooldridge Examples](https://github.com/bangecon/metricsToTheFace), Version 0.0.3. 
-4. Blackboard, Inc. 2021. [Blackboard](https://blackboard.sau.edu). 
-5. R Core Team. 2021. [R: A Language and Environment for Statistical Computing](https://cran.r-project.org/). R Foundation for Statistical Computing. 
-6. RStudio Team. 2020. [RStudio: Integrated Development for R](https://www.rstudio.com/products/rstudio/download/). Posit, Boston, MA. 
+Required:\
+1. Wooldridge, J. 2020/2016. Introductory Econometrics, 7th Edition
+(Recommended) or [5th
+Edition](https://economics.ut.ac.ir/documents/3030266/14100645/Jeffrey_M._Wooldridge_Introductory_Econometrics_A_Modern_Approach__2012.pdf),
+Cengage, Boston.\
+2. Heiss, Florian. 2016. [Using R for Introductory
+Econometrics](http://www.urfie.net/read/index.html). 3. Bang, J. 2023.
+[`metricsToTheFace`: `learnr` Tutorials for *Introductory Econometrics*
+using Wooldridge
+Examples](https://github.com/bangecon/metricsToTheFace), Version 0.0.3.
+4. Blackboard, Inc. 2021. [Blackboard](https://blackboard.sau.edu). 5. R
+Core Team. 2021. [R: A Language and Environment for Statistical
+Computing](https://cran.r-project.org/). R Foundation for Statistical
+Computing. 6. RStudio Team. 2020. [RStudio: Integrated Development for
+R](https://www.rstudio.com/products/rstudio/download/). Posit, Boston,
+MA.
 
-Recommended:  
-1. Illowsky, Barbara and Susan Dean. 2013. [Introductory Statistics](https://openstax.org/details/books/introductory-statistics). Openstax.
-2. Katchova, Ani, Econometrics Course, Econometrics Academy MOOC.
-3. Khan, Sal. Statistics and Probability, Khan Academy. 
+Recommended:\
+1. Illowsky, Barbara and Susan Dean. 2013. [Introductory
+Statistics](https://openstax.org/details/books/introductory-statistics).
+Openstax. 2. Katchova, Ani, Econometrics Course, Econometrics Academy
+MOOC. 3. Khan, Sal. Statistics and Probability, Khan Academy.
 
 ### Coursework and Grading
 
-| Assignment Type                                 | Point Total         |
-|-------------------------------------------------|---------------------|
-| Paper Sections/Drafts (4 @ 50 points each)      | 200 points          |
-| Peer Referee Report                             |  50 points          |
-| Pilot Analysis Presentation                     |  50 points          |
-| Final Draft of Research Paper                   | 250 points          |
-| Assessments                                     |  50 points          |
-| Participation                                   | 200 points          |
-| Final Exam                                      | 200 points          |
+| Assignment Type                             | Point Total |
+|---------------------------------------------|-------------|
+| Paper Sections/Drafts (4 \@ 50 points each) | 200 points  |
+| Peer Referee Report                         | 50 points   |
+| Pilot Analysis Presentation                 | 50 points   |
+| Final Draft of Research Paper               | 250 points  |
+| Assessments                                 | 50 points   |
+| Participation                               | 200 points  |
+| Final Exam                                  | 200 points  |
 
-<br> <br> 
+<br> <br>
 
-| Letter Grade     | Point Range               |
-|------------------|---------------------------|
-| A+/A/A-          | 900-1,000 points          |
-| B+/B/B-          | 800-899.9 points          |
-| C+/C/C-          | 700-799.9 points          |
-| D+/D/D-          | 600-699.9 points          |
-| F                | < 600 points              |
+| Letter Grade | Point Range      |
+|--------------|------------------|
+| A+/A/A-      | 900-1,000 points |
+| B+/B/B-      | 800-899.9 points |
+| C+/C/C-      | 700-799.9 points |
+| D+/D/D-      | 600-699.9 points |
+| F            | \< 600 points    |
 
 ### Class Structure
 
-This will be a "flipped" class of sorts. I will expect you to work through the main tutorial for each topic before class, record your progress on the exercises for that tutorial, and come to class ready to give a brief presentation of your work if I call on you. 
+This will be a "flipped" class of sorts. I will expect you to work
+through the main tutorial for each topic before class, record your
+progress on the exercises for that tutorial, and come to class ready to
+give a brief presentation of your work if I call on you.
 
-At the start of class, I will ask for a volunteer to present the main tutorial (15-20 minutes?). If no one volunteers, I will select one person at random. Coming to class unprepared to present will affect your participation grade if you are selected, as will absence from class (regardless of whether you are selected to present). After that, we will work the practice tutorial for that topic together-ish. 
+At the start of class, I will ask for a volunteer to present the main
+tutorial (15-20 minutes?). If no one volunteers, I will select one
+person at random. Coming to class unprepared to present will affect your
+participation grade if you are selected, as will absence from class
+(regardless of whether you are selected to present). After that, we will
+work the practice tutorial for that topic together-ish.
 
-You will start the semester with 2 tokens that you can use for various forms of leniency, including:  
-1. Forgiving a class absence; 
-2. Forgiving being unprepared to present on a day that no one volunteers and you are selected; 
-3. Replace a missed assessment score; 
-4. A one-class extension of a paper deadline; 
-5. Revising a paper submission. 
+You will start the semester with 2 tokens that you can use for various
+forms of leniency, including:\
+1. Forgiving a class absence; 2. Forgiving being unprepared to present
+on a day that no one volunteers and you are selected; 3. Replace a
+missed assessment score; 4. A one-class extension of a paper deadline;
+5. Revising a paper submission.
 
-## Getting Started with R 
+## Getting Started with R
 
-### Why R? 
+### Why R?
 
-R helps you talk to a computer and help solve big problems. Employers use R (or other similar languages like Python or Julia) for statistics and data analysis. We will use R in this class to develop basic proficiency with a computing language used in industry
+R helps you talk to a computer and help solve big problems. Employers
+use R (or other similar languages like Python or Julia) for statistics
+and data analysis. We will use R in this class to develop basic
+proficiency with a computing language used in industry
 
 ### Installing R
 
@@ -156,9 +189,13 @@ question("How often should you update R?",
 
 ### Why RStudio?
 
-RStudio is an Integrated Development Environment (IDE) for R. What does that mean? Well, if you think of R as a language, which it is, you can think of RStudio as a program that helps you write and work in the language. RStudio makes programming in R much easier and I suggest that you use it!
+RStudio is an Integrated Development Environment (IDE) for R. What does
+that mean? Well, if you think of R as a language, which it is, you can
+think of RStudio as a program that helps you write and work in the
+language. RStudio makes programming in R much easier and I suggest that
+you use it!
 
-### Where do I get RStudio? 
+### Where do I get RStudio?
 
 ```{r installRStudio, echo=FALSE}
 question("Where do you download RStudio?",
@@ -212,41 +249,44 @@ question("Where do you download RStudio?",
 3.  Review Existing Research
 4.  Collect Data
 5.  Analyze the Data
-  - Test *Causal* Hypotheses 
-  - Forecast/Predict
+
+-   Test *Causal* Hypotheses
+-   Forecast/Predict
+
 6.  Form a Conclusion
 
 ### Example 1: Effects of Training on Productivity
 
-$$wage=f(educ,exper,training; u)$$
-Where:  
-- $wage$ is the worker's hourly wage,
-- $educ$ is a measure of schooling, 
-- $exper$ is a measure of workforce experience,  
-- $training$ is a measure of time spent training, and
-- $u$ is random noise.
+$$wage=f(educ,exper,training; u)$$ Where:\
+- $wage$ is the worker's hourly wage, - $educ$ is a measure of
+schooling, - $exper$ is a measure of workforce experience,\
+- $training$ is a measure of time spent training, and - $u$ is random
+noise.
 
-Assuming we can approximate $f(\cdot)$ with a linear function, we could rewrite this as:
+Assuming we can approximate $f(\cdot)$ with a linear function, we could
+rewrite this as:
 
 $$wage=\beta_0 + \beta_1educ + \beta_2exper + \beta_3training + u$$
 
-An econometric model consists of a systematic part, $X\beta$, and a random error, $u$
+An econometric model consists of a systematic part, $X\beta$, and a
+random error, $u$
 
 ### Example 2: Effects of Sentencing on Crime
 
-$$crime=f(crimewage, marketwage, otherincome, p_{caught}, p_{convicted|caught}, \hat{sentence}, age; u)$$ 
+$$crime=f(crimewage, marketwage, otherincome, p_{caught}, p_{convicted|caught}, \hat{sentence}, age; u)$$
 
-Where:  
-- $crime$ is the number of hours spent in illegal activities,
-- $crimewage$ is the "wage" per hour for illegal work,
-- $marketwage$ is the wage for legal employment, 
-- $otherincome$ is income from other sources, 
-- $p_{caught}$ is the probability of getting caught, 
-- $p_{convicted|caught}$ is the probability of conviction if caught, 
-- $\hat{sentence}$ is the expected sentence if convicted, and 
-- $age$ is the person's age.
+Where:\
+- $crime$ is the number of hours spent in illegal activities, -
+$crimewage$ is the "wage" per hour for illegal work, - $marketwage$ is
+the wage for legal employment, - $otherincome$ is income from other
+sources, - $p_{caught}$ is the probability of getting caught, -
+$p_{convicted|caught}$ is the probability of conviction if caught, -
+$\hat{sentence}$ is the expected sentence if convicted, and - $age$ is
+the person's age.
 
-Some variables might not be observed (crime wage); others might only be observe by proxy or as an average ($p_{caught}$, $p_{convicted|caught}$, $\hat{sentence}$)
+Some variables might not be observed (crime wage); others might only be
+observe by proxy or as an average ($p_{caught}$, $p_{convicted|caught}$,
+$\hat{sentence}$)
 
 $$crime=\beta_0 + \beta_1marketwage + \beta_2otherinc + \beta_3freqarr + \beta_4freqconv + \beta_5avesen + \beta_6age + u$$
 
@@ -260,15 +300,104 @@ $$crime=\beta_0 + \beta_1marketwage + \beta_2otherinc + \beta_3freqarr + \beta_4
 
 ## Causality
 
-How could we determine whether spending on education *causes* better performance? 
+How could we determine whether spending on education *causes* better
+performance?
 
 Hold all else equal: *ceteris paribus*
 
-### Problems: 
+### Problems:
 
-1. Confounding (omitted) variables  
-Solution: Add those variables to the model.
-2. Non-random sample selection  
-Solution: Tobit (Chapter 17; Tobin, 1958); Heckit (Chapter 17; Heckman, 1976)
-3. Non-random treatment assignment  
-Solution: Instrumental Variables (Chapter 15); Matching treatment and controls (Rosenbaum & Rubin, 1983); Covariate balancing (Horvitz & Thompson, 1952; Robins et al., 2000)
+1.  Confounding (omitted) variables\
+    Solution: Add those variables to the model.
+2.  Non-random sample selection\
+    Solution: Tobit (Chapter 17; Tobin, 1958); Heckit (Chapter 17;
+    Heckman, 1976)
+3.  Non-random treatment assignment\
+    Solution: Instrumental Variables (Chapter 15); Matching treatment
+    and controls (Rosenbaum & Rubin, 1983); Covariate balancing (Horvitz
+    & Thompson, 1952; Robins et al., 2000)
+
+## Some R Basics
+
+### Classes of Objects
+
++-----------------+-----------------+-------------------------------+
+| Class           | Description     | Example                       |
++=================+=================+===============================+
+| numeric,        | Numbers         | 1, 2.5, pi(), exp()           |
+| integer         |                 |                               |
++-----------------+-----------------+-------------------------------+
+| character       | Letters &       | "John Doe", "Alaska",         |
+|                 | numbers         | c("Red", "Blue", "Green")     |
++-----------------+-----------------+-------------------------------+
+| factor          | Labelled        |                               |
+|                 | categories      |                               |
++-----------------+-----------------+-------------------------------+
+| logical         | "TRUE" or       | `is.na()` result; `2==2`      |
+|                 | "FALSE"         |                               |
++-----------------+-----------------+-------------------------------+
+| vector, matrix  | Sequence of     | `c(1,2,3,4)`;\                |
+|                 | numbers,\       | `matrix(1:4, nrow = 2)`       |
+|                 | Sequence of     |                               |
+|                 | columns         |                               |
++-----------------+-----------------+-------------------------------+
+| list            | Multiple        |                               |
+|                 | objects of      |                               |
+|                 | different sizes |                               |
+|                 | or types        |                               |
++-----------------+-----------------+-------------------------------+
+| data.frame      | List of         | `wooldridge::wage1`           |
+|                 | variables with  |                               |
+|                 | same lengths    |                               |
++-----------------+-----------------+-------------------------------+
+| formula         | Linear formula  | `y ~ x1 + x2`                 |
+|                 | *excluding*     |                               |
+|                 | parameters      |                               |
++-----------------+-----------------+-------------------------------+
+| lm              | Linear model    | `                             |
+|                 | result          | y.lm <- lm(y ~ x, data = df)` |
++-----------------+-----------------+-------------------------------+
+
+### Common Functions for Econometrics
+
++------------+-----------+-----------+-----------+--------------------+
+| Function   | Package   | Arguments | De        | Example            |
+|            |           |           | scription |                    |
++============+===========+===========+===========+====================+
+| `help()`,  | utils     | topic     | Help with | `help(lm)`, `?lm`  |
+| `?`        |           |           | a         |                    |
+|            |           |           | function  |                    |
++------------+-----------+-----------+-----------+--------------------+
+| `help.s    | utils     | pattern   | Help with | `help.search("     |
+| earch()`,\ |           |           | a topic   | linear models")`,\ |
+| `??`       |           |           |           | `                  |
+|            |           |           |           | ??"linear models"` |
++------------+-----------+-----------+-----------+--------------------+
+| `          | base      | object    | Quickly\  | `summary(df)`      |
+| summary()` |           |           | s         |                    |
+|            |           |           | ummarize\ |                    |
+|            |           |           | da        |                    |
+|            |           |           | ta/models |                    |
++------------+-----------+-----------+-----------+--------------------+
+| `tbl_      | gtsummary | data,     | Summary\  | `tbl_summary(df,`\ |
+| summary()` |           | statistic | tables    | `s                 |
+|            |           |           |           | tatistic = list(`\ |
+|            |           |           |           | `all_ continuous~  |
+|            |           |           |           | "{mean} ({sd})"))` |
++------------+-----------+-----------+-----------+--------------------+
+| `plot()`   | graphics  | x, y      | Sc        | `plot(df$x, df$y)` |
+|            |           |           | atterplot |                    |
++------------+-----------+-----------+-----------+--------------------+
+| `ggplot()` | ggplot2   | data,     | Begin gg  | `ggplot(           |
+|            |           | mapping   |           | df, aes(x, y)) +`\ |
+|            |           |           |           | `geom_point()`     |
++------------+-----------+-----------+-----------+--------------------+
+| `lm()`     | stats     | formula,  | Linear    | `lm(y ~ x1         |
+|            |           | data      | model     |  + x2, data = df)` |
++------------+-----------+-----------+-----------+--------------------+
+| `st        | stargazer | model,    | Re        | `                  |
+| argazer()` |           | type      | gression\ | stargazer(lm1, lm2 |
+|            |           |           | tables    | , type = "text",`\ |
+|            |           |           |           | `f                 |
+|            |           |           |           | ile = "file.txt")` |
++------------+-----------+-----------+-----------+--------------------+

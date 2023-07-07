@@ -7,10 +7,8 @@ theme_set(theme_classic())
 n <- 20
 
 ui <- fluidPage(
-
     # Application title
     titlePanel("Eyeball regression"),
-
     # Sidebar with a slider input for number of bins
     sidebarLayout(
         sidebarPanel(
@@ -53,96 +51,37 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
-
-    v <- reactiveValues(p1 = NULL,
-                        p2 = NULL,
-                        p3 = NULL,
-                        p4 = NULL,
-                        dat = NULL,
-                        MSE_guess = NULL,
-                        MSE_true = NULL,
-                        guess = NULL,
-                        intercept_guess = NULL,
-                        slope_guess = NULL,
-                        ols = NULL,
-                        intercept_true = NULL,
-                        slope_true = NULL)
-
-    ## Create some x values
-    x <- runif(n = n, min = 5, max = 95)
-
-    ## Create a y variable
-    # y = beta_0 + beta_1*x + noise
-
-    # pick a random number for the intercept
-    beta_0 <- rnorm(n = 1, mean = 0, sd = 100)
-
-    # pick a random number for the slope
-    beta_1 <- rnorm(n = 1, mean = 0, sd = 2)
-
-    # Create some individual-level "noise"
-    noise <- rnorm(n = n, mean = 0, sd = 25*abs(beta_1))
-
-    # Create the y values
-    y <- beta_0 + (beta_1 * x) + noise
-
+    v <- reactiveValues(
+      p1 = NULL, p2 = NULL, p3 = NULL, p4 = NULL, dat = NULL, MSE_guess = NULL,
+      MSE_true = NULL, guess = NULL, intercept_guess = NULL, slope_guess = NULL,
+      ols = NULL, intercept_true = NULL, slope_true = NULL)
+    x <- runif(n = n, min = 5, max = 95) # Create some x value
+    beta_0 <- rnorm(n = 1, mean = 0, sd = 100) # pick a random number for the intercept
+    beta_1 <- rnorm(n = 1, mean = 0, sd = 2) # pick a random number for the slope
+    noise <- rnorm(n = n, mean = 0, sd = 25*abs(beta_1)) # Create some "noise"
+    y <- beta_0 + (beta_1 * x) + noise # Create the y values
     dat <- bind_cols(x = x, y = y)
-
-    # Run a linear regression of y on x using lm()
-    fit <- lm(y ~ x, data = dat)
-
+    fit <- lm(y ~ x, data = dat)     # Run a linear regression of y on x using lm()
     intercept_true <- coef(fit)[1]
     slope_true <- coef(fit)[2]
-
-    # Plot our data and save as an object called "p"
-    p <- dat %>%
-        ggplot(aes(x = x,
-                   y = y)) +
-        geom_point(size = 4) +
-        labs(x = "",
-             y = "") +
-        xlim(0, 100) +
-        ylim(min(y) - sd(y),
-             max(y) + sd(y)) +
-        theme(text = element_text(size = 20)) +
-        coord_cartesian(expand  = FALSE)
-
+    p <- dat %>%      # Plot our data and save as an object called "p"
+        ggplot(aes(x = x, y = y)) +
+        geom_point(size = 4) + labs(x = "", y = "") +
+        xlim(0, 100) + ylim(min(y) - sd(y), max(y) + sd(y)) +
+        theme(text = element_text(size = 20)) + coord_cartesian(expand  = FALSE)
     datx <- dat %>%
-        mutate(
-            y_hat = intercept_true + (slope_true * x),
-            pred_error = y - y_hat
-        )
-
+        mutate(y_hat = intercept_true + (slope_true * x), pred_error = y - y_hat)
     MSE_true <- mean(datx$pred_error^2)
-
     v$p1 <- p
 
     observeEvent(input$button_go, {
-
         dat <- dat %>%
-            mutate(
-                y_hat = input$intercept + (input$slope * x),
-                pred_error = y - y_hat
-            )
-
+            mutate(y_hat = input$intercept + (input$slope * x), pred_error = y - y_hat)
         v$MSE_guess <- mean(dat$pred_error^2)
-
-
-        v$p2 <- geom_abline(
-                intercept = input$intercept,
-                slope = input$slope,
-                color = "blue",
-                lwd = 3
-            )
-
-        v$p3 <- geom_segment(data = dat,
-            aes(x = x,
-                             xend = x,
-                             y = y,
-                             yend = y_hat),
-                         color = "red",
-                         lty = "dotted",
-            lwd = 1)
+        v$p2 <- geom_abline(intercept = input$intercept, slope = input$slope,
+                color = "blue", lwd = 3)
+        v$p3 <- geom_segment(data = dat, aes(x = x, xend = x, y = y, yend = y_hat),
+            color = "red", lty = "dotted", lwd = 1)
     })
 
     observeEvent(input$button_clear, {
