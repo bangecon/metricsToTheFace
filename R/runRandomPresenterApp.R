@@ -7,7 +7,7 @@
 
 runRandomPresenterApp <- function() {
   appDir <-
-    system.file("shiny-examples", "randomPresenterApp", package = "metricsToTheFace")
+    system.file("shiny-examples", "randomPresenter", package = "metricsToTheFace")
   if (appDir == "") {
     stop("Could not find example directory. Try re-installing `metricsToTheFace`.",
          call. = FALSE)
