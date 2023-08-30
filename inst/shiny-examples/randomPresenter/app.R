@@ -7,8 +7,8 @@ ui <- fluidPage(
   sidebarPanel(
     numericInput(
       inputId = "seed",
-      label = "Enter today's date.",
-      value = as.integer(gsub("-", "", Sys.Date()))
+      label = "Enter the current time.",
+      value = as.integer(format(Sys.time(), '%H%M%S'))
     ),
     textInput(
       inputId = "sheet",
