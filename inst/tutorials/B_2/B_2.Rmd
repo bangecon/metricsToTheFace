@@ -229,6 +229,7 @@ Use the formula to calculate the correlation coefficient. The `ceosal1` data are
 
 ```{r cor-setup}
 ceosal1 <- wooldridge::ceosal1
+attach(ceosal1)
 E_sal.roe <- mean(salary*roe)
 E_sal.E_roe <- mean(salary)*mean(roe)
 ```
