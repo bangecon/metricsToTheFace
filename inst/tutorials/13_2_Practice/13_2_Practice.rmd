@@ -1,26 +1,37 @@
 ---
-output: slidy_presentation
-runtime: shiny_prerendered
 title: "Chapter 13 \n\n Pooled Cross Sections and \n\n Difference-in-Differences Estimation"
-author: "James Bang"
 description: > 
   This tutorial provides practice excercies on simple panel data methods.
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
 
 ```{r setup, include=FALSE}
 library(learnr)
-library(wooldridge)
-library(plm)
-library(gtsummary)
-library(stargazer)
 library(gradethis)
-gradethis_setup()
-traffic1 <- wooldridge::traffic1
-traffic1.long <- reshape(traffic1[,1:9], varying = c('admn90', 'admn85', 'open90', 'open85', 'dthrte90', 'dthrte85', 'speed90', 'speed85'), timevar = 'year', idvar = 'state', direction = 'long', sep = '')
-traffic1.long$time <- traffic1.long$year/5
-traffic1.lm1 <- lm(dthrte ~ open + admn + factor(year) + factor(state), data = traffic1.long)
-traffic1.pdata <- pdata.frame(traffic1.long, index = c('state', 'time'))
-knitr::opts_chunk$set(echo = FALSE)
+tutorial_options(exercise.eval = TRUE, exercise.reveal_solution = TRUE)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE, fig.height= 9, fig.width=8)
 ```
 
 ## Two-Period Panal Data Analysis Using First Differences

@@ -1,82 +1,37 @@
 ---
-title: "Chapter 6-1 Practice"
-output: learnr::tutorial
+title: "Chapter 17"
+subtitle: "Limited Dependent Variables & Sample Selection Corrections: Logit and Probit Estimation"
+description: >
+  This tutorial introduces tools for creating attractive tables and graphs.
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
 runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
 
 ```{r setup, include=FALSE}
 library(learnr)
 library(gradethis)
-library(stargazer)
-gpa2 <- wooldridge::gpa2
-colgpa.lm1 <- lm(colgpa ~ athlete + female + I(1-white) + hsize + I(hsize^2) + hsperc + sat, data = gpa2)
-colgpa.lm2 <- lm(colgpa ~ athlete + female + I(athlete*female) + I(1-white) + hsize + I(hsize^2) + hsperc + sat, data = gpa2)
-apple <- wooldridge::apple
-apple.lm1 <- lm(ecobuy ~ ecoprc + regprc + faminc + hhsize + educ + age, data = apple)
-gradethis_setup()
-tutorial_options(exercise.timelimit = 60)
-knitr::opts_chunk$set(echo = FALSE)
+tutorial_options(exercise.eval = TRUE, exercise.reveal_solution = TRUE)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE, fig.height= 9, fig.width=8)
 ```
 
-## Exercise
-
-Estimate the following model using the gpa2 dataset: 
-
-$$College\text{ }GPA = \beta_0 + \beta_1Athlete + \beta_2Female + \beta_3HS\text{ }Size + \beta_4HS\text{ }Size^2 + \beta_5HS\text{ }Percentile + \beta_6SAT + \beta_7Nonwhite \text{ : (gpa.lm1)} $$ 
-
-Estimate the same model with an interaction between athlete and gender. Present your results side-by-side using $stargazer()$. 
-
-Finally, estimate the model with an interaction between athlete and high school percentile. 
-
-```{r athleteGPAs, exercise=TRUE, exercise.reveal_solution = TRUE}
-
-```
-
-```{r athleteGPAs-solution}
-colgpa.lm1 <- lm(colgpa ~ athlete + female + I(1-white) + hsize + I(hsize^2) + hsperc + sat, data = gpa2)
-colgpa.lm2 <- lm(colgpa ~ athlete + female + I(athlete*female) + I(1-white) + hsize + I(hsize^2) + hsperc + sat, data = gpa2)
-colgpa.lm3 <- lm(colgpa ~ athlete + female + I(athlete*scale(hsperc, scale = FALSE)) + I(1-white) + hsize + I(hsize^2) + hsperc + sat, data = gpa2)
-stargazer(colgpa.lm1, colgpa.lm2, colgpa.lm3, type = 'text')
-```
-
-```{r athleteGPAs-hint}
-# Don't forget to use the I() operator in the terms that require math operations.
-# Don't forget to scale continuous interactions. 
-gpa.lm1 <- lm(..., ...)
-gpa.lm2 <- lm(..., ...)
-gpa.lm3 <- lm(..., ...)
-stargazer(gpa.lm1, gpa.lm2, gpa.lm3, ...)
-```
-
-```{r athleteGPAs-check}
-grade_code()
-```
-
-## Exercise
-
-Estimate the following model using the $apple$ dataset: 
-
-$$ Buy\text{ }Eco\text{-}Freindly = \beta_0 + \beta_1Price_{Eco} + \beta_2Price_{Reg} + \beta_3Income + \beta_4HH\text{ }Size + \beta_5Education + \beta_6Age + u $$ 
-
-Summarize this estimation using the $summary()$ function. 
-
-```{r apple, exercise=TRUE, exercise.reveal_solution = TRUE}
-
-```
-
-```{r apple-solution}
-apple.lm1 <- lm((ecolbs > 0) ~ ecoprc + regprc + faminc + hhsize + educ + age, data = apple)
-summary(apple.lm1)
-```
-
-```{r apple-hint}
-# Note that you can create a dummy variable for values greater, less than, or equal to a threshold value using the <, >, and = operators within parentheses. You do not need the I() function, just parentheses. 
-apple.lm1 <- lm(..., ...)
-summary(...)
-```
-
-```{r apple-check}
-grade_code()
-```
-
-Interpret the coefficient on the price of eco-friendly apples. 

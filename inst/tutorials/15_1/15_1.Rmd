@@ -1,38 +1,38 @@
 ---
-output: slidy_presentation
-runtime: shiny_prerendered
-title: "Chapter 15 \n\n Instrumental Variables Methods"
-author: "James Bang"
+title: "Chapter 15"
+subtitle: "Instrumental Variables Methods"
 description: >
   This tutorial introduces instrumental variables. 
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
 
 ```{r setup, include=FALSE}
 library(learnr)
-library(wooldridge)
-library(AER)
-library(ggdag)
-library(ggplot2)
 library(gradethis)
-library(stargazer)
-data(card, package='wooldridge')
-coords <- list(x = c(Educ = 0, Wage = 2, Exper =  1, Ability = 1, Z = -1), 
-               y = c(Educ = 0, Wage = 0, Exper = -0.5, Ability = 0.5, Z = 0))
-WageDag1 <- tidy_dagitty(dagify(Wage ~ Educ, coords = coords, exposure = "Educ", outcome = "Wage"))
-WageDag1 <- dag_label(WageDag1, labels = c("Educ" = "Exposure", "Wage" = "Outcome"))
-WageDag2 <- tidy_dagitty(dagify(Wage ~ Educ + Exper, Educ ~ Exper, coords = coords, exposure = "Educ", outcome = "Wage"))
-WageDag2 <- dag_label(WageDag2, labels = c("Educ" = "Exposure", "Wage" = "Outcome", "Exper" = ifelse(is_confounder(WageDag2, "Exper", "Educ", "Wage"), "Confounder", "")))
-WageDag3 <- tidy_dagitty(dagify(Wage ~ Educ + Exper + Ability, Educ ~ Exper + Ability + Z, coords = coords, exposure = "Educ", outcome = "Wage", latent = "Ability"))
-WageDag3 <- dag_label(WageDag3, labels = c("Educ" = "Exposure", "Wage" = "Outcome", "Exper" = ifelse(is_confounder(WageDag3, "Exper", "Educ", "Wage"), "Confounder", ""), "Ability" = "Latent", "Z" = "Instrument"))
-card.lm1 <- lm(log(wage) ~ educ + exper + I(exper^2) + black + smsa + south + smsa66 + reg662 + reg663 + reg664 + reg665 + reg666 + reg667 + reg668 + reg669, data=card)
-card.xhat <- lm(educ ~ nearc4 + exper + I(exper^2) + black + smsa + south + smsa66 + reg662 + reg663 + reg664 + reg665 + reg666 + reg667 + reg668 + reg669, data = card)
-card$educhat <- card.xhat$fitted.values
-card.lm2 <- lm(log(wage) ~ educhat + exper + I(exper^2) + black + smsa + south + smsa66 + reg662 + reg663 + reg664 + reg665 + reg666 + reg667 + reg668 + reg669, data=card) 
-sigma.iv <- sqrt(t(as.matrix(card.lm1$model[,1]) - as.matrix(card.lm1$model[,2:card.lm1$rank])%*%card.lm2$coefficients[2:card.lm1$rank] - card.lm2$coefficients[1])%*%(as.matrix(card.lm1$model[,1]) - as.matrix(card.lm1$model[,2:card.lm1$rank])%*%card.lm2$coefficients[2:card.lm1$rank] - card.lm2$coefficients[1])/(card.lm2$df.residual))
-se.iv <- as.numeric(sigma.iv/summary(card.lm2)$sigma)*as.vector(summary(card.lm2)$coefficients[,2])
-card.iv <-ivreg(log(wage) ~ educ + exper + I(exper^2) + black + smsa + south + smsa66 + reg662 + reg663 + reg664 + reg665 + reg666 + reg667 + reg668 + reg669 | nearc4 + exper + I(exper^2) + black + smsa + south + smsa66 + reg662 + reg663 + reg664 + reg665 + reg666 + reg667 + reg668 + reg669, data = card)
+tutorial_options(exercise.eval = TRUE, exercise.reveal_solution = TRUE)
 gradethis::gradethis_setup()
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, fig.height= 9, fig.width=8)
 ```
 
 ## Causal Diagrams (Directed Acyclic Graphs, DAGs)

@@ -1,30 +1,37 @@
 ---
-output: learnr::tutorial
-runtime: shiny_prerendered
 title: "Chapter 13 \n\n Pooling Cross Sections across Time: \n\n Simple Panel Data Methods"
-author: "James Bang"
 description: >
   This tutorial provides practice with pooled cross sections and difference-in-difference methods.
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
 
 ```{r setup, include=FALSE}
 library(learnr)
-library(wooldridge)
-library(stargazer)
-fertil1 <- wooldridge::fertil1
-fertil1$region <- factor(fertil1$east + 2*fertil1$northcen + 3*fertil1$west, 
-                         labels = c("South Central", "East", "North Central", "West"))
-fertil1$geog <- factor(fertil1$farm + 2*fertil1$othrural + 3*fertil1$town + 4*fertil1$smcity, 
-                       labels = c("City", "Farm", "Other Rural", "Town", "Small City"))
-fertil.lm1 <- lm(kids ~ educ + age + I(age^2) + black + region + geog, data = fertil1)
-fertil.lm2 <- lm(kids ~ educ + age + I(age^2) + black + region + geog + factor(year), data = fertil1)
-injury <- wooldridge::injury
-injury$injtype <- factor(injury$injtype, 
-                         labels = c("Head", "Neck", "Upper Extremeties","Trunk", "Lower Back", 
-                                    "Lower Extremities", "Occupational Disease", "Other"))
-injury.lm1 <- lm(log(durat) ~ afchnge*highearn, data = injury)
-injury.lm2 <- lm(log(durat) ~ afchnge*highearn + injtype + male, data = injury)
-knitr::opts_chunk$set(echo = FALSE)
+library(gradethis)
+tutorial_options(exercise.eval = TRUE, exercise.reveal_solution = TRUE)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE, fig.height= 9, fig.width=8)
 ```
 
 ## Pooled Cross Sections: Fertility over Time

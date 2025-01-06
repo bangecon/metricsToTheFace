@@ -10,6 +10,7 @@ date: "`r format(Sys.Date(), '%d %b %Y')`"
 output: 
   learnr::tutorial:
     progressive: true
+    allow_skip: true
 runtime: shiny_prerendered
 always_allow_html: yes
 editor_options: 

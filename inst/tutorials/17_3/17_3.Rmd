@@ -1,326 +1,37 @@
 ---
-output: slidy_presentation
-runtime: shiny_prerendered
-title: "Chapter 17 \n\n Limited Dependent Variables & Sample Selection Corrections \n\n Poisson Regression; Issues with Limited Dependent Variables"
+title: "Chapter 17"
+subtitle: "Limited Dependent Variables & Sample Selection Corrections: Logit and Probit Estimation"
 description: >
   This tutorial introduces tools for creating attractive tables and graphs.
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
 
 ```{r setup, include=FALSE}
 library(learnr)
 library(gradethis)
-library(gtsummary)
-library(corrgram)
-library(metricsToTheFace)
-ceosal1 <- wooldridge::ceosal1
-affairs <- wooldridge::affairs
-affairs$haskids <- factor(affairs$kids, labels = c("no","yes"))
-affairs$marriage <- factor(affairs$ratemarr, labels = c("very unhappy","unhappy","average","happy", "very happy"))
+tutorial_options(exercise.eval = TRUE, exercise.reveal_solution = TRUE)
 gradethis::gradethis_setup()
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, fig.height= 9, fig.width=8)
 ```
 
-## Posing a question
-
-<html>
-<blockquote class="twitter-tweet"><p lang="en" dir="ltr">Two concepts I&#39;ll likely never get: odds ratio (or log-odds ratio) and incidence rate ratio (IRR). Or, I can&#39;t figure out why they&#39;re preferred to average partial effects on the probability or the mean. Or to average elasticities/semi-elasticities on the mean.<a href="https://twitter.com/hashtag/metricstotheface?src=hash&amp;ref_src=twsrc%5Etfw">#metricstotheface</a></p>&mdash; Jeffrey Wooldridge (@jmwooldridge) <a href="https://twitter.com/jmwooldridge/status/1391395153143910404?ref_src=twsrc%5Etfw">May 9, 2021</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-</html>
-
-```{r singleSummary, exercise = TRUE}
-
-```
-
-```{r singleSummary-hint}
-ls()
-mean(...)
-median(...)
-sd(...)
-summary(...)
-```
-
-```{r singleSummary-solution}
-ls()
-mean(ceosal1$salary)
-median(ceosal1$salary)
-sd(ceosal1$salary)
-summary(ceosal1$salary)
-```
-
-```{r singleSummary-check}
-grade_code()
-```
-
-## Summarizing an Entire Data Frame
-
-- Calculate the summary statistics for all of the variables in *ceosal1*. 
-
-```{r multipleSummary, exercise=TRUE, exercise.eval=TRUE}
-
-```
-
-```{r multipleSummary-hint}
-summary(...)
-```
-
-```{r multipleSummary-solution}
-summary(ceosal1)
-```
-
-```{r multipleSummary-check}
-grade_code()
-```
-
-## Creating Pretty Tables
-
-Create summary tables of *ceosal1* using the *tbl_summary* function in the *gtsummary* package.
-
-```{r gtmedian, exercise=TRUE, exercise.eval=TRUE}
-
-```
-
-```{r gtmedian-hint}
-# The tbl_summary() function requires a data frame (or subset of one). 
-tbl_summary(...)
-```
-
-```{r gtmedian-solution}
-tbl_summary(ceosal1)
-```
-
-```{r gtmedian-check}
-grade_code(correct = "Well, we implemented the function correctly, but it gave us the median and the inter-quartile range (statistic = {median} ({p25}, {p75})). We are economists. We want the mean and standard deviation (sd). Adjust the 'statistic' option to give us what we want. Give me a couple of digits after the decimal place using digits = list() while you're at it!")
-```
-
-Input the request from the feedback below.
-
-```{r gtsummary, exercise=TRUE, exercise.eval=TRUE}
-
-```
-
-```{r gtsummary-hint}
-# The "statistic" and "digits" options require a list() that includes specifications for either individual variables or defined groups of variables, e.g. "all_continuous()", "all_categorical()". To set these list elements, tbl_summary requires a formula syntax. In other words, use "all_continuous() ~" instead of "all_continuous() =". 
-tbl_summary(..., statistic = ..., digits = ...)
-```
-
-```{r gtsummary-solution}
-tbl_summary(ceosal1, statistic = list(all_continuous() ~ "{mean} ({sd})"), digits = list(all_continuous() ~ c(2,2)))
-```
-
-```{r gtsummary-check}
-grade_code()
-```
-
-## Summarizing Raw Relationships between Variables
-
-Calculate the following:
-
-- The correlation of salary with ROE;
-- The correlation matrix for all numeric variables.
-
-```{r correlation, exercise=TRUE, exercise.eval=TRUE}
-
-
-```
-
-```{r correlation-hint}
-# The cor() function requires variables x and y as inputs, or a data frame. 
-cor(..., ...)
-cor(...)
-```
-
-```{r correlation-solution}
-cor(ceosal1$salary, ceosal1$roe)
-cor(ceosal1)
-```
-
-```{r correlation-check}
-grade_code()
-```
-
-## Pretty Correlation Matrix
-
-Use the *corrgram* function (part of the *corrgram* package) to create a correlogram.
-
-```{r corrheatmap, exercise=TRUE, exercise.eval=TRUE}
-
-
-```
-
-```{r corrheatmap-hint}
-corrgram(...)
-```
-
-```{r corrheatmap-solution}
-corrgram(ceosal1)
-```
-
-```{r corrheatmap-check}
-grade_code(correct = "Hmm... you entered this correctly, but it's not quite what we want. Try setting the options for 'panel' differently so we get something useful.")
-```
-
-Input the suggestion from the feedback below. 
-
-```{r corrgram, exercise=TRUE, exercise.eval=TRUE}
-
-
-```
-
-```{r corrgram-hint}
-# The options for the panel option are: panel.pts, panel.pie, panel.shade, panel.fill, 'panel.bar, panel.ellipse, panel.conf, and panel.cor 
-corrgram(ceosal1, panel = ...)
-```
-
-```{r corrgram-solution}
-corrgram(ceosal1, panel = panel.cor)
-```
-
-```{r corrgram-check}
-grade_code()
-```
-
-## Factor Variable Tables
-
-Using the *affairs* data, do the following: 
-
-- Generate the factor variables *haskids* and *marriage* for kids and ratemarr labels with labels *no*/*yes* and *very unhappy*/*unhappy*/*average*/*happy*/*very happy*, respectively;
-- Create a table that displays the proportions of each outcome of marriage happiness rating; 
-- Create a table that displays the proportions of each outcome of marriage happiness rating *and having kids*.
-
-```{r crosstab, exercise=TRUE, exercise.eval=TRUE}
-
-
-```
-
-```{r crosstab-hint}
-affairs$haskids <- factor(affairs$kids, labels = c("no","yes"))
-affairs$marriage <- factor(affairs$ratemarr, labels = c("very unhappy","unhappy","average","happy", "very happy"))
-# The prop.table() function requires a table input. You can nest a table() function inside prop.table() if you will not need the counts table later. 
-prop.table(table(..., ...))
-prop.table(table(..., ...))
-```
-
-```{r crosstab-solution}
-affairs$haskids <- factor(affairs$kids, labels = c("no","yes"))
-affairs$marriage <- factor(affairs$ratemarr, labels = c("very unhappy","unhappy","average","happy", "very happy"))
-prop.table(table(affairs$marriage))
-prop.table(table(affairs$marriage,affairs$haskids))
-```
-
-```{r crosstab-check}
-grade_code()
-```
-
-## Attractive Crosstab Tables
-
-- Replicate the previous tables using "tbl_cross" (using percent to generate percentages instead of proportions) to generate a more attractive layout that you can save as html. 
-- Combine counts and percentages in one table with each cell displaying percentages in parentheses next to its count.
-
-```{r tbl_cross-setup}
-```
-
-```{r tbl_cross, exercise=TRUE, exercise.eval=TRUE}
-
-
-```
-
-```{r tbl_cross-hint}
-# Typical statistic options are "{n}" (default), "{p}%", or "{n}, ({p}%)". 
-# Typical percent options are "none" (default), "column", "row", or "cell". 
-tbl_cross(..., row = ..., col = ..., statistic = '...', percent = '...')
-```
-
-```{r tbl_cross-solution}
-tbl_cross(affairs, row = marriage, col = haskids)
-tbl_cross(affairs, row = marriage, col = haskids, statistic = "{p}%")
-tbl_cross(affairs, row = marriage, col = haskids, percent = 'cell')
-```
-
-```{r tbl_cross-check}
-grade_code()
-```
-
-## Base Graphics 
-
-Plot the following: 
-
-- A histogram of CEO salary *relative* frequencies using the base-graphics hist() function;
-- A scatterplot of CEO salaries with ROE using the plot() function.
-
-Make sure your plots have descriptive (English) titles: *Histogram of Salary*, *Salary versus ROE*, *Salary*, and *ROE*.
-
-```{r basePlots, exercise=TRUE, exercise.eval=TRUE}
-
-
-```
-
-```{r basePlots-hint}
-# Hist takes a single variable as a required argument. Use main, xlab, and ylab to add descriptive titles. Use freq and/or probability options to switch between absolute and relative frequencies. 
-# The plot() function requires variables x and y as inputs, or a data frame. 
-hist(..., main = "...", xlab = "...", freq = ...)
-plot(ceosal1$salary, ..., main = "...", xlab = "...", ylab = "...")
-```
-
-```{r basePlots-solution}
-hist(ceosal1$salary, main = "Histogram of Salary", xlab = "Salary", freq = FALSE)
-plot(ceosal1$salary, ceosal1$roe, main = "Salary versus ROE", xlab = "Salary", ylab = "ROE")
-```
-
-```{r basePlots-check}
-grade_code()
-```
-
-## Grammar of Graphics (ggplot2)
-
-Some people prefer base graphics. Some prefer gg. Depending on what packages you use, you should know a little of each. You can call the ggplot() function with no arguments (but add them in layers) or inline. Either way, the main arguments you need to specify include (1) data and (2) aesthetics (aes). 
-
-Try replicating the previous plots using ggplot geom_hist() and geom_point syntax. 
-
-```{r ggplot, exercise=TRUE, exercise.eval=TRUE}
-
-
-```
-
-```{r ggplot-hint}
-# The geom_histogram() function requires a dataframe, and a mapping to an aes(x). You may also specify a "y" in aes() to change the scale of the bars.  
-ggplot() +
-  geom_histogram(data = ..., mapping = ...)
-# The geom_point() function requires a dataframe, and a mapping to an aes(x, y). 
-ggplot() + 
-  geom_point(data = ..., mapping = ...)
-```
-
-```{r ggplot-solution}
-ggplot() +
-  geom_freqpoly(data = ceosal1, mapping = aes(salary))
-ggplot() + 
-  geom_point(data = ceosal1, mapping = aes(salary, roe))
-```
-
-```{r ggplot-check}
-grade_code("That's great, but it might be useful to plot the relative frequency instead of the counts. Try adjusting the aesthetics using stat(count) and sum(count).")
-```
-
-Implement the suggestion in the feedback. 
-
-```{r ggrelfreq, exercise=TRUE, exercise.eval=TRUE}
-
-
-```
-
-```{r ggrelfreq-hint}
-# The geom_histogram() function requires a dataframe, and a mapping to an aes(x). You may also specify a "y" in aes() to change the scale of the bars.  
-ggplot() +
-  geom_histogram(data = ..., mapping = ...)
-# The geom_point() function requires a dataframe, and a mapping to an aes(x, y). 
-ggplot() + 
-  geom_point(data = ..., mapping = ...)
-```
-
-```{r ggrelfreq-solution}
-ggplot() +
-  geom_histogram(data = ceosal1, mapping = aes(x = salary, y = stat(count)/sum(count)))
-```
-
-```{r ggrelfreq-check}
-grade_code("You can also use 'geom_freqpoly' to give you something similar, but this will create a line plot connecting the heights of the relative frequencies instead of a true histogram.")
-```

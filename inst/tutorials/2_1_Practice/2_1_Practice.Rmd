@@ -4,6 +4,7 @@ subtitle: "The Simple Regression Model: Basic Properties"
 output: 
   learnr::tutorial:
     progressive: true
+    allow_skip: true
 runtime: shiny_prerendered
 author: 
   name: "Created by [Jim Bang](http://www.github.com/bangecon)"

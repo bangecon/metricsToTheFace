@@ -1,60 +1,38 @@
 ---
-output: slidy_presentation
-runtime: shiny_prerendered
-title: "Chapter 14 \n\n Advanced Panel Data Methods"
-author: "James Bang"
+title: "Chapter 14"
+subtitle: "Advanced Panel Data Methods"
 description: >
   This tutorial introduces advanced panel methods. 
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
 
 ```{r setup, include=FALSE}
 library(learnr)
-library(wooldridge)
-library(plm)
-library(lmtest)
-library(sandwich)
 library(gradethis)
-library(gtsummary)
-library(stargazer)
-library(lmtest)
+tutorial_options(exercise.eval = TRUE, exercise.reveal_solution = TRUE)
 gradethis::gradethis_setup()
-crime4 <- wooldridge::crime4
-crime4.p <- pdata.frame(crime4, index=c("county", "year") )
-crime4.p$lcrmrte.b <- Between(crime4.p$lcrmrte)
-crime4.p$lcrmrte.w <- Within(crime4.p$lcrmrte)
-crime4.p$lprbarr.b <- Between(crime4.p$lprbarr)
-crime4.p$lprbarr.w <- Within(crime4.p$lprbarr)
-crime4.p$lprbconv.b <- Between(crime4.p$lprbconv)
-crime4.p$lprbconv.w <- Within(crime4.p$lprbconv)
-crime4.p$lprbpris.b <- Between(crime4.p$lprbpris)
-crime4.p$lprbpris.w <- Within(crime4.p$lprbpris)
-crime4.p$lavgsen.b <- Between(crime4.p$lavgsen)
-crime4.p$lavgsen.w <- Within(crime4.p$lavgsen)
-crime4.p$lpolpc.b <- Between(crime4.p$lpolpc)
-crime4.p$lpolpc.w <- Within(crime4.p$lpolpc)
-crmrte.fe1 <- lm(log(crmrte) ~ lprbarr + lprbconv + lprbpris + lavgsen + lpolpc + factor(county), 
-                  data = crime4.p)
-crmrte.fe2 <- lm(lcrmrte.w ~ lprbarr.w + lprbconv.w + lprbpris.w + lavgsen.w + lpolpc.w, 
-                  data = crime4.p)
-crmrte.fe3 <- plm(log(crmrte) ~ lprbarr + lprbconv + lprbpris + lavgsen + lpolpc, 
-                  data = crime4.p, model = "within")
-crmrte.fe4 <- plm(log(crmrte) ~ lprbarr + lprbconv + lprbpris + lavgsen + lpolpc, 
-                  data = crime4.p, effects = "individual")
-crmrte.be1 <- lm(lcrmrte.b ~ lprbarr.b + lprbconv.b + lprbpris.b + lavgsen.b + lpolpc.b, 
-                 data = crime4.p)
-crmrte.re1 <- plm(log(crmrte) ~ lprbarr + lprbconv + lprbpris + lavgsen + lpolpc, 
-                  data = crime4.p, model = "random", effects = "none")
-crmrte.re2 <- plm(log(crmrte) ~ lprbarr + lprbconv + lprbpris + lavgsen + lpolpc, 
-                  data = crime4.p, effects = "none")
-crmrte.cre1 <- plm(lcrmrte ~ lprbarr + lprbconv + lprbpris + lavgsen + lpolpc + 
-                    lprbarr.b + lprbconv.b + lprbpris.b + lavgsen.b + lpolpc.b, 
-                  data = crime4.p, model = "random", effects = "none")
-crmrte.cre2 <- plm(lcrmrte ~ lprbarr + lprbconv + lprbpris + lavgsen + lpolpc + west + central +
-                    urban + lprbarr.b + lprbconv.b + lprbpris.b + lavgsen.b + lpolpc.b, 
-                  data = crime4.p, model = "random", effects = "none")
-crmrte.fe5 <- plm(lcrmrte ~ lprbarr + lprbconv + lprbpris + lavgsen + lpolpc + west + central + 
-                   urban, data = crime4.p, effects = "individual")
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, fig.height= 9, fig.width=8)
 ```
 
 # Correlated Random Effects
