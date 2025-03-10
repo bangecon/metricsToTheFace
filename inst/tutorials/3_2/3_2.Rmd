@@ -38,7 +38,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 The proofs in this tutorial are a bit easier if we express the estimator in matrix form. In matrix form, OLS solves 
 $$ min_\hat\beta (X\hat\beta\ - y)'(X\hat\beta - y) $$
-$$ min_\hat\beta (\hat\beta' X'X \hat\beta - 2\hat\beta'X'y - y'y)  $$
+$$ min_\hat\beta (\hat\beta' X'X \hat\beta - 2\hat\beta'X'y + y'y)  $$
 The first order condition solves
 $$ 2X'X\hat\beta - 2X'y = 0 $$
 The solution to which is
