@@ -183,7 +183,7 @@ Controlling for too many things risks overfitting the sample (and threatens exte
 
 Controlling for a variable that *causes* your treatment introduces *collider bias*. 
 
-```{r, echo = FALSE}
+```{r, echo = FALS, out.width="50%"E}
 library(tidyverse)
 library(gganimate)
 library(gifski)
@@ -228,7 +228,7 @@ animate(p,nframes=200)
 
 Controlling for a variable that is *caused by* the treatment and subsequently causes the outcome introduces post-treatment effect bias. 
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, out.width="50%"}
 library(tidyverse)
 library(gganimate)
 library(gifski)
