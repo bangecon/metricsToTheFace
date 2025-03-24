@@ -40,7 +40,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 Suppose we want to estimate the following model of (standardized) final exam scores: 
 
-$$\begin{align}Final &= \beta_0 + \beta_1Attendance + \beta_2PriorGPA + \beta_3ACT \\ &+ \beta_4PriorGPA^2 + \beta_5ACT^2 \end{align}$$
+1. $\begin{align}Final &= \beta_0 + \beta_1Attendance + \beta_2PriorGPA + \beta_3ACT + \beta_4PriorGPA^2 + \\ &\beta_5ACT^2 + u \end{align}$
 where: 
 
 $Attendance =$ percentage of classes the student attended, `atndrte`<br>
@@ -49,7 +49,7 @@ $ACT =$ student's ACT score, `ACT`<br>
 
 We may suspect that the *effect* of attendance depends on, or is *moderated by*, prior GPA: Attendance might not matter as much for students who do perform well generally. Then, 
 
-$$\begin{align}Final &= \beta_0 + \beta_1Attendance + \beta_2PriorGPA + \beta_3ACT \\ &+ \beta_4PriorGPA^2 + \beta_5ACT^2 + \beta_6PriorGPA \cdot Attendance + u \end{align}$$
+2. $\begin{align}Final &= \beta_0 + \beta_1Attendance + \beta_2PriorGPA + \beta_3ACT + \beta_4PriorGPA^2 \\ &+ \beta_5ACT^2 + \beta_6PriorGPA \cdot Attendance + u \end{align}$
 $\hat\beta_1 =$ effect of attendance on final performance *when prior GPA equals zero*. 
 
 What we (probably) want to know: The effect of attendance on final performance *at the mean* (of prior GPA and other variables): $\frac{\delta{Final}}{\delta{Attendance}}\Big\rvert_{PriorGPA = \bar{x}_{PriorGPA}} = \beta_1 + \beta_6 \cdot \bar{x}_{PriorGPA}$ 
@@ -99,7 +99,7 @@ grade_this({
 ### Centering Continous Interactions
 
 A trick to make things less cumbersome is to *center* the variables in the interaction. This estimates: 
-$$ Final = \beta_0 + \beta_1Attendance + \beta_2PriorGPA + \beta_3ACT + \beta_4PriorGPA^2 + \beta_5ACT^2 + \beta_6(PriorGPA - \mu_{PriorGPA}) \cdot (Attendance - \mu_{Attendance}) + u $$
+3. $\begin{align}Final &= \beta_0 + \beta_1Attendance + \beta_2PriorGPA + \beta_3ACT \beta_4PriorGPA^2 \\ &+ \beta_5ACT^2 + \beta_6(PriorGPA - \mu_{PriorGPA}) \cdot (Attendance - \mu_{Attendance}) + u \end{align}$
 
 Re-estimate the second specification using the `scale()` function with `scale = FALSE` for the interactions and summarize all three models using `stargazer()`. 
 
