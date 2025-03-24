@@ -172,7 +172,7 @@ $LM = nR_{\hat{u}^2}^2$
 ### House Prices
 
 1. Estimate the model of house prices given in by:  
-$Price = \beta_0 + \beta_1LotSize + \beta_2SquareFeet + \beta_3Bedrooms + u$
+$Price = \beta_0 + \beta_1 Lot Size + \beta_2 Square Feet + \beta_3 Bedrooms + u$
 2. Estimate the regression of the squared residuals on the explanatory variables. 
 3. Calculate the Breusch-Pagan statistic as the F-Statistic of the residual regression and the corresponding p-value. 
 4. Calculate the Breusch-Pagan LM-Statistic "by hand". 
