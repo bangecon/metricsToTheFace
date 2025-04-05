@@ -137,12 +137,12 @@ list(c(bpF1, bpF1p), bp1)
 ```
 
 ```{r white-solution}
-ureg1w  <- lm(resid(nettfa.lm2) ~ fitted(nettfa.lm2) + I(fitted(nettfa.lm2)^2))
+ureg1w  <- lm(resid(nettfa.lm2) ^ 2 ~ fitted(nettfa.lm2) + I(fitted(nettfa.lm2)^2))
 whiteF  <- summary(ureg1w)$fstatistic
 whiteFp <- pf(whiteF[1], whiteF[2], whiteF[3], lower.tail = FALSE)
-white1 <- bptest(nettfa.lm2, ~ fitted(nettfa.lm2) + I(fitted(nettfa.lm2)^2), 
+white   <- bptest(nettfa.lm2, ~ fitted(nettfa.lm2) + I(fitted(nettfa.lm2)^2), 
                  data = subset(k401ksubs, fsize == 1))
-list(c(whiteF1, whiteF1p), white1)
+list(c(whiteF, whiteFp), white)
 ```
 
 ```{r white-check}

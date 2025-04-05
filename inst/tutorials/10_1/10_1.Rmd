@@ -1,0 +1,141 @@
+---
+title: "Chapter 10" 
+subtitle: "Basic Regression Analysis with Time Series Data"
+description: >
+  This tutorial introduces basic issues specific to time series in regression analysis.
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+tutorial_options(exercise.eval = TRUE, exercise.reveal_solution = TRUE)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE, fig.height= 9, fig.width=8)
+```
+
+## The Nature of Time Series Data
+
+Temporal ordering of observations; cannot be arbitrarily reordered  
+Serial correlation  
+Nonindependence of observations  
+
+### Examples
+
+1. Static Models:  
+Inflation and Unemployment (Phillips Curve)  
+$$Inflation_t = \beta_0 + \beta_1 Unemployment + u_t$$  
+Murder Rates  
+$$Murder\ Rate_t = \beta_0 + \beta_1 Conviction\ Rate_t + \beta_2 Unemployment_t + \beta_3 Male\ Youth_t + u_t$$  
+2. Finite Distributed Lag Models:  
+Fertility Rates  
+$$Fertility\ Rate_t = \alpha_0 + \delta_0 Tax\ Exemption_t + \delta_1 Tax\ Exemption_{t-1} + \delta_2 Tax\ Exemption_{t-1} + u_t$$  
+Effect of Temporary versus Permanent Changes in the Treatment  
+$Impact\ Multiplier = \delta_0$
+$Long\text{-}Run\ Multiplier = \delta_0 + \delta_1 + \delta_2$
+
+## Assumptions  
+
+### Assumptions needed for $\hat\beta_OLS$ to be "BLUE"
+
+1.  Linear in the parameters  
+2.  No perfect multicollinearity  
+3.  $E(u|X)=0$ (strict exogeneity)  
+    a.  No omitted variables  
+    b.  No endogenous regressors  
+    c.  No measurement error  
+    d.  No included "colliders" (e.g. post-treatment effects)  
+4.  $Var(u) = \sigma^2$ (homoskedasticity)  
+5.  $X_i$'s and $Y_i$'s are independently and identically distributed
+(random sampling)  
+6.  $E(X^4) < 0$, $E(Y^4) < 0$ (no extreme "outliers")  
+Additional assumption for $\hat\beta_{OLS}$ to be "MVUE"  
+7.  $u \sim N(0, \sigma^2)$ (normal distribution of errors)  
+
+### Strong Assumptions for Time Series Data  
+
+Strict independence (2), exogeneity (4), and homoskedasticity (5) may be
+unrealistic. Replace with:  
+1.  Linear in the parameters  
+2.  No perfect multicollinearity  
+3.  $E(u_t|X)=0$ (strict exogeneity)  
+4.  $Var(u) = \sigma^2$ (homoskedasticity)  
+5.  $Corr(u_s, u_t |X) = 0, t \neq 0$ (independence - no serial correlation)  
+Additional assumption for $\hat\beta_{OLS}$ to be "MVUE"  
+6.  $u \sim N(0, \sigma^2)$ (normal distribution of errors)  
+
+## Example: Static Model of the Phillips Curve
+
+Use the `phillips` dataset in the `wooldridge` package containing data on US unemployment and inflation from 1948-2003 to estimate the following model:  
+$$Inflation_t = \beta_0 + \beta_1 Unemployment_t$$
+Summarize your output. 
+
+```{r phillips, exercise = TRUE}
+
+```
+
+```{r phillips-solution}
+phillips <- wooldridge::phillips
+phillips.lm1 <- lm(inf ~ unem, data = phillips)
+summary(phillips.lm1)
+```
+
+```{r phillips-check}
+grade_this({
+  if (identical(.result, .solution)) {
+    pass(random_praise())
+  }
+  fail(random_encouragement())
+})
+```
+
+## Example: Finite Distributed Lag Model of Fertility
+
+Use the `fertil3` dataset in the `wooldridge` package containing data on US fertility rates and tax exemptions from 1913-1984 to estimate the following models:
+
+1. $Fertility_t = \alpha_0 + \delta_1 Tax\ Exemption_t + \beta_1 WW2_t + \beta_2 Pill_t + u_t$ 
+
+2. $Fertility_t = \alpha_0 + \delta_1 Tax\ Exemption_t + \delta_1 Tax\ Exemption_{t-1} + \delta_1 Tax\ Exemption_{t-1} + \beta_1 WW2_t + \beta_2 Pill_t + u_t$
+
+## Trends and Seasonality  
+
+### Time Trends
+
+1.  Linear Time Trend  
+$$\Delta y_t = y_t - y_{t-1} = \alpha_1 + u_t$$
+$$y_t = \alpha_0 + \alpha_1 t + u_t$$
+
+2.  Exponential Time Trend
+$$\Delta log(y_t) = \frac{\Delta y_t}{y_t} = \alpha_1 + u_t$$
+$$\log(y_t) = \alpha_0 + \alpha_1 t + u_t$$
+3.  Nonparametric Time Trend (Panel Data Only)
+
+$$y_{it} = \alpha_0 + \sum_{t=1}^T \alpha_t d_t + X_{it} \beta + u_t$$
+Also known as time fixed effects. 
+
+### Seasonality
+
+Adjusting for seasonality merely involves including dummy variables for each month or quarter. 
+
+$$y_t = \alpha_0 + \alpha_1 Q1_t + \alpha_2 Q2_t + \alpha_3 Q3_t + X_t \beta + u_t$$
