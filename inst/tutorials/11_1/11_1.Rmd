@@ -118,6 +118,7 @@ Non-Stationarity
 Sometimes we can "see" nonstationarity in the time series plot:
 
 ```{r}
+fertil3 <- wooldridge::fertil3
 par(mfrow=c(1,2))
 plot(fertil3$year[-1], fertil3$gfr[-1], type = 'l', xlab = "Year", ylab = "Fertility")
 plot(fertil3$year[-1], diff(fertil3$gfr), type = 'l', xlab = "Year", ylab = "Change in Fertility")
