@@ -1,8 +1,8 @@
 ---
 title: "Chapter 11" 
-subtitle: "Advanced Time Series"
+subtitle: "Furher Issues in OLS with Time Series Data"
 description: >
-  This tutorial introduces some problems specific to time series in regression analysis.
+  This tutorial introduces some additional problems specific to time series in regression analysis.
 author: 
   name: "Created by [Jim Bang](http://www.github.com/bangecon)"
   email: BangJamesT@sau.edu
@@ -39,83 +39,61 @@ knitr::opts_chunk$set(echo = FALSE, fig.height= 9, fig.width=8)
 
 Assumptions needed for $\hat\beta_OLS$ to be "BLUE"
 
-1.  Linear in the parameters
-
+1.  Linear in the parameters  
 2.  $X_i$'s and $Y_i$'s are independently and identically distributed
-    (random sampling)
-
-3.  No perfect multicollinearity
-
-4.  $E(u|X)=0$ (strict exogeneity)
-
-    a.  No omitted variables
-    b.  No endogenous regressors
-    c.  No measurement error
-    d.  No included "colliders" (e.g. post-treatment effects)
-
-5.  $Var(u) = \sigma^2$ (homoskedasticity)
-
-6.  $E(X^4) < 0$, $E(Y^4) < 0$ (no extreme "outliers")
-
-Additional assumption for $\hat\beta_{OLS}$ to be "MVUE"
-
-7.  $u \sim N(0, \sigma^2)$ (normal distribution of errors)
+    (random sampling)  
+3.  No perfect multicollinearity  
+4.  $E(u|X)=0$ (strict exogeneity)  
+    a.  No omitted variables  
+    b.  No endogenous regressors  
+    c.  No measurement error  
+    d.  No included "colliders" (e.g. post-treatment effects)  
+5.  $Var(u) = \sigma^2$ (homoskedasticity)  
+6.  $E(X^4) < 0$, $E(Y^4) < 0$ (no extreme "outliers")  
+Additional assumption for $\hat\beta_{OLS}$ to be "MVUE"  
+7.  $u \sim N(0, \sigma^2)$ (normal distribution of errors)  
 
 ## Strong Assumptions for Time Series (Chapter 10)
 
 Strict independence (2), exogeneity (4), and homoskedasticity (5) may be
-unrealistic. Replace with
-
-1.  Linear in the parameters
-2.  Independence (random sampling)
-3.  No perfect multicollinearity
-4.  $E(u_t|X)=0$ (strict exogeneity)
-5.  $Var(u) = \sigma^2$ (homoskedasticity)
-6.  $Corr(u_s, u_t |X) = 0, t \neq 0$ (no serial correlation)
+unrealistic. Replace with:  
+1.  Linear in the parameters  
+2.  Independence (random sampling)  
+3.  No perfect multicollinearity  
+4.  $E(u_t|X)=0$ (strict exogeneity)  
+5.  $Var(u) = \sigma^2$ (homoskedasticity)  
+6.  $Corr(u_s, u_t |X) = 0, t \neq 0$ (no serial correlation)  
 
 ## Weakened Assumptions for Time Series (Chapter 11)
 
-Independence (2) *strict* exogeneity (4), homoskedasticity (5), and *no* serial correlation (6)
-may be unrealistic. Replace with:
-
-2.  Weak dependence <br>
-    $\lim_{h \to \infty} \text{corr}(X_t, X_{t+h}) = 0$ <br>
-    $\lim_{h \to \infty} \text{corr}(Y_t, Y_{t+h}) = 0$ <br> Dependence
-    between two values of X and Y decays the farther apart they are.
-
-Stationarity (three types)
-
-4.  Mean stationary: $E(x_t) = \mu$ <br> $E(u_t|X_t)=0$
-    (*contemporaneous* exogeneity)\
-5.  Variance stationary: mean stationarity *and* $V(x_t) = \sigma^2$
-    (*contemporaneous* homoskedasticity)
-6.  Covariance stationary: variance stationarity *and*
-    $Cov(x_t, x_{t+h}) = f(h)$ <br> $E(u_tu_s|X_t,X_s)=0$ (no [contemporaneous?] serial
-    correlation)
+Independence (2), *strict* exogeneity (4), homoskedasticity (5), and *no* serial correlation (6) may be unrealistic. Replace with:  
+2. Weak dependence  
+    $\lim_{h \to \infty} \text{corr}(X_t, X_{t+h}) = 0$  
+    $\lim_{h \to \infty} \text{corr}(Y_t, Y_{t+h}) = 0$  
+    Dependence between two values of X and Y decays the farther apart they are.  
+Stationarity (three types)  
+4.  Mean stationary: $E(x_t) = \mu$ <br> $E(u_t|X_t)=0$ (*contemporaneous* exogeneity)  
+5.  Variance stationary: mean stationarity *and* $V(x_t) = \sigma^2$ (*contemporaneous* homoskedasticity)  
+6.  Covariance stationary: variance stationarity *and*  
+    $Cov(x_t, x_{t+h}) = f(h)$ <br> $E(u_tu_s|X_t,X_s)=0$ (no [contemporaneous?] serial correlation)  
 
 Linearity, weak dependence, no perfect multicollinearity, and
 stationarity imply OLS will be *consistent* (but not necessarily
-completely unbiased)
+completely unbiased).  
 
 Consistency: $\text{plim}_{t \to \infty}\hat\beta = \beta$
 
-
 ## Examples
 
-Weak Dependence
+Weak Dependence  
+1.  MA(1) processes <br> $x_t = e_t + \alpha x_{t-1}$  
+2.  AR(1) processes <br> $y_t = \rho y_{t-1} + e_t$  
+Non-Stationarity  
+1.  Time trend <br> $y_t = \beta t + e_t$  
+2.  Seasonality <br> $y_t = \sum_{k=1}^K \delta_k s_kt + e_t$  
+3.  Random Walk <br> $y_t = y_{t-1} + e_t$  
 
-1.  MA(1) processes <br> $x_t = e_t + \alpha x_{t-1}$
-2.  AR(1) processes <br> $y_t = \rho y_{t-1} + e_t$
-
-Non-Stationarity
-
-1.  Time trend <br> $y_t = \beta t + e_t$
-2.  Seasonality <br> $y_t = \sum_{k=1}^K \delta_k s_kt + e_t$
-3.  Random Walk <br> $y_t = y_{t-1} + e_t$
-
-## Examples, Continued
-
-Sometimes we can "see" nonstationarity in the time series plot:
+Sometimes we can "see" non-stationarity in the time series plot:
 
 ```{r}
 fertil3 <- wooldridge::fertil3
@@ -126,7 +104,9 @@ plot(fertil3$year[-1], diff(fertil3$gfr), type = 'l', xlab = "Year", ylab = "Cha
 
 ## Exercise
 
-Using the $dynlm$ package, do the following:
+### Setup  
+
+Using the `nyse` dataset and the `dynlm` package, do the following:
 
 1.  Define time series (numbered 1,...,n and named $nyse.ts$)
 2.  Line plot the price against the time period
@@ -138,7 +118,7 @@ Using the $dynlm$ package, do the following:
 ```
 
 ```{r stationary-hint}
-nyse.ts <- ts(data)
+data.ts <- ts(data)
 plot(x, y)
 ```
 
@@ -152,18 +132,13 @@ plot(nyse$t, nyse$return, type = 'l')
 grade_code()
 ```
 
-## Exercise, Continued
+### Estimation  
 
-Next, do the following:
-
-1.  Estimate the following autoregressive models:
-    a.  $Return_t = \beta_0 + \beta_1 Return_{t-1} + e_t$
-    b.  $Return_t = \beta_0 + \beta_1 Return_{t-1} + \beta_2 Return_{t-2} + e_t$
-    c.  $Return_t = \beta_0 + \beta_1 Return_{t-1} + \beta_2 Return_{t-2} + \beta_3 Return_{t-3} + e_t$
-
-2.  Present the regression results using a formatted text-formatted
-    table with the number of observations, $R^2$, $\bar{R}^2$, and $F$
-    statistics reported at the bottom.
+1.  Estimate the following autoregressive models:  
+    a.  $Return_t = \beta_0 + \beta_1 Return_{t-1} + e_t$  
+    b.  $Return_t = \beta_0 + \beta_1 Return_{t-1} + \beta_2 Return_{t-2} + e_t$  
+    c.  $Return_t = \beta_0 + \beta_1 Return_{t-1} + \beta_2 Return_{t-2} + \beta_3 Return_{t-3} + e_t$  
+2.  Present the regression results using a formatted text-formatted table with the number of observations, $R^2$, $\bar{R}^2$, and $F$ statistics reported at the bottom.  
 
 ```{r arp, exercise = TRUE}
 
@@ -176,7 +151,6 @@ ar1 <- dynlm(formula, data)
 ar2 <- dynlm(formula, data) 
 ar3 <- dynlm(formula, data) 
 stargazer(list, type, keep.stat)
-
 ```
 
 ```{r arp-solution}
@@ -191,8 +165,21 @@ stargazer(reg1, reg2, reg3, type="text", keep.stat=c("n","rsq","adj.rsq","f"))
 grade_code()
 ```
 
+## Dynamically Complete Models in the Absence of Serial Correlation
+
+Consistency of the static model, $y_t = \beta_0 + \beta_1 x_t + u_t$ "only" requires $E(u_t|X_t)=0$.  
+Usually $u_t$ is serially correlated, but *if* we can assume that $E(u_t|X_t, y_{t-1}, X_{t-1},...) = E(u_t|X_t) = 0$, then the contemporaneous values of $X$ and $y$ contain all of the past information of themselves, and we can use the static model. 
+However, this is a strong assumption.  
+
+In general, we often encounter variables with *autocorrelation*.  
+To account for this we need to include an appropriate number of *lagged* values of the dependent *and* explanatory variables in the model. This is the idea behind the *Autoregressive Distributed Lag* (ADL) model: 
+
+$$y_t = \alpha + \rho_1 y_{t-1} + ... + \rho_p y_{t-p} + \beta_0 x_t + \beta_1 x_{t-1} + ... + \beta_p x_{t-p} + u_t$$
+
+where $p$ is the optimal lag length that can be determined using the *Akaike Information Criterion* (AIC) or *Bayesian Information Criterion* (BIC).
+
 ## Rules of Thumb
 
 1.  Include lags of the dependent variable
-2.  Take first differences (sometimes higher differences)
-3.  Check for serial correlation?
+2.  Check for serial correlation in the errors (see Chapter 12)
+3.  Take first (or higher-order) differences (see chapter 18)

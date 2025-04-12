@@ -37,7 +37,9 @@ knitr::opts_chunk$set(echo = FALSE)
 ## Population Density and Crime 
 
 1. Estimate the following model using the `crime2` dataset.
-$$ln(CrimeRate) = \beta_0 + \beta_1ln(LawExpendPC) + \beta_2ln(IncomePC) + \beta_3ln(PopulationDensity) + \beta_4West + \beta5Northeast + \beta_6South + u$$
+$$\begin{align} ln(CrimeRate) &= \beta_0 + \beta_1ln(LawExpend.PC) + \beta_2ln(IncomePC) \\ 
+&+ \beta_3ln(Pop.Density) + \beta_4West + \beta5Northeast\\ 
+&+ \beta_6South + u \end{align}$$
 2. Construct a 99% confidence interval for the law-enforcement expenditure elasticity of crime rates using `confint`.
 
 ```{r crime, exercise=TRUE}
@@ -63,7 +65,7 @@ grade_this({
 
 ### Estimation
 
-Use the `colGPA` to estimate the following model:  
+Use the `gpa1` to estimate the following model:  
 $$CollegeGPA = \beta_0 + \beta_1HSGPA + \beta_2ACT + \beta_3Skipped + u,$$ 
 where `skipped` measures the average number of classes a student missed each week. 
 

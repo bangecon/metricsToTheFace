@@ -186,9 +186,9 @@ Create a new named variable in $card$ called "educhat" equal to the $fitted.valu
 
 Substitute these fitted values for the raw education variable in the wage equation. 
 
-Use the ivreg function to calculate the "two stage least squares" (2SLS) instrumental-variables estimator for the wage equation, using proximity to a four-year college as the excluded instrument for eucation. 
+Use the ivreg function to calculate the "two stage least squares" (2SLS) instrumental-variables estimator for the wage equation, using proximity to a four-year college as the excluded instrument for education. 
 
-Summarize the results of the OLS estimator and both of the TSLS  using $stargazer$. 
+Summarize the results of the OLS estimator and both of the 2SLS using `stargazer`. 
 
 ```{r cardiv, exercise = TRUE}
 

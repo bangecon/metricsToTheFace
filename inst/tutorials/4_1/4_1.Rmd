@@ -185,32 +185,20 @@ $$ H_0: \beta = 0 $$ $$ H_1: \beta > 0 $$
 The following code calculates and graphs the rejection region (red), and p-value region for a one-tailed test ($P[t > \hat{\beta}_j/\hat{\sigma}_{\hat{\beta}_j}]$).
 
 ```{r, echo = TRUE}
+library(ggplot2)
 wage1 <- wooldridge::wage1
 wage.lm6 <- lm(wage ~ exper + educ + tenure, data = wage1)
-# Define values for x and y axes, and the critical and test values.
-x <- seq(-3.5, 3.5, length = 1000)
-y <- dt(x, wage.lm6$df.residual)
-t.critval <- qt(0.95, wage.lm6$df.residual)
-t.testval <- summary(wage.lm6)$coefficients['exper', 't value']
-# Plot the t distribution with n-k-1 degrees of freedom and sensibly-labeled axes.
-plot(x,
-     y,
-     type = "l",
-     ylab = "f(t)",
-     xlab = "t")
-# Add the polygon for the right-tailed, alpha = 0.05 t-critical value.
-polygon(c(x[x >= t.critval], max(x), t.critval),
-        c(y[x >= t.critval], 0, 0),
-        col = "red",
-        density = 10)
-# Add the polygon for the p-value.
-polygon(
-  c(x[x >= t.testval], max(x), t.testval),
-  c(y[x >= t.testval], 0, 0),
-  col = "blue",
-  density = 10,
-  angle = -45
-)
+tc = qt(.95, df = wage.lm6$df.residual)
+qvals = seq(tc, 4, by = 0.01)
+pvals = seq(summary(wage.lm6)$coefficients['exper','t value'], 4, by = 0.01)
+tq = dt(qvals, df = wage.lm6$df.residual)
+tp = dt(pvals, df = wage.lm6$df.residual)
+ggplot() + 
+  geom_function(fun = function(x) dt(x, df = wage.lm6$df.residual)) + 
+  geom_ribbon(aes(x = qvals, ymin = 0, ymax = tq), fill = "red", alpha = .3) + 
+  geom_ribbon(aes(x = pvals, ymin = 0, ymax = tp), fill = "blue", alpha = .3) + 
+  lims(x = c(-4, 4)) + 
+  labs(title = "Rejection Region and P Values", x = "t", y = "Density") 
 ```
 
 ## Do Sales Revenues *Affect* CEO Salaries?

@@ -1,0 +1,200 @@
+---
+title: "Chapter 11" 
+subtitle: "Furher Issues in OLS with Time Series Data"
+description: "This tutorial discusses tests for stationarity."
+author: 
+  name: "Created by [Jim Bang](http://www.github.com/bangecon)"
+  email: BangJamesT@sau.edu
+  affiliation: "[St. Ambrose University](http://www.sau.edu)"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+always_allow_html: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+<style type="text/css">
+h1{font-size: 24pt}
+h2{font-size: 20pt}
+h3{font-size: 18pt}
+h4,h5,h6{font-size: 16pt}
+body{font-size: 16pt}
+</style>
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+tutorial_options(exercise.eval = TRUE, exercise.reveal_solution = TRUE)
+gradethis::gradethis_setup()
+knitr::opts_chunk$set(echo = FALSE, fig.height= 9, fig.width=8)
+```
+
+## Testing for Nonstationarity
+
+Suppose we have a time series $y_t$ that follows an AR(1) process:  
+$$y_t = \alpha + \rho y_{t-1} + u_t$$
+where $u_t$ is a white noise error term with mean zero.  
+
+If $\rho = 1$ $y_t$ is a random walk and if $\rho >1$ $y_t$ is an explosive time series and in either case $y_t$ is nonstationary.
+$y_t$ is stationary only if $|\rho| < 1$.  
+(We are not usually worried about $\rho \le -1$, which would mean $y_t$ *implodes* to $-\infty$, because very few economic variables would behave this way, but it is statistically possible in theory.)
+
+We would like to test the null hypothesis that $\rho = 1$ (nonstationarity) against the alternative hypothesis that $\rho < 1$ (stationarity). The most common test for this is the Dickey-Fuller test.  
+
+### Dickey-Fuller Test
+
+To carry out the Dickey-Fuller test, we first rearrange the AR(1) equation to get:  
+$$\Delta y_t = \theta y_{t-1} + u_t$$
+where $\Delta y_t = y_t - y_{t-1}$ and $\theta = \rho - 1$. We then test $H_0: \theta = 0$ (nonstationarity) against $H_a: \theta < 0$ (stationarity).  
+
+While estimating the test statistic for the Dickey-Fuller test is a simple OLS estimation with corresponding OLS standard errors, the distribution for the test statistic itself is not a simple t-test: the distribution of the Dickey-Fuller test statistic is the... Dickey-Fuller distribution.  
+
+### Augmented Dickey-Fuller Test
+
+We can also use the Augmented Dickey-Fuller test (ADF) which adds lagged values of $\Delta y_t$. The ADF test is more robust to serial correlation in the error term and is the most common test for nonstationarity.  
+
+$$\Delta y_t = \theta y_{t-1} + \beta_1 \Delta y_{t-1} + ... + u_t$$
+Other options include adding a "drift" (constant) term, 
+$$\Delta y_t = \alpha + \theta y_{t-1} + \beta_1 \Delta y_{t-1} + ... + u_t$$
+time trend,  
+$$\Delta y_t = \beta_0 t + \theta y_{t-1} + \beta_1 \Delta y_{t-1} + ... + u_t$$
+or both.  
+
+### Example: Unit roots in GDP 
+
+Use the `inven` dataset from `wooldridge` to conduct an ADF test for a unit root in $log(GDP)$ using the `adf.test` function in the `tseries` package.  
+
+```{r adf, exercise = TRUE}
+
+```
+
+```{r adf-hint}
+# Remember to load the necessary packages and define your data frame as a time series. 
+```
+
+```{r adf-solution}
+library(dynlm)
+library(tseries)
+data(inven, package='wooldridge')
+inven.ts<- ts(inven)
+summary(dynlm( d(log(gdp)) ~ L(log(gdp)) + L(d(log(gdp))) + trend(inven.ts), data=inven.ts))
+adf.test(log(inven$gdp), k=1)
+```
+
+```{r adf-check}
+grade_code()
+```
+
+An alternative to the `adf.test` function is the `ur.df` function in the `urca` package. The `ur.df` function has a number of options for testing for unit roots, including the ADF test, the Phillips-Perron test, and the Kwiatkowski-Phillips-Schmidt-Shin (KPSS) test. The following code shows how to use the `ur.df` function to conduct an ADF test for a unit root in $log(GDP)$ using the `inven` dataset.  
+  
+```{r urca, echo = TRUE}
+library(urca)
+data(inven, package='wooldridge')
+summary( ur.df(log(inven$gdp) , type = c("trend"), lags = 1) )
+```
+
+The value of the test statistic we're interested in for the unit-root test is the first value in the "Value of the test statistic is:" row. The critical values are given in the "tau3" row of the "Critical values for the test statistics" table. Just like when we used `adf.test` we fail to reject the null hypothesis that GDP contains a unit root. Interpreting the output from `urca` is a bit more complicated, but this package is more flexible and allows for more options, including tests for cointegration, which we cover next.  
+
+## Cointegration
+
+Cointegration occurs when two or more nonstationary time series are related to each other in such a way that they share a common trend. This means that even though the individual time series may be nonstationary, their linear combination is stationary.
+
+### Spurious Regression
+
+Sometimes we have two variables that both follow a random walk, but they are still related to each other. For example, suppose we have two variables $y_t$ and $x_t$ that both follow independent random walk processes. We can write:
+$$y_t = y_{t-1} + u_t$$
+and
+$$x_t = x_{t-1} + v_t$$
+where $u_t$ and $v_t$ are white noise error terms.  
+
+Since $x$ and $y$ are independent, if we estimated the static time series for these variables $y_t = \beta_0 + \beta_1 x_t + u_t$, we would expect to get an *insignificant* result for $\beta_1$ about 95% of the time (at the 5% significance level). This is not the case and we end up finding a *significant* coefficient on $beta_1$ much more than 5% of the time because the fact that both processes share a random walk means that they may follow a common trend. 
+
+### Testing for Cointegration: Testing the Order of Integration
+
+If we have two nonstationary time series $y_t$ and $x_t$ whose first-differences are stationary ($I(1)$ processes), then in general, a linear combination of those variables, $y_t - \beta x_t$ is also stationary in first-differences ($I(1)$). However, it is still possible that for *some* $\beta = \beta^*$, $y_t - \beta^* x_t$ itself could be stationary ($I(0)$.  
+
+We can test for cointegration by estimating the static regression: 
+$$y_t = \beta_0 + \beta_1 x_t + u_t$$ 
+then testing the residuals $u_t = $ for stationarity. If the residuals are stationary, then $y_t$ and $x_t$ are cointegrated.
+
+Unfortunately, the distribution of the test statistic for $u_t$ being stationary is *neither* a t-test *nor* a Dickey-Fuller test. The distribution of the test statistic is the Engle-Granger distribution, whose critical values and p-values were derived by Davidson and McKinnon (1993). 
+
+### Example: Fertility and Personal Income
+
+Use the `fertility` dataset from `wooldridge` to conduct an ADF test for a unit root in $log(GDP)$ using the `adf.test` function in the `tseries` package.  
+
+```{r ur, exercise = TRUE}
+
+```
+
+```{r ur-hint}
+# Remember to test the level of integration for each variable.
+# Do the levels contain a unit root?
+# Are the differences stationary? 
+```
+
+```{r ur-solution}
+library(dynlm)
+library(tseries)
+library(urca)
+data(fertil3, package='wooldridge')
+# Confirm that fertility and the tax exemption *contain* a unit root in their levels. 
+summary( ur.df(fertil3$gfr, type = c("trend"), lags = 1) )
+summary( ur.df(fertil3$pe, type = c("trend"), lags = 1) )
+# Confirm that the differences are stationary.
+summary( ur.df(diff(fertil3$gfr), type = c("trend"), lags = 1) )
+summary( ur.df(diff(fertil3$pe), type = c("trend"), lags = 1) )
+```
+
+```{r ur-check}
+grade_code()
+```
+
+Since the first set of tests yield test statistics of $-1.474$ and and $-1.471$, respectively, against a 5% critical value of $-3.45$, we fail to reject the null hypothesis of a unit root in levels. However, since the second set of tests yield test statistics of $-5.86$ and $-5.62$, respectively, we *can* reject the null hypothesis of a unit root in differences which confirms that both variables are $I(1)$ processes. This allows us to continue with the cointegration test. 
+
+### Testing for Cointegration: Testing the Residuals of the Static Regression
+
+The Engle-Granger test for cointegration is a two-step process. First, we estimate the static simple regression:  
+$$Fertility_t = \beta_0 + \beta_1 Tax\ Exemption_t + u_t$$  
+
+Then we test the residuals $u_t$ for stationarity using the ADF test. If the residuals are stationary, then we can conclude that the two variables are cointegrated. 
+
+```{r ca, exercise = TRUE}
+
+```
+
+```{r ca-hint}
+
+```
+
+```{r ca-setup}
+library(dynlm)
+library(tseries)
+library(urca)
+data(fertil3, package='wooldridge')
+```
+
+```{r ca-solution}
+# Estimate the static regression
+fertil.lm0 <- dynlm(gfr ~ year + pe, data = fertil3)
+# Test the residuals for stationarity
+fertil.ca <- ur.df(fertil.lm0$residuals, type = c("none"), lags = 1)
+```
+
+```{r ca-check}
+grade_code()
+```
+
+The test statistic for the residuals is $-2.438$ and the critical value at even the 10% level is $-3.50$ (see table 18.5 in the book for this critical value since the values for this test differ slightly from the standard Dickey-Fuller values). Since we *cannot* reject the null hypothesis of a unit root in the residuals, we conclude that fertility and the tax exemption are *not* cointegrated and we can trust the estimates of estimating the model using first-differences (and, perhaps, a time trend).  
+
+### Error Correction Models
+
+Correcting for cointegration is in fact fairly system. Basically, we can estimate the static regression and then use the residuals from that regression as an "error correction" term. We then include the lag of these residuals as a control when we estimate the equation of interest in first-differences.  
+$$ \Delta y_t = \beta_0 + \gamma_1 \Delta x_t +  \gamma_2 \Delta x_{t-1} + ... + \delta (y_{t-1} - \beta x_{t-1}) + v_t$$
+
+This is called the Engle-Granger two-step procedure. 

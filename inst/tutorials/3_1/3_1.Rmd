@@ -40,9 +40,9 @@ knitr::opts_chunk$set(echo = FALSE)
 
 Using the wage1 data: 
 
-1. Regress wages on education (with an intercept). 
-2. Regress wages on education *and experience* (with an intercept). 
-3. Create a `list()` summarizing each regression object using `summary()`.
+1. Regress wages on education (with an intercept).  
+2. Regress wages on education *and experience* (with an intercept).  
+3. Create a `list()` summarizing each regression object using `summary()`.  
 
 ```{r multipleLM, exercise = TRUE}
 
@@ -178,24 +178,24 @@ Since this tutorial knits as an `html` document I needed to use some extra trick
 
 ### Assumptions of the Classical Regression Model
 
-1. Linear in the parameters
-2. Random Sampling: $(X_i, Y_i)$ are independently and identically distributed
-3. No Perfect Multicollinearity
-4. $E[u|x] = 0$
-5. Homoskedasticity: $u_i{'s}$ have constant variance regardless of the value of $x$
-6. Large Outliers are Unlikely: $X$ and $Y$ have finite fourth moments
-$$E(X^4)< \infty$$
-$$E(Y^4)< \infty$$
+1. Linear in the parameters  
+2. Random Sampling: $(X_i, Y_i)$ are independently and identically distributed  
+3. No Perfect Multicollinearity 
+4. $E[u|x] = 0$  
+5. Homo skedasticity: $u_i{'s}$ have constant variance regardless of the value of $x$  
+6. Large Outliers are Unlikely: $X$ and $Y$ have finite fourth moments  
+$$E(X^4)< \infty$$  
+$$E(Y^4)< \infty$$  
 
 ### Eyeball Testing the Assumptions
 
 The `lm()` function creates an `lm` object as its stored output. We've already seen that some functions behave differently depending on the type of object you apply them to. For example, when applied to a data frame, `summary()` generates a table for each variable containing the minimum, 25th percentile, median, mean, 75th percentile, and maximum for quantitative variables and a (abbreviated) frequency table for factors. When applied to an `lm` object, `summary()` (or, `summary.lm()` if you're not into the whole brevity thing) reports a list that includes: (1) the call function; (2) descriptive statistics for the residuals; (3) the table of coefficients, standard errors, t-values, and p-values; (4) footnotes with significance codes; and (5) various regression diagnostics (standard error of regression, residual degrees of freedom, $R^2$, $\bar{R}^2$, and the F statistic with its associated degrees of freedom and p-value). 
 
 The same is true for the `plot()` function: It behaves differently applying it to different classes of objects. Applying `plot()` to an `lm` function generates four graphs:  
-1. Residuals versus fitted values: This plot mainly helps identify heteroskedasticity by identifying a trend relationship between the residuals and all of the X's. If the residuals exhibit the assumption of homoskedasticity, the "trend" will be a horizontal line (at zero). It can also identify "extreme" values of the residuals. 
-2. Q-Q plot of the residuals: This plot helps identify non-normality in the residuals by plotting the actual (standardized) residuals against the theoretical quantiles of the residuals *if they exhibited a normal distribution*. If the residuals are normally disbributed, the points of the Q-Q plot should align on a $y = x$ equality line. 
-3. Scale-location plot ($\sqrt{|\text{standardized residuals}|}$ versus fitted values): This plot complements plotting the non-standardized residuals to the fitted values. If the homoskedasticity assumption holds, then this plot will show a horizontal trend line. The variation of the residuals around the trend should also be roughly constant. 
-4. Standardized residuals versus leverage: This plot helps identify disproportionately influential observations and extreme outliers by plotting the standardized residuals against "leverage" (measured by "Cook's distance," see details). Observations with very high residuals may indicate the presence of extreme outliers; observations with very high leverage may influence the slope estimates disproportionately.
+1. Residuals versus fitted values: This plot mainly helps identify heteroskedasticity by identifying a trend relationship between the residuals and all of the X's. If the residuals exhibit the assumption of homoskedasticity, the "trend" will be a horizontal line (at zero). It can also identify "extreme" values of the residuals.  
+2. Q-Q plot of the residuals: This plot helps identify non-normality in the residuals by plotting the actual (standardized) residuals against the theoretical quantiles of the residuals *if they exhibited a normal distribution*. If the residuals are normally disbributed, the points of the Q-Q plot should align on a $y = x$ equality line.  
+3. Scale-location plot ($\sqrt{|\text{standardized residuals}|}$ versus fitted values): This plot complements plotting the non-standardized residuals to the fitted values. If the homoskedasticity assumption holds, then this plot will show a horizontal trend line. The variation of the residuals around the trend should also be roughly constant.  
+4. Standardized residuals versus leverage: This plot helps identify disproportionately influential observations and extreme outliers by plotting the standardized residuals against "leverage" (measured by "Cook's distance," see details). Observations with very high residuals may indicate the presence of extreme outliers; observations with very high leverage may influence the slope estimates disproportionately.  
 
 <details style="line-height:105%"><summary>Click here to see the mathematical definition of leverage.</summary>
 
@@ -249,14 +249,14 @@ $$-2X'(y - X\hat{\beta}) = 0$$
 
 ### Interpretating the Coefficients
 
-Predicted values of y:
-$$\hat{wage}=\hat{\beta}_0+\hat{\beta}_1educ+\hat{\beta}_2exper$$
-Changes in $\hat{y}$:
-$$ \Delta \hat{wage}=\hat{\beta}_0+\hat{\beta}_1 \Delta educ + \hat{\beta}_2 \Delta exper$$
-*Ceteris paribus* the predicted change in $y$ in response to an observed change in $x$ is:
-$$ \Delta \hat{wage}=0+\hat{\beta}_1 \Delta educ+\hat{\beta}_2 (0)$$
-$$ \Delta \hat{wage}=\hat{\beta}_1 \Delta educ $$
-The predicted change in wage is $\hat\beta_1$ dollars per hour *for each additional year of education*. 
+Predicted values of y:  
+$$\hat{wage}=\hat{\beta}_0+\hat{\beta}_1educ+\hat{\beta}_2exper$$  
+Changes in $\hat{y}$:  
+$$ \Delta \hat{wage}=\hat{\beta}_0+\hat{\beta}_1 \Delta educ + \hat{\beta}_2 \Delta exper$$  
+*Ceteris paribus* the predicted change in $y$ in response to an observed change in $x$ is:  
+$$ \Delta \hat{wage}=0+\hat{\beta}_1 \Delta educ+\hat{\beta}_2 (0)$$  
+$$ \Delta \hat{wage}=\hat{\beta}_1 \Delta educ $$  
+The predicted change in wage is $\hat\beta_1$ dollars per hour *for each additional year of education*.   
 
 ### Optimization by Hand Demo
 

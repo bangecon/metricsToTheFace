@@ -39,8 +39,8 @@ knitr::opts_chunk$set(echo = FALSE)
 Estimate the following models using the `hprice1` dataset.
 
 1. $Price = \beta_0 + \beta_1Lot\text{ }Size + \beta_2Square\text{ }Feet + \beta_3Bedrooms + u$
-2. $Price = \beta_0 + \beta_1Lot\text{ }Size + \beta_2Square\text{ }Feet + \beta_3Bedrooms + \beta4Square\text{ }Feet \cdot Bedrooms + u$
-3. $Price = \beta_0 + \beta_1Lot\text{ }Size + \beta_2Square\text{ }Feet + \beta_3Bedrooms + \beta4(Square\text{ }Feet - \mu_{Sq.\text{ }Ft.}) \cdot (Bedrooms - \mu_{Bedrooms}) + u$
+2. $\begin{align}Price = \beta_0 + \beta_1Lot\text{ }Size + \beta_2Square\text{ }Feet + \beta_3Bedrooms \\ &+ \beta4Square\text{ }Feet \cdot Bedrooms + u \end{align}$
+3. $\begin{align}Price = \beta_0 + \beta_1Lot\text{ }Size + \beta_2Square\text{ }Feet + \beta_3Bedrooms \\ &+ \beta4(Square\text{ }Feet - \mu_{Sq.\text{ }Ft.}) \cdot (Bedrooms - \mu_{Bedrooms}) + u \end{align}$
 
 Present all three sets of estimates in the same **text** table using `stargazer.`
 
@@ -49,7 +49,7 @@ Present all three sets of estimates in the same **text** table using `stargazer.
 ```
 
 ```{r housePricePractice-solution}
-library(stargazer)
+library(stargazer, quietly = TRUE)
 hprice1 <- wooldridge::hprice1
 hprice.lm1 <- lm(price ~ lotsize + sqrft + bdrms, data = hprice1)
 hprice.lm2 <- lm(price ~ lotsize + sqrft*bdrms, data = hprice1)
@@ -78,7 +78,7 @@ Calculate and store the AICs for all three unique models (no interaction and no 
 ```
 
 ```{r, AIC-setup}
-library(stargazer)
+library(stargazer, quietly = TRUE)
 hprice1 <- wooldridge::hprice1
 hprice1 <- wooldridge::hprice1
 hprice.lm1 <- lm(price ~ lotsize + sqrft + bdrms, data = hprice1)
