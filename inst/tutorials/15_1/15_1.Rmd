@@ -42,6 +42,17 @@ The effect we wish to estimate is:
 $$ln(Wage_i) = \beta_0 + \beta_1Education_i + u_i$$
 
 ```{r, include = TRUE, fig.align = 'center'}
+library(ggdag)
+library(ggplot2)
+WageDag1 <- tidy_dagitty(dagify(
+  Wage ~ Educ,
+  exposure = "Educ",
+  outcome = "Wage"
+))
+WageDag1 <-
+  dag_label(WageDag1,
+            labels = c("Educ" = "Exposure",
+                       "Wage" = "Outcome"))
 ggdag(WageDag1) + theme_dag(legend.position = 'none') + geom_dag_label_repel(aes(label = label))
 ```
 
@@ -54,7 +65,6 @@ library(ggdag)
 library(ggplot2)
 WageDag1 <- tidy_dagitty(dagify(
   Wage ~ Educ,
-  coords = coords,
   exposure = "Educ",
   outcome = "Wage"
 ))
@@ -72,6 +82,26 @@ In chapter four, we learned about the problem of omitted variables bias:
 $$ln(Wage_i) = \beta_0 + \beta_1Education_i + \beta_2Experience_i + \beta_3Experience_i^2  + u_i$$
 
 ```{r, include = TRUE, fig.align = 'center'}
+WageDag2 <-
+  tidy_dagitty(
+    dagify(
+      Wage ~ Educ + Exper,
+      Educ ~ Exper,
+      exposure = "Educ",
+      outcome = "Wage"
+    )
+  )
+WageDag2 <-
+  dag_label(WageDag2,
+            labels = c(
+              "Educ" = "Exposure",
+              "Wage" = "Outcome",
+              "Exper" = ifelse(
+                is_confounder(WageDag2, "Exper", "Educ", "Wage"),
+                "Confounder",
+                ""
+              )
+            ))
 ggdag_collider(WageDag2) + theme_dag(legend.position = 'none') + geom_dag_label_repel(aes(label = label)) 
 ```
 
@@ -83,7 +113,6 @@ WageDag2 <-
     dagify(
       Wage ~ Educ + Exper,
       Educ ~ Exper,
-      coords = coords,
       exposure = "Educ",
       outcome = "Wage"
     )
@@ -112,6 +141,29 @@ $$Education_i = \gamma_0 + \gamma_1Ability_i + v_i$$
 Also suppose that ability is unobservable, but we have a variable that causes *education* but *not wages* to vary. 
 
 ```{r, include = TRUE, fig.align = 'center'}
+WageDag3 <-
+  tidy_dagitty(
+    dagify(
+      Wage ~ Educ + Exper + Ability,
+      Exper ~~ Educ,
+      Educ ~ Ability + Z,
+      exposure = "Educ",
+      outcome = "Wage",
+      latent = "Ability"
+    )
+  )
+WageDag3 <-
+  dag_label(WageDag3,
+            labels = c(
+              "Educ" = "Exposure",
+              "Wage" = "Outcome",
+              "Exper" = ifelse(
+                is_confounder(WageDag3, "Exper", "Educ", "Wage"),
+                "Confounder", ""),
+              "Ability" = "Latent", 
+              "Z" = "Instrument"
+            ))
+WageDag3 <- control_for(WageDag3, "Ability")
 ggdag_collider(WageDag3) + theme_dag(legend.position = 'none') + geom_dag_label_repel(aes(label = label))
 ```
 
@@ -125,8 +177,7 @@ WageDag3 <-
     dagify(
       Wage ~ Educ + Exper + Ability,
       Exper ~~ Educ,
-      Educ ~ Ability + Z
-      coords = coords,
+      Educ ~ Ability + Z,
       exposure = "Educ",
       outcome = "Wage",
       latent = "Ability"
