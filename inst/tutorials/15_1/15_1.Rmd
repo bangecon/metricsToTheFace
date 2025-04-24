@@ -43,7 +43,7 @@ $$ln(Wage_i) = \beta_0 + \beta_1Education_i + u_i$$
 
 ```{r, include = TRUE, fig.align = 'center'}
 library(ggdag, quietly = TRUE)
-library(ggplot2, quietly = TRUE))
+library(ggplot2, quietly = TRUE)
 WageDag1 <- tidy_dagitty(dagify(
   Wage ~ Educ,
   exposure = "Educ",
@@ -61,8 +61,8 @@ ggdag(WageDag1) + theme_dag(legend.position = 'none') + geom_dag_label_repel(aes
 The code that creates the simple DAG is:
 
 ```{r, echo = TRUE, fig.show = 'hide'}
-library(ggdag, quietly = TRUE))
-library(ggplot2, quietly = TRUE))
+library(ggdag, quietly = TRUE)
+library(ggplot2, quietly = TRUE)
 WageDag1 <- tidy_dagitty(dagify(
   Wage ~ Educ,
   exposure = "Educ",
