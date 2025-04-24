@@ -1,5 +1,5 @@
 ---
-title: "Chapter 11" 
+title: "Chapter 18" 
 subtitle: "Furher Issues in OLS with Time Series Data"
 description: "This tutorial discusses tests for stationarity."
 author: 
