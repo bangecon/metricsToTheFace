@@ -1,6 +1,6 @@
 Package: metricsToTheFace
 Title: metricsToTheFace: [learnr] Tutorials for *Introductory Econometrics* using Wooldridge Examples
-Version: 0.0.3
+Version: 0.0.4
 Authors@R: 
     person(given = "James",
            family = "Bang",
@@ -38,4 +38,6 @@ Imports:
   multcomp,
   lmtest,
   gtsummary, 
-  googlesheets4
+  googlesheets4, 
+  plm, 
+  cardx

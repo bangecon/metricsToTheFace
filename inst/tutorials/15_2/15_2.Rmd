@@ -28,6 +28,12 @@ body{font-size: 16pt}
 ```{r setup, include=FALSE}
 library(learnr)
 library(gradethis)
+library(haven, quietly = TRUE)
+library(gtsummary, quietly = TRUE)
+library(tidyverse, quietly = TRUE)
+library(broom, quietly = TRUE)
+library(cardx)
+library(stargazer, quietly = TRUE)
 tutorial_options(exercise.eval = TRUE, exercise.reveal_solution = TRUE)
 gradethis::gradethis_setup()
 knitr::opts_chunk$set(echo = FALSE, fig.height= 9, fig.width=8)
@@ -74,6 +80,7 @@ Sometimes, we even use a controlled regression *after* matching on some of the o
 Matching (exactly) according to age (adult versus child) and gender tells an even more different story: 
 
 ```{r matchedMeans, echo = TRUE}
+library(MatchIt)
 classMatch <- matchit(FirstClass ~ Adult + Female, data = titanic, method = 'nearest')
 titanic.matchit  <- match.data(classMatch)
 add_p(tbl_summary(titanic.matchit[,2:5], by = FirstClass))
